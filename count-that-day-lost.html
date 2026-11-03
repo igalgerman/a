@@ -74,7 +74,7 @@ button,input{font:inherit;color:inherit}
 .panel h3{font:700 36px/1.15 var(--f-display)}
 .muted{color:var(--muted)}
 
-.btn{appearance:none;border:0;cursor:pointer;font:600 28px/1 var(--f-body);padding:20px 34px;border-radius:999px;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;gap:14px;transition:transform .15s,box-shadow .15s,background-color .2s,opacity .2s;white-space:nowrap}
+.btn{appearance:none;border:0;cursor:pointer;text-decoration:none;font:600 28px/1 var(--f-body);padding:20px 34px;border-radius:999px;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;gap:14px;transition:transform .15s,box-shadow .15s,background-color .2s,opacity .2s;white-space:nowrap}
 .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(20,10,40,.6)}
 .btn:active{transform:translateY(1px)}
 .btn.sun{background:var(--sun);color:var(--ink)}
@@ -105,9 +105,16 @@ button,input{font:inherit;color:inherit}
 
 /* hook */
 .hook-grid{flex:1;display:grid;grid-template-columns:1fr 760px;gap:48px;align-items:center}
-.hook-num{display:flex;flex-direction:column;gap:6px;color:var(--sky-ink)}
-.hook-num b{font:800 230px/.9 var(--f-display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.hook-num span{font:500 50px/1.2 var(--f-poem);font-style:italic}
+.video-card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;aspect-ratio:16/9;max-width:100%;padding:40px 44px;border-radius:30px;background:radial-gradient(circle at 50% 120%,rgba(238,90,47,.75),transparent 60%),linear-gradient(165deg,var(--dusk),var(--ink));color:var(--paper);text-decoration:none;box-shadow:var(--shadow);overflow:hidden;transition:transform .2s}
+.video-card:hover{transform:translateY(-4px)}
+.vc-play{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:50%;background:var(--sun);color:var(--ink);display:grid;place-items:center;font-size:76px;box-shadow:0 0 0 20px rgba(255,182,39,.25),0 0 0 44px rgba(255,182,39,.1);transition:transform .2s}
+.video-card:hover .vc-play{transform:translate(-50%,-50%) scale(1.07)}
+.vc-play .ic{fill:currentColor;margin-left:10px}
+.vc-title{font:800 66px/1 var(--f-display);letter-spacing:-.02em}
+.vc-meta{font:500 26px/1.3 var(--f-body);color:var(--paper-soft)}
+.watch-q{display:flex;flex-direction:column;gap:14px;counter-reset:wq}
+.watch-q li{counter-increment:wq;display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:start;font-size:31px;line-height:1.3}
+.watch-q li::before{content:counter(wq);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--sun-pale);font:800 24px/1 var(--f-display)}
 .hook-panel{display:flex;flex-direction:column;gap:22px}
 .lead{font:600 40px/1.25 var(--f-body)}
 .hook-panel hr{border:0;border-top:3px dashed var(--line);margin:6px 0;width:100%}
@@ -496,18 +503,25 @@ button,input{font:inherit;color:inherit}
     </div>
   </section>
 
-  <!-- 2 · hook -->
-  <section class="slide" id="s-hook" aria-label="Warm-up">
-    <header class="s-head"><p class="eyebrow">Warm-up</p><h2 class="s-title">How rich are you today?</h2></header>
+  <!-- 2 · warm-up video -->
+  <section class="slide" id="s-hook" aria-label="Warm-up video">
+    <header class="s-head"><p class="eyebrow">Warm-up · short film · about 3 minutes</p><h2 class="s-title">Watch: is his day well spent?</h2></header>
     <div class="hook-grid">
-      <div class="hook-num"><b id="countup">86,400</b><span>seconds in every day</span></div>
+      <a class="video-card" href="https://www.youtube.com/watch?v=uaWA2GbcnJU" target="_blank" rel="noopener">
+        <span class="vc-play"><svg class="ic"><use href="#i-play"/></svg></span>
+        <span class="vc-title">Unsung Hero</span>
+        <span class="vc-meta">Short film · about 3 min · English subtitles · opens in YouTube</span>
+      </a>
       <div class="panel hook-panel">
-        <p class="lead">Every morning you get 86,400 seconds. For free.</p>
-        <p>At sunset they are gone. You can’t save them for tomorrow.</p>
+        <h3>Watch and think</h3>
+        <ol class="watch-q">
+          <li>What kind acts does he do?</li>
+          <li>What does he get in return?</li>
+          <li>Find one “self-denying deed” in the film.</li>
+        </ol>
         <hr>
-        <h3>Talk to your partner</h3>
-        <p>Yesterday, did you do <b>one thing</b> that made someone smile? What was it?</p>
-        <div><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1-minute timer</button></div>
+        <p class="lead">Is his day <b>well spent</b> or <b>lost</b>? Why?</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap"><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1-minute timer</button><a class="btn ghost small" href="https://www.youtube.com/results?search_query=Unsung+Hero+Thai+Life+Insurance" target="_blank" rel="noopener"><svg class="ic"><use href="#i-lens"/></svg> Find it on YouTube</a></div>
       </div>
     </div>
   </section>
@@ -936,10 +950,10 @@ function cloop(){ cx.clearRect(0,0,1920,1080); parts.forEach(p=>{p.vy+=.75;p.vx*
 /* ---------- teacher notes (Hebrew) ---------- */
 const NOTES={
  "s-cover":["דקה 0–1 · פתיחה","ברכו את הכיתה והציגו: שיעור סיכום לשיר Count That Day Lost. שימו לב לשמש בצד ימין: היא תשקע לאט במהלך השיעור, בדיוק כמו בשיר (at set of sun). בשקופית האחרונה כבר יהיה לילה."],
- "s-hook":["דקה 1–4 · פעילות פתיחה","שאלו: כמה שניות יש ביממה? תנו לנחש, ואז המספר נספר. תלמיד מקריא את הכרטיס. שיחה בזוגות דקה אחת (כפתור הטיימר) ושיתוף של 2 תלמידים. חיבור לשיר: היום הוא כמו כסף, אפשר ‘לבזבז’ אותו טוב (well spent) או לאבד אותו (lost)."],
- "s-goals":["דקה 4–5 · מטרות השיעור","תלמיד מקריא את מטרת השיעור. ארבע התחנות הן מפת השיעור. בסוף השיעור אפשר לחזור לכאן ולשאול: האם השגנו את המשימה?"],
- "s-author":["דקה 5–7 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
- "s-vocab":["דקה 7–10 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. אם הזמן לחוץ, הפכו 5 כרטיסים ואז Flip all."],
+ "s-hook":["דקה 1–5 · סרטון פתיחה","לפני השיעור: פתחו את הסרטון מראש ובדקו סאונד, כי לפעמים יש פרסומת לפניו. קראו עם הכיתה את 3 השאלות לפני הצפייה, ואז לחצו על הסרטון (נפתח בלשונית חדשה, כ-3 דקות, עם כתוביות באנגלית). אחרי הצפייה: דקה בזוגות ושיתוף קצר. רמז לשאלה 3: הוא נותן את כרע העוף שלו לכלב רחוב = self-denying deed. תוכנית ב׳ אם אין אינטרנט: שאלו כמה שניות יש ביממה (86,400) ומה עשיתם איתן אתמול."],
+ "s-goals":["דקה 5–6 · מטרות השיעור","תלמיד מקריא את מטרת השיעור. ארבע התחנות הן מפת השיעור. בסוף השיעור אפשר לחזור לכאן ולשאול: האם השגנו את המשימה?"],
+ "s-author":["דקה 6–8 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
+ "s-vocab":["דקה 8–10 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. הפכו 4–5 כרטיסים ואז Flip all, כדי לעמוד בזמן."],
  "s-poem":["דקה 10–15 · השיר","קריאה קולית (מורה, ואז תלמיד). אחר כך 3–4 עדשות, ולפני כל לחיצה שואלים את הכיתה. Rhyme: אילו מילים מתחרזות? Money words: מה משותף למילים? (זו קריאה פרשנית שעוזרת לתלמידים, לא חלק ממחוון רשמי.) If → Then: תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
  "s-structure":["דקה 15–18 · מבנה · HOTS: comparing and contrasting","לחצו Reveal next שורה אחרי שורה, ולפני כל חשיפה שאלו את הכיתה. השוואה בין שני הבתים מתאימה לשאלות בסגנון הבגרות. מסקנה: אותו מבנה, תוצאה הפוכה = ניגוד (contrast)."],
  "s-acts":["דקה 18–19 · שלושה מעשים קטנים","דקה אחת: לעשות, להגיד, להסתכל. שאלה מהירה: איזה מהם הכי קל לכם? הדגישו nothing cost. אם הזמן לחוץ, אפשר לדלג."],
@@ -1017,9 +1031,6 @@ $("#tmrReset").addEventListener("click",()=>tmrSet(tmr.total));
 $$("[data-pre]").forEach(b=>b.addEventListener("click",()=>tmrSet(+b.dataset.pre)));
 $$("[data-timer]").forEach(b=>b.addEventListener("click",()=>{tmrSet(+b.dataset.timer);tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true");tmrStart()}));
 tmrDraw();
-
-/* ---------- hook count-up ---------- */
-enter["s-hook"]=()=>{ const el=$("#countup"); if(reduced){el.textContent="86,400";return} const t0=performance.now(); (function f(now){const k=Math.min(1,(now-t0)/1700);const e=1-Math.pow(1-k,3);el.textContent=Math.round(86400*e).toLocaleString("en-US");if(k<1&&slides[cur].id==="s-hook")requestAnimationFrame(f);else el.textContent="86,400"})(t0); };
 
 /* ---------- author vote ---------- */
 $$("[data-vote]").forEach(b=>b.addEventListener("click",()=>{
