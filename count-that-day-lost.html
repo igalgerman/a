@@ -100,11 +100,14 @@ button,input{font:inherit;color:inherit}
 .cover-text{display:flex;flex-direction:column;gap:28px;max-width:1040px}
 .cover-title{font:800 176px/.88 var(--f-display);letter-spacing:-.04em;color:var(--sky-ink)}
 .cover-poet{font:italic 500 50px/1.2 var(--f-poem);color:var(--sky-ink)}
+.cover-credit{font:600 24px/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--sky-ink-soft)}
 .cover-q{font:500 34px/1.4 var(--f-body);color:var(--sky-ink-soft);max-width:760px}
 .cover-receipt{position:absolute;right:260px;top:430px;width:470px;transform:rotate(3.5deg)}
 
 /* hook */
 .hook-grid{flex:1;display:grid;grid-template-columns:1fr 760px;gap:48px;align-items:center}
+.video-wrap{min-width:0}
+.video-frame{display:block;width:100%;aspect-ratio:16/9;max-width:100%;border:0;border-radius:30px;background:var(--ink);box-shadow:var(--shadow)}
 .video-card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;aspect-ratio:16/9;max-width:100%;padding:40px 44px;border-radius:30px;background:radial-gradient(circle at 50% 120%,rgba(238,90,47,.75),transparent 60%),linear-gradient(165deg,var(--dusk),var(--ink));color:var(--paper);text-decoration:none;box-shadow:var(--shadow);overflow:hidden;transition:transform .2s}
 .video-card:hover{transform:translateY(-4px)}
 .vc-play{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:50%;background:var(--sun);color:var(--ink);display:grid;place-items:center;font-size:76px;box-shadow:0 0 0 20px rgba(255,182,39,.25),0 0 0 44px rgba(255,182,39,.1);transition:transform .2s}
@@ -405,6 +408,9 @@ button,input{font:inherit;color:inherit}
 .closing{justify-content:center;align-items:flex-start;padding-left:150px}
 .closing q{font:italic 500 112px/1.08 var(--f-poem);color:var(--paper);quotes:none;max-width:1400px;letter-spacing:-.01em}
 .closing .thanks{font:800 60px/1.1 var(--f-display);color:var(--sun)}
+.mission{display:flex;gap:14px;flex-wrap:wrap}
+.mission span{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;background:rgba(255,249,242,.1);color:var(--paper);font:600 26px/1 var(--f-body);box-shadow:inset 0 0 0 2px rgba(255,249,242,.3)}
+.mission .ic{color:var(--sun);font-size:28px}
 .closing .sub{font:500 32px/1.4 var(--f-body);color:var(--paper-soft)}
 
 /* ---------- HUD, timer, notes ---------- */
@@ -487,6 +493,7 @@ button,input{font:inherit;color:inherit}
       <p class="eyebrow">Summary lesson · Grade 10 · 4 points</p>
       <h1 class="cover-title">Count<br>That Day<br>Lost</h1>
       <p class="cover-poet">a poem by George Eliot</p>
+      <p class="cover-credit">Prepared by Vered German</p>
       <p class="cover-q">At set of sun, how will you count your day?</p>
       <div><button class="btn big" data-go="next">Start the lesson <svg class="ic"><use href="#i-right"/></svg></button></div>
     </div>
@@ -507,11 +514,13 @@ button,input{font:inherit;color:inherit}
   <section class="slide" id="s-hook" aria-label="Warm-up video">
     <header class="s-head"><p class="eyebrow">Warm-up · short film · about 3 minutes</p><h2 class="s-title">Watch: is his day well spent?</h2></header>
     <div class="hook-grid">
+      <div class="video-wrap" id="videoWrap">
       <a class="video-card" href="https://www.youtube.com/watch?v=uaWA2GbcnJU" target="_blank" rel="noopener">
         <span class="vc-play"><svg class="ic"><use href="#i-play"/></svg></span>
         <span class="vc-title">Unsung Hero</span>
         <span class="vc-meta">Short film · about 3 min · English subtitles · opens in YouTube</span>
       </a>
+      </div>
       <div class="panel hook-panel">
         <h3>Watch and think</h3>
         <ol class="watch-q">
@@ -855,6 +864,7 @@ button,input{font:inherit;color:inherit}
     <div style="display:flex;flex-direction:column;gap:40px">
       <q class="on-sky">Then you may count<br>that day well spent.</q>
       <p class="thanks on-sky">Thank you! Go and be someone’s sunshine.</p>
+      <div class="mission"><span><svg class="ic"><use href="#i-check"/></svg>Remember</span><span><svg class="ic"><use href="#i-check"/></svg>Analyze</span><span><svg class="ic"><use href="#i-check"/></svg>Play</span><span><svg class="ic"><use href="#i-check"/></svg>Connect</span></div>
       <p class="sub">Count That Day Lost · George Eliot</p>
     </div>
   </section>
@@ -1032,6 +1042,14 @@ $$("[data-pre]").forEach(b=>b.addEventListener("click",()=>tmrSet(+b.dataset.pre
 $$("[data-timer]").forEach(b=>b.addEventListener("click",()=>{tmrSet(+b.dataset.timer);tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true");tmrStart()}));
 tmrDraw();
 
+/* ---------- warm-up video: embedded where the host allows it ---------- */
+const VID="uaWA2GbcnJU";
+const canEmbed=location.protocol==="https:"&&!/claude|anthropic/i.test(location.hostname);
+function videoMount(){ if(!canEmbed) return; const w=$("#videoWrap"); if(w.querySelector("iframe")) return;
+  w.innerHTML='<iframe class="video-frame" title="Unsung Hero short film" src="https://www.youtube-nocookie.com/embed/'+VID+'?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'; }
+enter["s-hook"]=videoMount;
+leave["s-hook"]=()=>{ const f=$("#videoWrap iframe"); if(f) f.src=f.src; };
+
 /* ---------- author vote ---------- */
 $$("[data-vote]").forEach(b=>b.addEventListener("click",()=>{
   $$("[data-vote]").forEach(x=>x.classList.toggle("chosen",x===b));
@@ -1045,19 +1063,20 @@ $$("[data-vote]").forEach(b=>b.addEventListener("click",()=>{
 const VOCAB=[
  ["set of sun","line 1","sunset; the end of the day","שקיעה"],
  ["deed","line 4","an act; something you do","מעשה"],
- ["self-denying","line 4","giving up what you want, to help others","מוותר על עצמו"],
+ ["self-denying","line 4","giving up what you want, to help others","של ויתור עצמי"],
  ["eased","line 5","made someone feel better","הקל, הרגיע"],
  ["glance","line 6","a quick look","מבט חטוף"],
  ["livelong day","line 9","the whole long day","כל היום כולו"],
  ["cheered","line 10","made someone happy","שימח, עודד"],
- ["by yea or nay","line 10","by saying “yes” or “no”: in any way","בשום דרך"],
+ ["by yea or nay","line 10","by saying “yes” or “no”: in any way","לא ב״כן״ ולא ב״לא״"],
  ["trace","line 12","find a sign or a mark of","למצוא סימן"],
  ["soul","line 15","a person","נפש, אדם"]
 ];
 const vgrid=$("#vgrid");
 VOCAB.forEach(v=>{const b=document.createElement("button");b.className="flip";b.setAttribute("aria-label",v[0]+": flip card");
   b.innerHTML='<div class="in"><div class="face front"><span class="tag">'+v[1]+'</span><span class="v-word">'+v[0].replace("self-","self-<wbr>")+'</span></div><div class="face back"><span class="tag">'+v[0]+'</span><span class="v-mean">'+v[2]+'</span><span class="v-he" lang="he">'+v[3]+'</span></div></div>';
-  b.addEventListener("click",()=>{b.classList.toggle("flipped");sfx.pop()}); vgrid.appendChild(b)});
+  b.addEventListener("click",()=>{b.classList.toggle("flipped");sfx.pop();vLabel()}); vgrid.appendChild(b)});
+function vLabel(){const all=$$("#vgrid .flip").every(c=>c.classList.contains("flipped"));$("#vFlipAll").textContent=all?"Flip back":"Flip all"}
 $("#vFlipAll").addEventListener("click",()=>{const cards=$$("#vgrid .flip");const all=cards.every(c=>c.classList.contains("flipped"));cards.forEach((c,i)=>setTimeout(()=>c.classList.toggle("flipped",!all),reduced?0:i*60));$("#vFlipAll").textContent=all?"Flip all":"Flip back"});
 
 /* ---------- poem lenses ---------- */
@@ -1091,7 +1110,7 @@ const DEV=[
  ["Repetition","the same word again and again","“One self-denying deed, one word… One glance”","lines 4–6","Even one small act is enough."],
  ["Rhyme","words that end with the same sound","sun / done · word / heard · cost / lost","AABCCBDD","The same pattern in both stanzas."],
  ["Contrast","two opposite things side by side","“well spent” ↔ “worse than lost”","lines 8 and 16","A day with kindness against a day without it."],
- ["Money language","words from the world of money","count · spent · cost · lost","lines 2, 8, 15, 16","Your day is like money. Spend it well!"]
+ ["Money language","words from the world of money","count · spent · cost · lost","lines 2–3, 8, 15–16","Your day is like money. Spend it well!"]
 ];
 const dgrid=$("#dgrid");
 DEV.forEach(d=>{const b=document.createElement("button");b.className="flip";b.setAttribute("aria-label",d[0]+": flip card");
@@ -1110,7 +1129,7 @@ const SORT=[
  ["You helped your little brother with his homework.","spent","“brought the sunshine to one face”"]
 ];
 const SPENT_TOTAL=SORT.filter(s=>s[1]==="spent").length;
-const so={i:0,done:false,spent:0,lost:0};
+const so={i:0,done:false,spent:0,lost:0,end:false};
 const sdots=$("#sortDots"); SORT.forEach(()=>sdots.appendChild(document.createElement("i")));
 function sortDraw(){
   const s=SORT[so.i]; $("#sortNum").textContent="Situation "+(so.i+1)+" of "+SORT.length; $("#sortText").textContent=s[0];
@@ -1134,7 +1153,15 @@ function sortAnswer(choice){
 }
 $("#sortSpent").addEventListener("click",()=>sortAnswer("spent"));
 $("#sortLost").addEventListener("click",()=>sortAnswer("lost"));
-$("#sortNext").addEventListener("click",()=>{ if(so.i<SORT.length-1){so.i++;sortDraw()} else {so.i=0;so.spent=so.lost=0;sortMeter();sortDraw()} });
+$("#sortNext").addEventListener("click",()=>{
+  if(so.i<SORT.length-1){so.i++;sortDraw();return}
+  if(!so.end){ so.end=true; [...sdots.children].forEach(d=>d.className="on"); $("#sortNum").textContent="All done";
+    $("#sortText").textContent="You found "+so.spent+" kind acts and "+so.lost+" lost days.";
+    $("#sortFb").className="sort-fb ok"; $("#sortFbIc").firstElementChild.setAttribute("href","#i-sun");
+    $("#sortFbText").innerHTML="Remember: just <b>one</b> kind act makes a day well spent.";
+    $("#sortNext").innerHTML='<svg class="ic"><use href="#i-reset"/></svg> Start again'; return }
+  so.end=false; so.i=0; so.spent=so.lost=0; sortMeter(); sortDraw();
+});
 sortDraw(); sortMeter();
 
 /* ---------- think deeper ---------- */
@@ -1193,7 +1220,7 @@ function qDraw(){
   qTimerReset(); if(slides[cur].id==="s-quiz") qTimerStart();
 }
 function quizPick(k){
-  if(qz.rev||!qz.started) return; qz.rev=true; qTimerStop();
+  if(qz.rev||!qz.started||!$("#qFinal").hidden) return; qz.rev=true; qTimerStop();
   const q=QUIZ[qz.i], opts=$$("#qOpts .q-opt"); $("#qOpts").classList.add("done");
   opts.forEach((o,j)=>{ if(j===q[2]) o.classList.add("right"); else if(j===k) o.classList.add("wrong"); else o.classList.add("dim"); });
   $("#qExplain").classList.remove("hide");
@@ -1233,7 +1260,7 @@ function layoutRays(){
     rays[k].setAttribute("x1",cxp+c*150); rays[k].setAttribute("y1",cyp+s*150); rays[k].setAttribute("x2",cxp+c*(rx-40)*.78); rays[k].setAttribute("y2",cyp+s*(ry-10)*.78);
     notesEls[k].style.left=(cxp+c*rx)+"px"; notesEls[k].style.top=(cyp+s*ry)+"px"; }
 }
-function addRay(text){ text=(text||"").trim(); if(!text) return; const k=rayN%SLOTS; rayN++; const n=notesEls[k]; n.classList.remove("show"); void n.offsetWidth; n.textContent=text; n.classList.add("show"); rays[k].classList.add("lit"); $("#rayCount").textContent=rayN; $("#bigSun").style.setProperty("--g",Math.min(rayN,24)); sfx.good(); if(rayN%SLOTS===0) confetti(120); }
+function addRay(text){ text=(text||"").trim(); if(!text) return; const k=[0,4,2,6,1,5,3,7][rayN%SLOTS]; rayN++; const n=notesEls[k]; n.classList.remove("show"); void n.offsetWidth; n.textContent=text; n.classList.add("show"); rays[k].classList.add("lit"); $("#rayCount").textContent=rayN; $("#bigSun").style.setProperty("--g",Math.min(rayN,24)); sfx.good(); if(rayN%SLOTS===0) confetti(120); }
 $("#wallForm").addEventListener("submit",e=>{e.preventDefault();const i=$("#wall-text");addRay(i.value);i.value=""});
 $$("#suggest button").forEach(b=>b.addEventListener("click",()=>addRay(b.textContent)));
 enter["s-wall"]=()=>requestAnimationFrame(layoutRays);
