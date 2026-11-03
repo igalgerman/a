@@ -693,14 +693,14 @@ button,input{font:inherit;color:inherit}
       <div class="panel" style="display:flex;flex-direction:column;gap:24px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:20px"><h3>Teams</h3>
           <div class="seg" role="group" aria-label="Number of teams" id="teamSeg">
-            <button data-n="2" aria-pressed="false">2</button><button data-n="3" aria-pressed="true">3</button><button data-n="4" aria-pressed="false">4</button>
+            <button data-n="2" aria-pressed="false">2</button><button data-n="3" aria-pressed="false">3</button><button data-n="4" aria-pressed="true">4</button>
           </div>
         </div>
         <div class="team-inputs" id="teamInputs">
           <label style="--c:var(--sun)"><input id="team-name-1" value="Sunrise" aria-label="Team 1 name" maxlength="18"></label>
-          <label style="--c:var(--ember)"><input id="team-name-2" value="Sunset" aria-label="Team 2 name" maxlength="18"></label>
-          <label style="--c:var(--dusk)"><input id="team-name-3" value="Sunshine" aria-label="Team 3 name" maxlength="18"></label>
-          <label style="--c:var(--sky)" hidden><input id="team-name-4" value="Stars" aria-label="Team 4 name" maxlength="18"></label>
+          <label style="--c:var(--ember)"><input id="team-name-2" value="Sunshine" aria-label="Team 2 name" maxlength="18"></label>
+          <label style="--c:var(--dusk)"><input id="team-name-3" value="Sunset" aria-label="Team 3 name" maxlength="18"></label>
+          <label style="--c:var(--sky)"><input id="team-name-4" value="Stars" aria-label="Team 4 name" maxlength="18"></label>
         </div>
         <div style="margin-top:auto"><button class="btn sun big" id="quizStart">Start the challenge <svg class="ic"><use href="#i-right"/></svg></button></div>
       </div>
@@ -985,7 +985,7 @@ const QUIZ=[
 ];
 const TEAM_C=["var(--sun)","var(--ember)","var(--dusk)","var(--sky)"];
 const qz={i:0,rev:false,teams:[],started:false};
-let teamN=3;
+let teamN=4;
 const qd=$("#qDots"); QUIZ.forEach(()=>qd.appendChild(document.createElement("i")));
 $$("#teamSeg button").forEach(b=>b.addEventListener("click",()=>{teamN=+b.dataset.n;$$("#teamSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$$("#teamInputs label").forEach((l,k)=>l.hidden=k>=teamN)}));
 function quizInit(){
