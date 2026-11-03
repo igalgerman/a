@@ -529,7 +529,7 @@ button,input{font:inherit;color:inherit}
         </ol>
         <hr>
         <p class="lead">Is his day <b>well spent</b> or <b>lost</b>? Why?</p>
-        <div style="display:flex;gap:14px;flex-wrap:wrap"><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1-minute timer</button><a class="btn ghost small" href="https://www.youtube.com/results?search_query=Unsung+Hero+Thai+Life+Insurance" target="_blank" rel="noopener"><svg class="ic"><use href="#i-lens"/></svg> Find it on YouTube</a></div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap"><a class="btn ghost small" href="https://www.youtube.com/results?search_query=Unsung+Hero+Thai+Life+Insurance" target="_blank" rel="noopener"><svg class="ic"><use href="#i-lens"/></svg> Find it on YouTube</a></div>
       </div>
     </div>
   </section>
@@ -696,34 +696,6 @@ button,input{font:inherit;color:inherit}
     </div>
   </section>
 
-  <!-- 11 · think deeper -->
-  <section class="slide" id="s-think" aria-label="Think deeper">
-    <div class="s-head-row">
-      <header class="s-head"><p class="eyebrow">Think deeper · HOTS</p><h2 class="s-title">Think, pair, share</h2></header>
-      <div class="tabs" role="group" aria-label="Questions">
-        <button class="chip" data-think="0" aria-pressed="true" style="--c:var(--sun)">Question 1</button>
-        <button class="chip" data-think="1" aria-pressed="false" style="--c:var(--ember)">Question 2</button>
-        <button class="chip" data-think="2" aria-pressed="false" style="--c:var(--dusk)">Question 3</button>
-      </div>
-    </div>
-    <div class="panel think-card">
-      <div style="display:flex;flex-direction:column;gap:30px;min-width:0">
-        <p class="tag" id="thinkTag">Question 1 · line 16 · HOTS: cause and effect</p>
-        <p class="think-q" id="thinkQ"></p>
-        <div class="tps" style="margin-top:auto">
-          <span><svg class="ic"><use href="#i-bulb"/></svg> Think alone · 30 sec</span>
-          <span><svg class="ic"><use href="#i-speech"/></svg> Pair · 1 min</span>
-          <span><svg class="ic"><use href="#i-sun"/></svg> Share with the class</span>
-        </div>
-        <div style="display:flex;gap:14px"><button class="btn ghost small" data-timer="30"><svg class="ic"><use href="#i-clock"/></svg> 30 sec</button><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1 min</button></div>
-      </div>
-      <div style="min-width:0">
-        <div class="ideas-cover" id="ideasCover"><p style="font-size:30px">Talk first. Then compare your ideas with these.</p><button class="btn sun" id="ideasBtn">Show possible ideas</button></div>
-        <ul class="ideas" id="ideas" hidden></ul>
-      </div>
-    </div>
-  </section>
-
   <!-- 12 · quiz setup -->
   <section class="slide" id="s-setup" aria-label="Quiz setup">
     <header class="s-head"><p class="eyebrow">Play</p><h2 class="s-title">The Sunset Challenge</h2></header>
@@ -731,9 +703,9 @@ button,input{font:inherit;color:inherit}
       <div class="panel" style="display:flex;flex-direction:column;gap:26px">
         <h3>How to play</h3>
         <ol class="rules">
-          <li>10 questions about the poem. 20 seconds for each one.</li>
+          <li>10 questions about the poem.</li>
           <li>Each team writes its answer (A, B, C or D) on a page.</li>
-          <li>When the time is up, all teams show their answer.</li>
+          <li>When the teacher says “Show!”, all teams show their answer.</li>
           <li>The teacher shows the right answer. +1 point for every team that is right.</li>
         </ol>
       </div>
@@ -760,10 +732,6 @@ button,input{font:inherit;color:inherit}
       <div class="q-main">
         <div class="q-top">
           <div class="q-meta"><p class="eyebrow" id="qNum">Question 1 of 10</p><div class="dots" id="qDots"></div></div>
-          <div class="q-timer">
-            <div class="ring" id="ring"><svg viewBox="0 0 110 110"><circle class="bg" cx="55" cy="55" r="46"/><circle class="fg" id="ringFg" cx="55" cy="55" r="46" stroke-dasharray="289.03" stroke-dashoffset="0"/></svg><b id="ringNum">20</b></div>
-            <button class="icon-btn" id="qPause" aria-label="Pause timer"><svg class="ic"><use href="#i-pause"/></svg></button>
-          </div>
         </div>
         <div class="panel q-card"><p class="q-text" id="qText"></p></div>
         <div class="q-opts" id="qOpts"></div>
@@ -782,69 +750,6 @@ button,input{font:inherit;color:inherit}
     </div>
   </section>
 
-  <!-- 14 · sunshine wall -->
-  <section class="slide" id="s-wall" aria-label="Be someone's sunshine">
-    <header class="s-head"><p class="eyebrow">Connect · the poem in action</p><h2 class="s-title">Be someone’s sunshine</h2></header>
-    <div class="wall">
-      <div class="panel" style="display:flex;flex-direction:column;gap:22px">
-        <ol class="wall-steps">
-          <li>Take a sticky note.</li>
-          <li>Write one kind sentence to a classmate.</li>
-          <li>Stick it on the board around the sun.</li>
-        </ol>
-        <div><button class="btn ghost small" data-timer="180"><svg class="ic"><use href="#i-clock"/></svg> 3-minute timer</button></div>
-        <p class="wall-quote">“one word / That eased the heart of him who heard”</p>
-      </div>
-      <div class="sunbox">
-        <div class="sunfield" id="sunfield">
-          <svg id="rays" aria-hidden="true"></svg>
-          <div class="big-sun" id="bigSun"><div><b id="rayCount">0</b><small>rays of<br>sunshine</small></div></div>
-        </div>
-        <form class="wall-input" id="wallForm"><input id="wall-text" placeholder="Type a kind sentence…" maxlength="60" autocomplete="off" aria-label="Kind sentence"><button class="btn sun" type="submit"><svg class="ic"><use href="#i-plus"/></svg> Add</button></form>
-        <div class="suggest" id="suggest">
-          <button type="button">You are a good friend</button><button type="button">Thank you for helping me</button><button type="button">You always make me laugh</button><button type="button">Good luck on the test!</button><button type="button">I like your ideas</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 15 · exit ticket -->
-  <section class="slide" id="s-exit" aria-label="Exit ticket">
-    <div class="s-head-row">
-      <header class="s-head"><p class="eyebrow">Exit ticket · 3 minutes</p><h2 class="s-title">Count your day: 3 · 2 · 1</h2></header>
-      <div class="tools"><button class="btn soft small" data-timer="180"><svg class="ic"><use href="#i-clock"/></svg> 3-minute timer</button></div>
-    </div>
-    <div class="exit-grid">
-      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>3</b><span>words from the poem I remember</span></div><div class="wline"></div><div class="wline"></div><div class="wline"></div></div></div>
-      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>2</b><span>literary devices + an example</span></div><div class="wline"></div><div class="wline"></div></div></div>
-      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>1</b><span>kind act I will do tomorrow</span></div><div class="wline"></div></div></div>
-    </div>
-    <div class="exit-foot"><q class="on-sky">If you sit down at set of sun / And count the acts that you have done…</q></div>
-  </section>
-
-  <!-- 16 · homework -->
-  <section class="slide" id="s-write" aria-label="Bagrut practice">
-    <header class="s-head"><p class="eyebrow">Homework · HOTS: explaining cause and effect</p><h2 class="s-title">Bagrut practice</h2></header>
-    <div class="write-grid">
-      <div class="panel" style="display:flex;flex-direction:column;gap:24px">
-        <p class="write-q">The speaker says that a day with no kind act is <i>“worse than lost.”</i> Explain why. Use details from the poem.</p>
-        <p class="tag">Sentence starters</p>
-        <ol class="starters">
-          <li>In the poem, the speaker says that…</li>
-          <li>This means that…</li>
-          <li>I think this is because…</li>
-          <li>For example, in line ___, the speaker says “…”</li>
-        </ol>
-      </div>
-      <div class="panel" style="display:flex;flex-direction:column;gap:22px">
-        <p class="tag">Word bank</p>
-        <div class="wbank"><span>kindness</span><span>a chance</span><span>free</span><span>“nothing cost”</span><span>sunshine</span><span>wasted</span><span>choice</span></div>
-        <div style="margin-top:auto" id="modelWrap"><button class="btn sun" id="modelBtn">Show a model answer</button></div>
-        <p class="model" id="model" hidden>In the poem, the speaker says that if we do nothing kind all day, the day is <mark>“worse than lost.”</mark> I think this is because a kind act is easy and <mark>“nothing cost.”</mark> We had a chance to bring <mark>“sunshine to one face,”</mark> but we didn’t use it. When we lose something, it is an accident. A day with no kindness is our choice.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- 17 · closing -->
   <section class="slide closing" id="s-end" aria-label="Closing">
     <div style="display:flex;flex-direction:column;gap:40px">
@@ -857,22 +762,13 @@ button,input{font:inherit;color:inherit}
   <!-- overlays -->
   <canvas id="confetti" width="1920" height="1080" aria-hidden="true"></canvas>
 
-  <div class="tmr" id="tmr" hidden>
-    <div class="tmr-top"><span class="tag"><svg class="ic"><use href="#i-clock"/></svg> Timer</span><button class="tmr-x" id="tmrClose" aria-label="Close timer"><svg class="ic"><use href="#i-x"/></svg></button></div>
-    <p class="tmr-big" id="tmrBig">1:00</p>
-    <div class="tmr-bar"><i id="tmrBar"></i></div>
-    <div class="tmr-pre"><button data-pre="30">0:30</button><button data-pre="60">1:00</button><button data-pre="120">2:00</button><button data-pre="180">3:00</button><button data-pre="300">5:00</button></div>
-    <div class="tmr-ctl"><button class="btn sun small" id="tmrGo"><svg class="ic"><use href="#i-play"/></svg> Start</button><button class="btn ghost small" id="tmrReset"><svg class="ic"><use href="#i-reset"/></svg> Reset</button></div>
-  </div>
-
-  <div class="notes" id="notes" hidden><h4 id="notesHead">הערות למורה</h4><p id="notesText"></p><p class="keys">מקשים: ← → מעבר שקופיות · F מסך מלא · T טיימר · N הערות · במבחן: 1–4 לבחירת תשובה</p></div>
+  <div class="notes" id="notes" hidden><h4 id="notesHead">הערות למורה</h4><p id="notesText"></p><p class="keys">מקשים: ← → מעבר שקופיות · F מסך מלא · N הערות · במבחן: 1–4 לבחירת תשובה</p></div>
 
   <div class="hud" id="hud">
     <span class="clock" title="Time of day in the lesson"><svg class="ic" id="clockIc"><use href="#i-sun"/></svg><span id="clock">07:00</span></span>
     <button id="prev" aria-label="Previous slide"><svg class="ic"><use href="#i-left"/></svg></button>
     <span class="count" id="count">1 / 17</span>
     <button id="next" aria-label="Next slide"><svg class="ic"><use href="#i-right"/></svg></button>
-    <button id="tmrBtn" aria-label="Timer" aria-pressed="false"><svg class="ic"><use href="#i-clock"/></svg><span id="tmrMini"></span></button>
     <button id="soundBtn" aria-label="Sound on" aria-pressed="false"><svg class="ic"><use href="#i-sound" id="soundUse"/></svg></button>
     <button id="notesBtn" aria-label="Teacher notes" aria-pressed="false"><svg class="ic"><use href="#i-notes"/></svg></button>
     <button id="fsBtn" aria-label="Full screen"><svg class="ic"><use href="#i-full"/></svg></button>
@@ -945,21 +841,17 @@ function cloop(){ cx.clearRect(0,0,1920,1080); parts.forEach(p=>{p.vy+=.75;p.vx*
 /* ---------- teacher notes (Hebrew) ---------- */
 const NOTES={
  "s-cover":["דקה 0–1 · פתיחה","ברכו את הכיתה והציגו: שיעור סיכום לשיר Count That Day Lost. שימו לב לשמש בצד ימין: היא תשקע לאט במהלך השיעור, בדיוק כמו בשיר (at set of sun). בשקופית האחרונה כבר יהיה לילה."],
- "s-hook":["דקה 1–5 · סרטון פתיחה","לפני השיעור: פתחו את הסרטון מראש ובדקו סאונד, כי לפעמים יש פרסומת לפניו. קראו עם הכיתה את 3 השאלות לפני הצפייה, ואז לחצו על הסרטון (נפתח בלשונית חדשה, כ-3 דקות, עם כתוביות באנגלית). אחרי הצפייה: דקה בזוגות ושיתוף קצר. רמז לשאלה 3: הוא נותן את כרע העוף שלו לכלב רחוב = self-denying deed. תוכנית ב׳ אם אין אינטרנט: שאלו כמה שניות יש ביממה (86,400) ומה עשיתם איתן אתמול."],
- "s-author":["דקה 5–7 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
- "s-vocab":["דקה 7–10 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. הפכו 4–5 כרטיסים ואז Flip all, כדי לעמוד בזמן."],
- "s-poem":["דקה 10–15 · השיר","קריאה קולית (מורה, ואז תלמיד). אחר כך 3–4 עדשות, ולפני כל לחיצה שואלים את הכיתה. Rhyme: אילו מילים מתחרזות? Money words: מה משותף למילים? (זו קריאה פרשנית שעוזרת לתלמידים, לא חלק ממחוון רשמי.) If → Then: תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
- "s-structure":["דקה 15–18 · מבנה · HOTS: comparing and contrasting","לחצו Reveal next שורה אחרי שורה, ולפני כל חשיפה שאלו את הכיתה. השוואה בין שני הבתים מתאימה לשאלות בסגנון הבגרות. מסקנה: אותו מבנה, תוצאה הפוכה = ניגוד (contrast)."],
- "s-acts":["דקה 18–19 · שלושה מעשים קטנים","דקה אחת: לעשות, להגיד, להסתכל. שאלה מהירה: איזה מהם הכי קל לכם? הדגישו nothing cost. אם הזמן לחוץ, אפשר לדלג."],
- "s-devices":["דקה 19–22 · אמצעים ספרותיים","לפני כל לחיצה בקשו מהתלמידים למצוא בשיר דוגמה לאמצעי. אפשר כתחרות קטנה בין השולחנות. הלחיצה חושפת ציטוט, מספר שורה ומה זה אומר."],
- "s-sort":["דקה 22–25 · Well spent or lost?","תלמיד מקריא מצב, וכל הכיתה מצביעה: אגודל למעלה = well spent, אגודל למטה = lost. לחצו על מה שרוב הכיתה בחרה, ותלמיד מקריא את הציטוט שבמשוב. מספיקים 4–5 מצבים אם הזמן לחוץ."],
- "s-think":["דקה 25–27 · HOTS","בחרו שאלה אחת (מומלץ: שאלה 1, cause and effect). Think-Pair-Share: חצי דקה לבד, דקה בזוג, שיתוף. רק אחר כך Show possible ideas. אמרו בקול את שם מיומנות החשיבה, כמו שמבקשים בשאלות HOTS בבגרות."],
- "s-setup":["דקה 27–28 · הכנה לחידון","חלקו לקבוצות לפי שורות או שולחנות. כל קבוצה כותבת את האות (A/B/C/D) על דף או על לוח מחיק ומרימה כשנגמר הזמן."],
- "s-quiz":["דקה 28–35 · החידון","לכל שאלה 20 שניות (אפשר לעצור). כשנגמר הזמן כל הקבוצות מרימות תשובה. לחצו על התשובה הנכונה כדי לחשוף, ותנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. אם הזמן נגמר, Finish now עובר ישר למסך המנצחים."],
- "s-wall":["דקה 35–39 · Be someone’s sunshine","רגע השיא הרגשי של השיעור. כל תלמיד כותב משפט טוב לחבר/ה על פתק דביק ומדביק סביב שמש שמצוירת על הלוח. במקביל הקלידו כמה משפטים: כל משפט מוסיף קרן לשמש שעל המסך. חיבור לשיר: one word that eased the heart."],
- "s-exit":["דקה 39–42 · כרטיס יציאה","כרטיס 3-2-1 על דף. אוספים ביציאה מהכיתה. זו גם הערכה מעצבת שמראה מה התלמידים הבינו בשיעור."],
- "s-write":["דקה 42–43 · שיעורי בית","הציגו את שאלת הבגרות כשיעורי בית. קראו יחד את השאלה, את פתיחי המשפטים ואת מחסן המילים. את תשובת הדוגמה חושפים בשיעור הבא."],
- "s-end":["דקה 43–44 · סיום","השמש שקעה, בדיוק כמו בשיר. שאלה אחרונה: האם השיעור היום היה well spent? תודה!"]
+ "s-hook":["דקה 1–5 · סרטון פתיחה","לפני השיעור: פתחו את הסרטון מראש ובדקו סאונד, כי לפעמים יש פרסומת לפניו. קראו עם הכיתה את 3 השאלות לפני הצפייה, ואז הפעילו את הסרטון (כ-3 דקות, עם כתוביות באנגלית). אחרי הצפייה: שיחה קצרה בזוגות ושיתוף. רמז לשאלה 3: הוא נותן את כרע העוף שלו לכלב רחוב = self-denying deed. תוכנית ב׳ אם אין אינטרנט: שאלו כמה שניות יש ביממה (86,400) ומה עשיתם איתן אתמול."],
+ "s-author":["דקה 5–7 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר?"],
+ "s-vocab":["דקה 7–11 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. בסוף: Flip all."],
+ "s-poem":["דקה 11–19 · השיר","קריאה קולית (מורה, ואז תלמיד). אחר כך עוברים על העדשות אחת אחת, ולפני כל לחיצה שואלים את הכיתה. Rhyme: אילו מילים מתחרזות? Money words: מה משותף למילים? (קריאה פרשנית שעוזרת לתלמידים, לא חלק ממחוון רשמי.) If → Then: תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
+ "s-structure":["דקה 19–23 · מבנה · HOTS: comparing and contrasting","לחצו Reveal next שורה אחרי שורה, ולפני כל חשיפה שאלו את הכיתה. השוואה בין שני הבתים מתאימה לשאלות בסגנון הבגרות. מסקנה: אותו מבנה, תוצאה הפוכה = ניגוד (contrast)."],
+ "s-acts":["דקה 23–26 · שלושה מעשים קטנים","לעשות, להגיד, להסתכל. שאלו: איזה מהם הכי קל לכם? למה? הדגישו nothing cost: טוב לב לא עולה כסף, כל אחד יכול."],
+ "s-devices":["דקה 26–30 · אמצעים ספרותיים","לפני כל לחיצה בקשו מהתלמידים למצוא בשיר דוגמה לאמצעי. אפשר כתחרות קטנה בין השולחנות. הלחיצה חושפת ציטוט, מספר שורה ומה זה אומר."],
+ "s-sort":["דקה 30–34 · Well spent or lost?","תלמיד מקריא מצב, וכל הכיתה מצביעה: אגודל למעלה = well spent, אגודל למטה = lost. לחצו על מה שרוב הכיתה בחרה, ותלמיד מקריא את הציטוט שבמשוב."],
+ "s-setup":["דקה 34–35 · הכנה לחידון","חלקו לקבוצות לפי שורות או שולחנות. כל קבוצה כותבת את האות (A/B/C/D) על דף או על לוח מחיק, ומרימה כשאתם אומרים Show!"],
+ "s-quiz":["דקה 35–43 · החידון","קוראים את השאלה, נותנים לקבוצות לחשוב ולכתוב, ואומרים Show! לחצו על התשובה הנכונה כדי לחשוף, ותנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. אם הזמן נגמר, Finish now עובר ישר למסך המנצחים."],
+ "s-end":["דקה 43–45 · סיום","השמש שקעה, בדיוק כמו בשיר. שאלה אחרונה: האם השיעור היום היה well spent? תודה!"]
 };
 const notes=$("#notes");
 function renderNotes(){ const n=NOTES[slides[cur].id]||["",""]; $("#notesHead").textContent="שקופית "+(cur+1)+" · "+n[0]; $("#notesText").textContent=n[1]; }
@@ -997,7 +889,6 @@ document.addEventListener("keydown",e=>{
   else if(k==="Home"){go(0)} else if(k==="End"){go(N-1)}
   else if(k==="f"||k==="F"){toggleFs()}
   else if(k==="n"||k==="N"){toggleNotes()}
-  else if(k==="t"||k==="T"){toggleTimer()}
   else if(slides[cur].id==="s-quiz"&&/^[1-4]$/.test(k)){quizPick(+k-1)}
 });
 let tx=0,ty=0;
@@ -1008,23 +899,6 @@ document.addEventListener("mousemove",wake); wake();
 let wl=null;
 function toggleFs(){ try{ if(document.fullscreenElement){document.exitFullscreen().catch(()=>{})} else {const r=app.requestFullscreen&&app.requestFullscreen(); if(r&&r.catch) r.catch(()=>{}); try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>wl=l).catch(()=>{})}catch(e){} } }catch(e){} }
 $("#fsBtn").addEventListener("click",toggleFs);
-
-/* ---------- timer widget ---------- */
-const tmr={total:60,left:60,run:false,id:0,last:0};
-const tmrEl=$("#tmr");
-const fmt=s=>{s=Math.ceil(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
-function tmrDraw(){ $("#tmrBig").textContent=fmt(tmr.left); $("#tmrBar").style.width=(tmr.left/tmr.total*100)+"%"; $("#tmrMini").textContent=tmr.run?fmt(tmr.left):""; $("#tmrGo").innerHTML=tmr.run?'<svg class="ic"><use href="#i-pause"/></svg> Pause':'<svg class="ic"><use href="#i-play"/></svg> '+(tmr.left<tmr.total&&tmr.left>0?"Resume":"Start"); }
-function tmrSet(s){ clearInterval(tmr.id); tmr.run=false; tmr.total=tmr.left=s; $("#tmrBig").classList.remove("done"); tmrDraw(); }
-function tmrStart(){ if(tmr.left<=0) tmrSet(tmr.total); tmr.run=true; tmr.last=performance.now(); clearInterval(tmr.id); tmr.id=setInterval(()=>{const now=performance.now();tmr.left=Math.max(0,tmr.left-(now-tmr.last)/1000);tmr.last=now; if(tmr.left<=0){clearInterval(tmr.id);tmr.run=false;$("#tmrBig").classList.add("done");sfx.done();tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true")} tmrDraw()},200); tmrDraw(); }
-function tmrPause(){ clearInterval(tmr.id); tmr.run=false; tmrDraw(); }
-function toggleTimer(){ tmrEl.hidden=!tmrEl.hidden; $("#tmrBtn").setAttribute("aria-pressed",String(!tmrEl.hidden)); }
-$("#tmrBtn").addEventListener("click",toggleTimer);
-$("#tmrClose").addEventListener("click",()=>{tmrEl.hidden=true;$("#tmrBtn").setAttribute("aria-pressed","false")});
-$("#tmrGo").addEventListener("click",()=>tmr.run?tmrPause():tmrStart());
-$("#tmrReset").addEventListener("click",()=>tmrSet(tmr.total));
-$$("[data-pre]").forEach(b=>b.addEventListener("click",()=>tmrSet(+b.dataset.pre)));
-$$("[data-timer]").forEach(b=>b.addEventListener("click",()=>{tmrSet(+b.dataset.timer);tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true");tmrStart()}));
-tmrDraw();
 
 /* ---------- warm-up video: embedded where the host allows it ---------- */
 const VID="uaWA2GbcnJU";
@@ -1146,18 +1020,6 @@ $("#sortNext").addEventListener("click",()=>{
 });
 sortDraw(); sortMeter();
 
-/* ---------- think deeper ---------- */
-const THINK=[
- ["Question 1 · line 16 · HOTS: cause and effect","Why does the speaker say <i>“worse than lost”</i> and not only <i>“lost”</i>?",["When we lose something, it is usually an accident.","A kind act is easy and free: it “nothing cost”.","So a day with no kindness is a missed chance. It is our choice, and that is worse."]],
- ["Question 2 · line 1 · HOTS: inferring","Why do we “count the acts” <i>at set of sun</i>, and not in the morning?",["Sunset is the end of the day: a time to stop and think about what we did.","It is like checking a bank account at the end of the day.","Contrast: the sun goes down, but kindness brings “sunshine” to people."]],
- ["Question 3 · lines 4–6 · HOTS: explaining patterns","Why does the poem say <i>“one”</i> deed, <i>“one”</i> word, <i>“one”</i> glance, and not many?",["The speaker wants to show that kindness is not hard.","Even one small act is enough to make a day well spent.","Everyone can do it, every day."]]
-];
-let thinkI=0;
-function thinkDraw(){ const t=THINK[thinkI]; $("#thinkTag").textContent=t[0]; $("#thinkQ").innerHTML=t[1]; const ul=$("#ideas"); ul.innerHTML=t[2].map(x=>"<li>"+x+"</li>").join(""); ul.hidden=true; $("#ideasCover").hidden=false; $$("[data-think]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.think===thinkI))); }
-$$("[data-think]").forEach(b=>b.addEventListener("click",()=>{thinkI=+b.dataset.think;thinkDraw()}));
-$("#ideasBtn").addEventListener("click",()=>{$("#ideasCover").hidden=true;$("#ideas").hidden=false;sfx.pop()});
-thinkDraw();
-
 /* ---------- quiz ---------- */
 const QUIZ=[
  ["When does the speaker “count the acts”?",["In the morning","At set of sun (sunset)","At midnight","At lunch time"],1,"“If you sit down at set of sun” (line 1): at the end of the day."],
@@ -1171,8 +1033,8 @@ const QUIZ=[
  ["Why is a day with no kindness “worse than lost”?",["Because you lost something important","Because the sun did not shine","Because you were sick all day","Because you had a chance to do good and didn’t use it"],3,"A kind act is free and easy, so missing the chance is worse than losing something by accident."],
  ["What is the main message of the poem?",["Small acts of kindness make our day meaningful","Money is the most important thing","Sunsets are beautiful","Count your money every night"],0,"Even one small kind act makes a day “well spent”."]
 ];
-const QT=20, CIRC=289.03, TEAM_C=["var(--sun)","var(--ember)","var(--dusk)","var(--sky)"];
-const qz={i:0,rev:false,left:QT,run:false,id:0,last:0,teams:[],started:false};
+const TEAM_C=["var(--sun)","var(--ember)","var(--dusk)","var(--sky)"];
+const qz={i:0,rev:false,teams:[],started:false};
 let teamN=3;
 const qd=$("#qDots"); QUIZ.forEach(()=>qd.appendChild(document.createElement("i")));
 $$("#teamSeg button").forEach(b=>b.addEventListener("click",()=>{teamN=+b.dataset.n;$$("#teamSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$$("#teamInputs label").forEach((l,k)=>l.hidden=k>=teamN)}));
@@ -1199,10 +1061,9 @@ function qDraw(){
   q[1].forEach((o,k)=>{const b=document.createElement("button");b.className="q-opt";b.innerHTML='<span class="let">'+"ABCD"[k]+'</span><span class="otext"></span><svg class="ic mark ok"><use href="#i-check"/></svg><svg class="ic mark no"><use href="#i-x"/></svg>';b.querySelector(".otext").textContent=o;b.addEventListener("click",()=>quizPick(k));box.appendChild(b)});
   $("#qExplain").classList.add("hide"); $("#qExplain").textContent=q[3];
   $("#qNext").textContent="Show the answer";
-  qTimerReset(); if(slides[cur].id==="s-quiz") qTimerStart();
 }
 function quizPick(k){
-  if(qz.rev||!qz.started||!$("#qFinal").hidden) return; qz.rev=true; qTimerStop();
+  if(qz.rev||!qz.started||!$("#qFinal").hidden) return; qz.rev=true;
   const q=QUIZ[qz.i], opts=$$("#qOpts .q-opt"); $("#qOpts").classList.add("done");
   opts.forEach((o,j)=>{ if(j===q[2]) o.classList.add("right"); else if(j===k) o.classList.add("wrong"); else o.classList.add("dim"); });
   $("#qExplain").classList.remove("hide");
@@ -1211,7 +1072,7 @@ function quizPick(k){
 }
 $("#qNext").addEventListener("click",()=>{ if(!qz.rev){quizPick(-1);return} if(qz.i<QUIZ.length-1){qz.i++;qDraw()} else quizFinal(); });
 function quizFinal(){
-  qTimerStop(); const f=$("#qFinal"); f.hidden=false;
+  const f=$("#qFinal"); f.hidden=false;
   const sorted=[...qz.teams].sort((a,b)=>b.score-a.score), top=sorted[0].score, winners=sorted.filter(t=>t.score===top);
   $("#qWin").textContent=winners.length>1?"It’s a tie! "+winners.map(w=>w.name).join(" & "):winners[0].name+" wins!";
   const max=Math.max(1,top), r=$("#results"); r.innerHTML="";
@@ -1220,38 +1081,13 @@ function quizFinal(){
 }
 $("#qEnd").addEventListener("click",()=>{if(qz.started)quizFinal()});
 $("#qAgain").addEventListener("click",()=>{qz.teams.forEach(t=>t.score=0);qz.i=0;$("#qFinal").hidden=true;boardDraw();qDraw()});
-function qTimerDraw(){ $("#ringNum").textContent=Math.ceil(qz.left); $("#ringFg").setAttribute("stroke-dashoffset",(CIRC*(1-qz.left/QT)).toFixed(1)); $("#ring").classList.toggle("late",qz.left<=5); $("#qPause").firstElementChild.firstElementChild.setAttribute("href",qz.run?"#i-pause":"#i-play"); }
-function qTimerReset(){ qTimerStop(); qz.left=QT; qTimerDraw(); }
-function qTimerStart(){ if(qz.rev||qz.left<=0) return; qz.run=true; qz.last=performance.now(); clearInterval(qz.id); qz.id=setInterval(()=>{const now=performance.now();qz.left=Math.max(0,qz.left-(now-qz.last)/1000);qz.last=now;if(qz.left<=0){qTimerStop();sfx.done();$("#qNext").textContent="Time! Show the answer"}qTimerDraw()},100); qTimerDraw(); }
-function qTimerStop(){ clearInterval(qz.id); qz.run=false; qTimerDraw(); }
-$("#qPause").addEventListener("click",()=>qz.run?qTimerStop():qTimerStart());
 $("#quizStart").addEventListener("click",()=>{quizInit();go(slides.findIndex(s=>s.id==="s-quiz"))});
-enter["s-quiz"]=()=>{ if(!qz.started) quizInit(); else if(!qz.rev&&$("#qFinal").hidden) qTimerStart(); };
-leave["s-quiz"]=()=>qTimerStop();
-
-/* ---------- writing ---------- */
-$("#modelBtn").addEventListener("click",()=>{$("#modelWrap").hidden=true;$("#model").hidden=false;sfx.pop()});
-
-/* ---------- sunshine wall ---------- */
-const SLOTS=8, field=$("#sunfield"), raysSvg=$("#rays"); let rays=[], notesEls=[], rayN=0;
-function layoutRays(){
-  const w=field.clientWidth, h=field.clientHeight, cxp=w/2, cyp=h/2, rx=Math.min(390,w/2-150), ry=Math.min(235,h/2-34);
-  raysSvg.setAttribute("viewBox","0 0 "+w+" "+h);
-  if(!rays.length){ for(let k=0;k<SLOTS;k++){ const l=document.createElementNS("http://www.w3.org/2000/svg","line"); raysSvg.appendChild(l); rays.push(l); const n=document.createElement("div"); n.className="ray-note"; field.appendChild(n); notesEls.push(n);} }
-  for(let k=0;k<SLOTS;k++){ const a=-Math.PI/2+k*2*Math.PI/SLOTS, c=Math.cos(a), s=Math.sin(a);
-    rays[k].setAttribute("x1",cxp+c*150); rays[k].setAttribute("y1",cyp+s*150); rays[k].setAttribute("x2",cxp+c*(rx-40)*.78); rays[k].setAttribute("y2",cyp+s*(ry-10)*.78);
-    notesEls[k].style.left=(cxp+c*rx)+"px"; notesEls[k].style.top=(cyp+s*ry)+"px"; }
-}
-function addRay(text){ text=(text||"").trim(); if(!text) return; const k=[0,4,2,6,1,5,3,7][rayN%SLOTS]; rayN++; const n=notesEls[k]; n.classList.remove("show"); void n.offsetWidth; n.textContent=text; n.classList.add("show"); rays[k].classList.add("lit"); $("#rayCount").textContent=rayN; $("#bigSun").style.setProperty("--g",Math.min(rayN,24)); sfx.good(); if(rayN%SLOTS===0) confetti(120); }
-$("#wallForm").addEventListener("submit",e=>{e.preventDefault();const i=$("#wall-text");addRay(i.value);i.value=""});
-$$("#suggest button").forEach(b=>b.addEventListener("click",()=>addRay(b.textContent)));
-enter["s-wall"]=()=>requestAnimationFrame(layoutRays);
+enter["s-quiz"]=()=>{ if(!qz.started) quizInit(); };
 
 /* ---------- boot ---------- */
 function start(data){
   let i=0; const m=/^#slide-(\d+)$/.exec(location.hash||""); if(m) i=+m[1]-1; if(data&&typeof data.slide==="number") i=data.slide;
   i=Math.max(0,Math.min(N-1,i)); slides[0].classList.add("active"); cur=0; go(i,true);
-  layoutRays();
 }
 try{ window.claude&&window.claude.hot&&window.claude.hot.snapshot&&window.claude.hot.snapshot(()=>({slide:cur})) }catch(e){}
 try{ (window.claude&&window.claude.hot&&window.claude.hot.ready) ? window.claude.hot.ready(start) : start((window.claude&&window.claude.hot&&window.claude.hot.data)||{}) }catch(e){ start({}) }
