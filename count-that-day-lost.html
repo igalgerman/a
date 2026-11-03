@@ -535,18 +535,6 @@ button,input{font:inherit;color:inherit}
     </div>
   </section>
 
-  <!-- 3 · goals -->
-  <section class="slide" id="s-goals" aria-label="Lesson goals">
-    <header class="s-head"><p class="eyebrow">Today’s mission</p><h2 class="s-title">Four stops before sunset</h2></header>
-    <p class="goal-lead on-sky">By the end of the lesson, I can <b>explain the message</b> of the poem and <b>support it</b> with lines from the text.</p>
-    <ol class="steps">
-      <li class="panel"><span class="step-n">1</span><h3>Remember</h3><p>the words and the ideas of the poem</p></li>
-      <li class="panel"><span class="step-n">2</span><h3>Analyze</h3><p>the structure and the literary devices</p></li>
-      <li class="panel"><span class="step-n">3</span><h3>Play</h3><p>the Sunset Challenge quiz</p></li>
-      <li class="panel"><span class="step-n">4</span><h3>Connect</h3><p>the poem to my own day</p></li>
-    </ol>
-  </section>
-
   <!-- 4 · author -->
   <section class="slide" id="s-author" aria-label="The poet">
     <header class="s-head"><p class="eyebrow">Meet the poet</p><h2 class="s-title">Who wrote the poem?</h2></header>
@@ -864,7 +852,6 @@ button,input{font:inherit;color:inherit}
     <div style="display:flex;flex-direction:column;gap:40px">
       <q class="on-sky">Then you may count<br>that day well spent.</q>
       <p class="thanks on-sky">Thank you! Go and be someone’s sunshine.</p>
-      <div class="mission"><span><svg class="ic"><use href="#i-check"/></svg>Remember</span><span><svg class="ic"><use href="#i-check"/></svg>Analyze</span><span><svg class="ic"><use href="#i-check"/></svg>Play</span><span><svg class="ic"><use href="#i-check"/></svg>Connect</span></div>
       <p class="sub">Count That Day Lost · George Eliot</p>
     </div>
   </section>
@@ -961,9 +948,8 @@ function cloop(){ cx.clearRect(0,0,1920,1080); parts.forEach(p=>{p.vy+=.75;p.vx*
 const NOTES={
  "s-cover":["דקה 0–1 · פתיחה","ברכו את הכיתה והציגו: שיעור סיכום לשיר Count That Day Lost. שימו לב לשמש בצד ימין: היא תשקע לאט במהלך השיעור, בדיוק כמו בשיר (at set of sun). בשקופית האחרונה כבר יהיה לילה."],
  "s-hook":["דקה 1–5 · סרטון פתיחה","לפני השיעור: פתחו את הסרטון מראש ובדקו סאונד, כי לפעמים יש פרסומת לפניו. קראו עם הכיתה את 3 השאלות לפני הצפייה, ואז לחצו על הסרטון (נפתח בלשונית חדשה, כ-3 דקות, עם כתוביות באנגלית). אחרי הצפייה: דקה בזוגות ושיתוף קצר. רמז לשאלה 3: הוא נותן את כרע העוף שלו לכלב רחוב = self-denying deed. תוכנית ב׳ אם אין אינטרנט: שאלו כמה שניות יש ביממה (86,400) ומה עשיתם איתן אתמול."],
- "s-goals":["דקה 5–6 · מטרות השיעור","תלמיד מקריא את מטרת השיעור. ארבע התחנות הן מפת השיעור. בסוף השיעור אפשר לחזור לכאן ולשאול: האם השגנו את המשימה?"],
- "s-author":["דקה 6–8 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
- "s-vocab":["דקה 8–10 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. הפכו 4–5 כרטיסים ואז Flip all, כדי לעמוד בזמן."],
+ "s-author":["דקה 5–7 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
+ "s-vocab":["דקה 7–10 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. הפכו 4–5 כרטיסים ואז Flip all, כדי לעמוד בזמן."],
  "s-poem":["דקה 10–15 · השיר","קריאה קולית (מורה, ואז תלמיד). אחר כך 3–4 עדשות, ולפני כל לחיצה שואלים את הכיתה. Rhyme: אילו מילים מתחרזות? Money words: מה משותף למילים? (זו קריאה פרשנית שעוזרת לתלמידים, לא חלק ממחוון רשמי.) If → Then: תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
  "s-structure":["דקה 15–18 · מבנה · HOTS: comparing and contrasting","לחצו Reveal next שורה אחרי שורה, ולפני כל חשיפה שאלו את הכיתה. השוואה בין שני הבתים מתאימה לשאלות בסגנון הבגרות. מסקנה: אותו מבנה, תוצאה הפוכה = ניגוד (contrast)."],
  "s-acts":["דקה 18–19 · שלושה מעשים קטנים","דקה אחת: לעשות, להגיד, להסתכל. שאלה מהירה: איזה מהם הכי קל לכם? הדגישו nothing cost. אם הזמן לחוץ, אפשר לדלג."],
