@@ -1,0 +1,1239 @@
+<title>Count That Day Lost</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..600&family=Rubik:wght@400..700&display=swap">
+<style>
+:root{
+  /* Layout: one 1920×1080 stage scaled to the screen. Behind every slide a single sky moves from morning to night as the lesson advances, so the sun sets on the last slides ("at set of sun"). Content sits on paper panels and day-receipt slips. */
+  --ink:#221A3B;
+  --ink-soft:#3A3157;
+  --paper:#FFF9F2;
+  --paper-2:#F4EBE0;
+  --paper-soft:#F6E9DC;
+  --line:#E3D7CB;
+  --sun:#FFB627;
+  --sun-pale:#FFE3A1;
+  --ember:#EE5A2F;
+  --ember-deep:#B5381A;
+  --dusk:#5A3E91;
+  --dusk-pale:#DCD0F7;
+  --sky:#3C8FD0;
+  --sky-pale:#C4E3FB;
+  --void:#0E0B1C;
+  --muted:#675D80;
+  --good:#1D8657;
+  --good-pale:#D3F1E1;
+  --bad:#C93739;
+  --bad-pale:#FBDCDC;
+  --hl-a:#FFDD7E; --hl-b:#BFE1FF; --hl-c:#FFCABB; --hl-d:#DACDF7; --hl-money:#BFEBCF;
+  --hud:rgba(14,11,28,.64);
+  --hud-ink:#FFF6EA;
+  --shadow:0 30px 70px -30px rgba(18,10,44,.6), 0 4px 14px -6px rgba(18,10,44,.25);
+  --f-display:"Bricolage Grotesque","Arial Black","Segoe UI",system-ui,sans-serif;
+  --f-poem:"Literata",Georgia,"Times New Roman",serif;
+  --f-body:"Rubik","Segoe UI",Arial,system-ui,sans-serif;
+  --f-mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0;background:var(--void);color:var(--paper);font-family:var(--f-body);overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+#app{height:100%;display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;background:var(--void)}
+#app:fullscreen{padding:0}
+#viewport{position:relative;flex:none;overflow:hidden;border-radius:16px;box-shadow:0 40px 120px -40px rgba(0,0,0,.85);background:var(--ink)}
+#app:fullscreen #viewport{border-radius:0;box-shadow:none}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;font:400 30px/1.45 var(--f-body);color:var(--ink);--sky-ink:var(--ink);--sky-ink-soft:var(--ink-soft)}
+#stage.ink-light{--sky-ink:var(--paper);--sky-ink-soft:var(--paper-soft)}
+#stage p,#stage h1,#stage h2,#stage h3,#stage ol,#stage ul{margin:0}
+#stage ol,#stage ul{padding:0;list-style:none}
+.ic{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:4px solid var(--sun);outline-offset:4px}
+
+/* ---------- sky ---------- */
+#sky,#stars{position:absolute;inset:0;pointer-events:none}
+#stars{opacity:0}
+#stars i{position:absolute;border-radius:50%;background:var(--paper);animation:twinkle 3.2s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.2}to{opacity:1}}
+#sun{position:absolute;left:0;top:0;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;pointer-events:none}
+#hills{position:absolute;left:0;bottom:0;width:1920px;height:300px;pointer-events:none}
+
+/* ---------- slides ---------- */
+.slide{position:absolute;inset:0;padding:84px 120px 128px;display:flex;flex-direction:column;gap:36px;opacity:0;visibility:hidden;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease,visibility 0s linear .55s}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .55s ease,transform .55s ease,visibility 0s}
+.s-head{display:flex;flex-direction:column;gap:12px}
+.s-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:32px}
+.eyebrow{font:600 24px/1.2 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--sky-ink-soft);transition:color .8s}
+.s-title{font:800 84px/1 var(--f-display);letter-spacing:-.025em;color:var(--sky-ink);text-wrap:balance;transition:color .8s}
+.ink-light .s-title,.ink-light .on-sky{text-shadow:0 2px 26px rgba(10,6,30,.4)}
+.hint{font:500 26px/1.3 var(--f-body);color:var(--sky-ink-soft)}
+.tools{display:flex;gap:14px;flex:none;align-items:center}
+.panel{background:var(--paper);color:var(--ink);border-radius:30px;padding:40px 48px;box-shadow:var(--shadow)}
+.panel h3{font:700 36px/1.15 var(--f-display)}
+.muted{color:var(--muted)}
+
+.btn{appearance:none;border:0;cursor:pointer;font:600 28px/1 var(--f-body);padding:20px 34px;border-radius:999px;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;gap:14px;transition:transform .15s,box-shadow .15s,background-color .2s,opacity .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(20,10,40,.6)}
+.btn:active{transform:translateY(1px)}
+.btn.sun{background:var(--sun);color:var(--ink)}
+.btn.dusk{background:var(--dusk);color:var(--paper)}
+.btn.soft{background:var(--paper);color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 3px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 3px var(--ink)}
+.btn.small{font-size:24px;padding:14px 24px}
+.btn.big{font-size:34px;padding:26px 44px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* ---------- receipt slips ---------- */
+.receipt-wrap{filter:drop-shadow(0 26px 40px rgba(18,10,44,.45))}
+.receipt{background:var(--paper);color:var(--ink);font:500 24px/1.5 var(--f-mono);padding:34px 36px 52px;-webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/28px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/28px 100%}
+.rc-head{font-weight:700;letter-spacing:.3em;text-align:center}
+.rc-sub{text-align:center;color:var(--muted);font-size:20px;padding-bottom:14px;border-bottom:3px dashed var(--line)}
+.rc-row{display:flex;align-items:baseline;gap:10px;padding-top:12px}
+.rc-row i{flex:1;border-bottom:3px dotted var(--line)}
+.rc-total{display:flex;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:3px dashed var(--line);font-weight:700}
+
+/* cover */
+.cover{justify-content:center;padding-left:150px}
+.cover-text{display:flex;flex-direction:column;gap:28px;max-width:1040px}
+.cover-title{font:800 176px/.88 var(--f-display);letter-spacing:-.04em;color:var(--sky-ink)}
+.cover-poet{font:italic 500 50px/1.2 var(--f-poem);color:var(--sky-ink)}
+.cover-q{font:500 34px/1.4 var(--f-body);color:var(--sky-ink-soft);max-width:760px}
+.cover-receipt{position:absolute;right:260px;top:430px;width:470px;transform:rotate(3.5deg)}
+
+/* hook */
+.hook-grid{flex:1;display:grid;grid-template-columns:1fr 760px;gap:48px;align-items:center}
+.hook-num{display:flex;flex-direction:column;gap:6px;color:var(--sky-ink)}
+.hook-num b{font:800 230px/.9 var(--f-display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.hook-num span{font:500 50px/1.2 var(--f-poem);font-style:italic}
+.hook-panel{display:flex;flex-direction:column;gap:22px}
+.lead{font:600 40px/1.25 var(--f-body)}
+.hook-panel hr{border:0;border-top:3px dashed var(--line);margin:6px 0;width:100%}
+
+/* goals */
+.goal-lead{font:500 42px/1.3 var(--f-body);color:var(--sky-ink);max-width:1280px;text-wrap:balance}
+.goal-lead b{font-weight:700}
+.steps{margin-top:auto !important;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;counter-reset:none}
+.steps li{display:flex;flex-direction:column;gap:14px;padding:36px 36px 40px}
+.step-n{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font:800 36px var(--f-display)}
+.steps li:nth-child(1) .step-n{background:var(--sun-pale)}
+.steps li:nth-child(2) .step-n{background:var(--hl-c)}
+.steps li:nth-child(3) .step-n{background:var(--dusk-pale)}
+.steps li:nth-child(4) .step-n{background:var(--ink);color:var(--paper)}
+.steps h3{font:800 48px/1 var(--f-display)}
+.steps p{font-size:28px;color:var(--muted)}
+
+/* author */
+.author-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;min-height:0}
+.author-card{display:flex;flex-direction:column;gap:18px}
+.quill{font-size:84px;color:var(--ember)}
+.author-name{font:800 96px/1 var(--f-display);letter-spacing:-.03em}
+.author-meta{font:500 30px var(--f-body);color:var(--muted)}
+.author-q{margin-top:auto !important;font:600 38px/1.25 var(--f-body)}
+.vote{display:flex;gap:18px}
+.vote .btn.chosen{background:var(--ink);color:var(--paper);box-shadow:none}
+.author-reveal{display:flex;flex-direction:column;justify-content:center}
+.ar-wait{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--muted);text-align:center}
+.ar-wait span{font:800 240px/1 var(--f-display);color:var(--line)}
+.ar-answer{display:flex;flex-direction:column;gap:20px;font-size:32px}
+.ar-big{font:800 80px/1 var(--f-display);color:var(--ember-deep)}
+.ar-books span{display:block;font:600 22px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ar-books{font:italic 500 36px var(--f-poem)}
+.ar-think{background:var(--sun-pale);border-radius:20px;padding:20px 26px;font-size:28px}
+
+/* flip cards */
+.flip{appearance:none;border:0;background:none;padding:0;cursor:pointer;perspective:1500px;text-align:left;color:var(--ink);min-height:0}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.75,.25,1);transform-style:preserve-3d}
+.flip.flipped .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;padding:28px 30px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow);overflow:hidden}
+.front{background:var(--paper)}
+.back{background:var(--ink);color:var(--paper);transform:rotateY(180deg)}
+.flip:hover .front{background:#FFFDF9}
+.tag{font:600 20px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.back .tag{color:var(--sun)}
+.vgrid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:1fr;gap:24px;min-height:0}
+.v-word{font:800 46px/1.02 var(--f-display);letter-spacing:-.02em;hyphens:manual}
+.v-mean{font:500 28px/1.3 var(--f-body)}
+.v-he{font:600 32px/1.3 var(--f-body);color:var(--sun);direction:rtl;text-align:right}
+
+/* poem */
+.lens{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.chip{appearance:none;border:0;cursor:pointer;font:600 25px/1 var(--f-body);padding:16px 24px 16px 20px;border-radius:999px;background:var(--paper);color:var(--ink);display:inline-flex;align-items:center;gap:12px;box-shadow:0 8px 20px -12px rgba(18,10,44,.6);transition:background-color .2s,color .2s,transform .15s}
+.chip:hover{transform:translateY(-2px)}
+.chip::before{content:"";width:20px;height:20px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.poem{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.stanza-card{padding:30px 36px 34px}
+.stanza-label{display:flex;justify-content:space-between;font:600 20px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:16px;margin-bottom:10px;border-bottom:2px solid var(--line)}
+.stanza{counter-reset:ln}
+.stanza.s2{counter-reset:ln 8}
+.stanza li{counter-increment:ln;position:relative;padding:0 50px 0 58px;font:400 33px/1.76 var(--f-poem);white-space:nowrap;transition:color .35s}
+.stanza li.ind{padding-left:118px}
+.stanza li::before{content:counter(ln);position:absolute;left:0;top:.5em;font:500 20px/1 var(--f-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.stanza li::after{content:attr(data-r);position:absolute;right:0;top:.32em;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font:700 22px/1 var(--f-body);text-transform:uppercase;opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s}
+.stanza li[data-r="a"]::after{background:var(--hl-a)}
+.stanza li[data-r="b"]::after{background:var(--hl-b)}
+.stanza li[data-r="c"]::after{background:var(--hl-c)}
+.stanza li[data-r="d"]::after{background:var(--hl-d)}
+.poem.m-rhyme .stanza li::after{opacity:1;transform:none}
+.stanza span{border-radius:8px;padding:0 .08em;margin:0 -.08em;transition:background-color .35s,color .35s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.poem.lensed .stanza li{color:#8F86A6}
+.poem.m-rhyme .r-a{background:var(--hl-a);color:var(--ink)}
+.poem.m-rhyme .r-b{background:var(--hl-b);color:var(--ink)}
+.poem.m-rhyme .r-c{background:var(--hl-c);color:var(--ink)}
+.poem.m-rhyme .r-d{background:var(--hl-d);color:var(--ink)}
+.poem.m-sun .t-sun{background:var(--hl-a);color:var(--ink)}
+.poem.m-money .t-money{background:var(--hl-money);color:var(--ink)}
+.poem.m-one .t-one{background:var(--hl-c);color:var(--ink)}
+.poem.m-if .t-if{background:var(--hl-d);color:var(--ink)}
+.lens-info{display:flex;align-items:center;gap:26px;padding:24px 36px;font-size:29px;line-height:1.35;min-height:120px}
+.lens-info .ic{font-size:48px;color:var(--ember)}
+
+/* mirror table */
+.mirror{flex:1;display:grid;grid-template-columns:200px 1fr 1fr;grid-template-rows:auto repeat(4,1fr);gap:16px 22px;min-height:0}
+.m-head{display:flex;align-items:center;gap:20px;padding:22px 30px;border-radius:24px;color:var(--ink)}
+.m-head .ic{font-size:56px}
+.m-head small{display:block;font:600 20px/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.m-head b{font:800 40px/1.1 var(--f-display)}
+.m-head.s1{background:var(--sun)}
+.m-head.s2{background:var(--dusk);color:var(--paper)}
+.m-label{align-self:center;font:800 40px/1 var(--f-display);color:var(--sky-ink);text-align:right;transition:color .8s}
+.m-cell{appearance:none;border:0;cursor:pointer;position:relative;text-align:left;border-radius:22px;padding:18px 30px;background:var(--paper);color:var(--ink);font:500 31px/1.3 var(--f-body);box-shadow:var(--shadow);display:flex;align-items:center}
+.m-cell i{font-family:var(--f-poem)}
+.m-cell .ans{transition:opacity .4s}
+.m-cell:not(.shown) .ans{opacity:0}
+.m-cell:not(.shown)::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;font:800 56px/1 var(--f-display);color:var(--line)}
+.m-cell:not(.shown):hover::after{color:var(--sun)}
+.mirror-foot{display:flex;align-items:center;gap:20px;font:600 32px/1.3 var(--f-body);color:var(--sky-ink)}
+.mirror-foot b{font-family:var(--f-display);font-weight:800;padding:6px 18px;border-radius:12px;background:var(--ember);color:var(--paper)}
+
+/* three acts */
+.acts{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:32px;min-height:0}
+.act{display:flex;flex-direction:column;gap:20px}
+.act-ic{width:110px;height:110px;border-radius:32px;display:grid;place-items:center;font-size:60px}
+.act:nth-child(1) .act-ic{background:var(--sun-pale)}
+.act:nth-child(2) .act-ic{background:var(--hl-c)}
+.act:nth-child(3) .act-ic{background:var(--sky-pale)}
+.act-verb{font:800 76px/1 var(--f-display);letter-spacing:-.02em}
+.act-quote{font:italic 500 34px/1.35 var(--f-poem)}
+.act-quote small{display:block;font:500 20px/1.6 var(--f-body);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.act p:last-child{margin-top:auto !important;font-size:28px;color:var(--muted)}
+.band{display:flex;align-items:center;justify-content:space-between;gap:40px;padding:28px 44px;border-radius:28px;background:var(--ink);color:var(--paper)}
+.band q{font:italic 500 34px/1.3 var(--f-poem);quotes:"“" "”"}
+.band b{font:800 40px/1.1 var(--f-display);color:var(--sun);white-space:nowrap}
+
+/* devices */
+.dgrid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:26px;min-height:0}
+.d-name{font:800 56px/1 var(--f-display);letter-spacing:-.02em}
+.d-def{font:500 29px/1.3 var(--f-body);color:var(--muted)}
+.d-quote{font:italic 500 33px/1.32 var(--f-poem)}
+.d-why{font:500 26px/1.3 var(--f-body);color:var(--paper-soft)}
+.dgrid .flip:nth-child(1) .front{border-top:10px solid var(--hl-a)}
+.dgrid .flip:nth-child(2) .front{border-top:10px solid var(--hl-b)}
+.dgrid .flip:nth-child(3) .front{border-top:10px solid var(--hl-c)}
+.dgrid .flip:nth-child(4) .front{border-top:10px solid var(--hl-d)}
+.dgrid .flip:nth-child(5) .front{border-top:10px solid var(--ember)}
+.dgrid .flip:nth-child(6) .front{border-top:10px solid var(--hl-money)}
+
+/* sorting */
+.sort-grid{flex:1;display:grid;grid-template-columns:1fr 470px;gap:36px;min-height:0}
+.sort-card{display:flex;flex-direction:column;gap:26px}
+.sort-text{font:700 56px/1.15 var(--f-display);letter-spacing:-.015em;text-wrap:balance;min-height:200px}
+.sort-btns{display:flex;gap:20px}
+.sort-btns .btn{font-size:32px;padding:24px 36px}
+.sort-btns .btn.picked{box-shadow:0 0 0 5px var(--paper),0 0 0 9px var(--ink)}
+.sort-fb{margin-top:auto !important;border-radius:22px;padding:22px 28px;font-size:30px;line-height:1.35;background:var(--paper-2);min-height:116px;display:flex;align-items:center;gap:20px}
+.sort-fb.ok{background:var(--good-pale)}
+.sort-fb.no{background:var(--bad-pale)}
+.sort-fb .ic{font-size:44px}
+.sort-fb.ok .ic{color:var(--good)}
+.sort-fb.no .ic{color:var(--bad)}
+.sort-fb i{font-family:var(--f-poem)}
+.sort-foot{display:flex;justify-content:space-between;align-items:center}
+.tally{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center}
+.meter{position:relative;width:280px;height:280px;border-radius:50%;background:var(--paper-2);overflow:hidden;box-shadow:inset 0 0 0 8px var(--sun-pale)}
+.meter-fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,var(--ember),var(--sun));transition:height .8s cubic-bezier(.2,.8,.2,1)}
+.meter span{position:absolute;inset:0;display:grid;place-items:center;font:800 80px/1 var(--f-display);color:var(--ink)}
+.tally-row{display:flex;gap:16px;width:100%}
+.tally-row div{flex:1;border-radius:20px;padding:16px;background:var(--paper-2);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;color:var(--muted)}
+.tally-row b{font:800 54px/1 var(--f-display);color:var(--ink)}
+.dots{display:flex;gap:10px}
+.dots i{width:16px;height:16px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--ink)}
+.dots i.cur{background:var(--ember)}
+
+/* think deeper */
+.tabs{display:flex;gap:14px}
+.think-card{flex:1;display:grid;grid-template-columns:1fr 560px;gap:48px;min-height:0}
+.think-q{font:700 58px/1.15 var(--f-display);letter-spacing:-.015em;text-wrap:balance}
+.think-q i{font-family:var(--f-poem);font-weight:500}
+.tps{display:flex;gap:14px;flex-wrap:wrap}
+.tps span{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:14px;background:var(--paper-2);font:600 24px/1 var(--f-body)}
+.ideas{border-radius:24px;background:var(--ink);color:var(--paper);padding:34px 38px;display:flex;flex-direction:column;gap:18px}
+.ideas li{position:relative;padding-left:40px;font-size:29px;line-height:1.35}
+.ideas li::before{content:"";position:absolute;left:0;top:.42em;width:20px;height:20px;border-radius:50%;background:var(--sun)}
+.ideas-cover{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:24px;height:100%;border-radius:24px;border:4px dashed var(--line);padding:34px;color:var(--muted)}
+
+/* quiz setup */
+.setup{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:40px;min-height:0}
+.rules{display:flex;flex-direction:column;gap:22px;counter-reset:r}
+.rules li{counter-increment:r;display:grid;grid-template-columns:60px 1fr;gap:20px;align-items:start;font-size:31px;line-height:1.35}
+.rules li::before{content:counter(r);width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:800 28px var(--f-display);background:var(--sun-pale)}
+.seg{display:inline-flex;background:var(--paper-2);border-radius:999px;padding:6px}
+.seg button{appearance:none;border:0;background:transparent;cursor:pointer;font:700 28px/1 var(--f-body);padding:14px 28px;border-radius:999px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.team-inputs{display:flex;flex-direction:column;gap:14px}
+.team-inputs label{display:flex;align-items:center;gap:16px}
+.team-inputs label::before{content:"";width:26px;height:26px;border-radius:50%;background:var(--c);flex:none}
+.team-inputs input{flex:1;min-width:0;font:500 30px/1 var(--f-body);padding:16px 22px;border-radius:16px;border:3px solid var(--line);background:var(--paper);color:var(--ink)}
+.team-inputs input:focus{outline:none;border-color:var(--ink)}
+
+/* quiz */
+.quiz{flex:1;display:grid;grid-template-columns:1fr 370px;gap:40px;min-height:0}
+.q-main{display:flex;flex-direction:column;gap:24px;min-height:0}
+.q-top{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.q-meta{display:flex;flex-direction:column;gap:14px}
+.q-meta .dots i{background:rgba(255,249,242,.35)}
+.q-meta .dots i.on{background:var(--sun)}
+.q-meta .dots i.cur{background:var(--paper)}
+.q-timer{display:flex;align-items:center;gap:14px}
+.ring{position:relative;width:110px;height:110px}
+.ring svg{width:110px;height:110px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.ring .bg{stroke:rgba(255,249,242,.25)}
+.ring .fg{stroke:var(--sun);stroke-linecap:round;transition:stroke .3s}
+.ring.late .fg{stroke:var(--ember)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 40px/1 var(--f-display);color:var(--paper);font-variant-numeric:tabular-nums}
+.icon-btn{appearance:none;border:0;cursor:pointer;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--ink);font-size:28px;box-shadow:var(--shadow)}
+.q-card{padding:40px 48px}
+.q-text{font:700 56px/1.16 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
+.q-opts{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:22px;min-height:0;max-height:420px}
+.q-opt{appearance:none;border:0;cursor:pointer;display:flex;align-items:center;gap:22px;padding:22px 26px;border-radius:24px;background:var(--paper);color:var(--ink);font:500 36px/1.2 var(--f-body);text-align:left;box-shadow:var(--shadow);transition:transform .15s,background-color .3s,opacity .3s,box-shadow .3s;min-height:118px}
+.q-opt:hover{transform:translateY(-3px)}
+.q-opt .let{flex:none;width:70px;height:70px;border-radius:20px;display:grid;place-items:center;font:800 36px/1 var(--f-display)}
+.q-opt:nth-child(1) .let{background:var(--hl-a)}
+.q-opt:nth-child(2) .let{background:var(--hl-b)}
+.q-opt:nth-child(3) .let{background:var(--hl-c)}
+.q-opt:nth-child(4) .let{background:var(--hl-d)}
+.q-opt .mark{margin-left:auto;font-size:44px;display:none}
+.q-opt.right{background:var(--good-pale);box-shadow:inset 0 0 0 5px var(--good)}
+.q-opt.right .let{background:var(--good);color:var(--paper)}
+.q-opt.right .mark.ok{display:block;color:var(--good)}
+.q-opt.wrong{background:var(--bad-pale);box-shadow:inset 0 0 0 5px var(--bad)}
+.q-opt.wrong .let{background:var(--bad);color:var(--paper)}
+.q-opt.wrong .mark.no{display:block;color:var(--bad)}
+.q-opt.dim{opacity:.5}
+.q-opts.done .q-opt{pointer-events:none}
+.q-bottom{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:30px}
+.q-explain{font:500 29px/1.35 var(--f-body);color:var(--sky-ink);flex:1;min-width:0;transition:opacity .3s}
+.q-explain.hide{opacity:0}
+.board{display:flex;flex-direction:column;gap:18px;min-height:0}
+.board-title{display:flex;align-items:center;gap:12px;font:600 24px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--sky-ink-soft)}
+.team{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 14px;padding:26px 28px;border-radius:24px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);border-left:14px solid var(--c)}
+.team-name{font:700 31px/1.15 var(--f-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team-score{grid-row:span 2;font:800 84px/1 var(--f-display);font-variant-numeric:tabular-nums;transition:transform .3s}
+.team-score.bump{transform:scale(1.25)}
+.team-ctl{display:flex;gap:10px}
+.team-ctl button{appearance:none;border:0;cursor:pointer;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--paper-2);color:var(--ink);font-size:26px}
+.team-ctl button.plus{background:var(--ink);color:var(--paper)}
+.q-final{position:absolute;inset:84px 120px 128px;z-index:5;display:flex;flex-direction:column;gap:26px;padding:56px 64px}
+.q-final .tag{font-size:24px}
+.q-win{font:800 110px/1 var(--f-display);letter-spacing:-.03em;color:var(--ember-deep)}
+.results{display:flex;flex-direction:column;gap:16px;flex:1}
+.res{display:grid;grid-template-columns:300px 1fr 90px;align-items:center;gap:24px;font:600 30px/1 var(--f-body)}
+.res-bar{height:44px;border-radius:999px;background:var(--paper-2);overflow:hidden}
+.res-bar i{display:block;height:100%;width:0;border-radius:999px;background:var(--c);transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.res b{font:800 48px/1 var(--f-display);text-align:right}
+.q-final-btns{display:flex;gap:18px}
+
+/* writing */
+.write-grid{flex:1;display:grid;grid-template-columns:1.1fr .9fr;gap:36px;min-height:0}
+.write-q{font:700 42px/1.2 var(--f-display);text-wrap:balance}
+.write-q i{font-family:var(--f-poem);font-weight:500}
+.starters{display:flex;flex-direction:column;gap:14px}
+.starters li{padding:14px 22px;border-radius:16px;background:var(--paper-2);font-size:28px}
+.wbank{display:flex;flex-wrap:wrap;gap:12px}
+.wbank span{padding:10px 20px;border-radius:999px;background:var(--sun-pale);font:600 26px/1.2 var(--f-body)}
+.model{border-radius:24px;background:var(--ink);color:var(--paper);padding:30px 34px;font:500 28px/1.45 var(--f-body)}
+.model mark{background:transparent;color:var(--sun);font-weight:700}
+
+/* sunshine wall */
+.wall{flex:1;display:grid;grid-template-columns:600px 1fr;gap:40px;min-height:0}
+.wall-steps{display:flex;flex-direction:column;gap:20px;counter-reset:w}
+.wall-steps li{counter-increment:w;display:grid;grid-template-columns:56px 1fr;gap:18px;font-size:30px;line-height:1.3}
+.wall-steps li::before{content:counter(w);width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--sun);font:800 26px var(--f-display)}
+.wall-quote{margin-top:auto !important;font:italic 500 32px/1.35 var(--f-poem);padding-top:22px;border-top:3px dashed var(--line)}
+.sunbox{position:relative;display:flex;flex-direction:column;gap:20px;min-height:0}
+.sunfield{position:relative;flex:1}
+.sunfield svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.sunfield line{stroke:rgba(255,249,242,.25);stroke-width:10;stroke-linecap:round;transition:stroke .6s}
+.sunfield line.lit{stroke:var(--sun)}
+.big-sun{position:absolute;left:50%;top:50%;width:250px;height:250px;margin:-125px 0 0 -125px;border-radius:50%;background:radial-gradient(circle at 38% 36%,#FFF7D6,var(--sun) 55%,var(--ember));box-shadow:0 0 calc(60px + var(--g,0) * 14px) calc(12px + var(--g,0) * 5px) rgba(255,182,39,.55);display:grid;place-items:center;text-align:center;transition:box-shadow .8s,transform .8s;transform:scale(calc(1 + var(--g,0) * .015))}
+.big-sun b{font:800 72px/1 var(--f-display);color:var(--ink)}
+.big-sun small{display:block;font:600 20px/1.2 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.ray-note{position:absolute;width:max-content;max-width:290px;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:12px 20px;border-radius:18px;background:var(--paper);color:var(--ink);font:600 24px/1.25 var(--f-body);text-align:center;box-shadow:var(--shadow);transition:opacity .5s,transform .5s cubic-bezier(.2,1.4,.4,1)}
+.ray-note.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.wall-input{display:flex;gap:14px}
+.wall-input input{flex:1;min-width:0;font:500 28px/1 var(--f-body);padding:18px 24px;border-radius:999px;border:0;background:var(--paper);color:var(--ink)}
+.wall-input input:focus{outline:4px solid var(--sun);outline-offset:2px}
+.suggest{display:flex;flex-wrap:wrap;gap:10px}
+.suggest button{appearance:none;border:0;cursor:pointer;font:500 22px/1 var(--f-body);padding:12px 18px;border-radius:999px;background:rgba(14,11,28,.62);color:var(--paper);box-shadow:inset 0 0 0 2px rgba(255,249,242,.35)}
+.suggest button:hover{background:rgba(14,11,28,.85)}
+
+/* exit ticket */
+.exit-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:40px;align-items:start;min-height:0}
+.exit-grid .receipt-wrap:nth-child(1){transform:rotate(-1.5deg)}
+.exit-grid .receipt-wrap:nth-child(2){transform:rotate(1deg) translateY(16px)}
+.exit-grid .receipt-wrap:nth-child(3){transform:rotate(-.5deg)}
+.exit-n{display:flex;align-items:baseline;gap:18px;padding:6px 0 16px;border-bottom:3px dashed var(--line)}
+.exit-n b{font:800 110px/1 var(--f-display);color:var(--ember-deep)}
+.exit-n span{font:700 28px/1.2 var(--f-body)}
+.wline{height:80px;border-bottom:3px dotted var(--line)}
+.exit-foot{display:flex;align-items:center;justify-content:space-between;gap:30px}
+.exit-foot q{font:italic 500 38px/1.3 var(--f-poem);color:var(--sky-ink);quotes:"“" "”"}
+
+/* closing */
+.closing{justify-content:center;align-items:flex-start;padding-left:150px}
+.closing q{font:italic 500 112px/1.08 var(--f-poem);color:var(--paper);quotes:none;max-width:1400px;letter-spacing:-.01em}
+.closing .thanks{font:800 60px/1.1 var(--f-display);color:var(--sun)}
+.closing .sub{font:500 32px/1.4 var(--f-body);color:var(--paper-soft)}
+
+/* ---------- HUD, timer, notes ---------- */
+.hud{position:absolute;right:30px;bottom:24px;z-index:50;display:flex;align-items:center;gap:4px;padding:8px 10px;border-radius:999px;background:var(--hud);color:var(--hud-ink);font:500 22px/1 var(--f-body);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:opacity .4s}
+#stage.idle .hud{opacity:.22}
+.hud button{appearance:none;border:0;cursor:pointer;min-width:52px;height:52px;padding:0 12px;border-radius:999px;background:transparent;color:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 22px/1 var(--f-body);font-variant-numeric:tabular-nums}
+.hud button .ic{font-size:26px}
+.hud button:hover,.hud button[aria-pressed="true"]{background:rgba(255,249,242,.16)}
+.hud .count{padding:0 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hud .clock{display:inline-flex;align-items:center;gap:8px;padding:0 14px 0 8px;border-right:2px solid rgba(255,249,242,.2);font-variant-numeric:tabular-nums}
+.hud .clock .ic{color:var(--sun);font-size:26px}
+.progress{position:absolute;left:0;right:0;bottom:0;height:6px;z-index:49;background:rgba(255,249,242,.15)}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--ember));transition:width .6s ease}
+.tmr{position:absolute;top:28px;right:30px;z-index:60;width:420px;padding:24px 28px 28px;border-radius:28px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
+.tmr-top{display:flex;justify-content:space-between;align-items:center}
+.tmr-top .tag{display:flex;align-items:center;gap:10px}
+.tmr-x{appearance:none;border:0;cursor:pointer;width:48px;height:48px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;font-size:24px;color:var(--ink)}
+.tmr-big{font:800 120px/1 var(--f-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-align:center}
+.tmr-big.done{color:var(--ember-deep);animation:pulse .6s ease-in-out 4}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.tmr-bar{height:10px;border-radius:999px;background:var(--paper-2);overflow:hidden}
+.tmr-bar i{display:block;height:100%;width:100%;background:var(--sun);transition:width .25s linear}
+.tmr-pre{display:flex;gap:8px}
+.tmr-pre button{flex:1;appearance:none;border:0;cursor:pointer;padding:12px 0;border-radius:14px;background:var(--paper-2);font:600 22px/1 var(--f-body);color:var(--ink)}
+.tmr-pre button:hover{background:var(--sun-pale)}
+.tmr-ctl{display:flex;gap:10px}
+.tmr-ctl .btn{flex:1}
+.notes{position:absolute;left:30px;bottom:100px;z-index:60;width:820px;max-height:640px;overflow:auto;padding:30px 36px;border-radius:26px;background:rgba(14,11,28,.94);color:var(--hud-ink);direction:rtl;text-align:right;font:400 28px/1.55 var(--f-body);box-shadow:var(--shadow)}
+.notes h4{margin:0 0 12px;font:700 22px/1.2 var(--f-body);letter-spacing:.06em;color:var(--sun)}
+.notes p{margin:0}
+.notes .keys{margin-top:16px;padding-top:14px;border-top:2px solid rgba(255,249,242,.15);font-size:22px;color:var(--paper-soft)}
+#confetti{position:absolute;inset:0;z-index:70;pointer-events:none}
+
+@media (prefers-reduced-motion: reduce){
+  .slide,.flip .in,.ray-note,.meter-fill,.res-bar i{transition-duration:.01s !important}
+  #stars i,.tmr-big.done{animation:none}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.2A8.6 8.6 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 1.8M9.5 2.5h5"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><path d="M3.5 8.5h17v4h-17zM5.5 12.5v8h13v-8M12 8.5v12M12 8.5S10.8 3.6 8.3 4c-2.3.4-1.6 4.5 3.7 4.5zm0 0s1.2-4.9 3.7-4.5c2.3.4 1.6 4.5-3.7 4.5z"/></symbol>
+  <symbol id="i-speech" viewBox="0 0 24 24"><path d="M20.5 11.6a8 8 0 0 1-11.7 7.1L3.5 20l1.3-4.7a8 8 0 1 1 15.7-3.7z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19.5 12h-15M10.5 6l-6 6 6 6"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-notes" viewBox="0 0 24 24"><path d="M6 3.5h12v17H6zM9 8h6M9 12h6M9 16h3.5"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l5 4v-13l-5 4H4zM16 9a4.2 4.2 0 0 1 0 6M18.6 6.4a8 8 0 0 1 0 11.2"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l5 4v-13l-5 4H4zM16.5 9.5l5 5M21.5 9.5l-5 5"/></symbol>
+  <symbol id="i-quill" viewBox="0 0 24 24"><path d="M20 4c-7.5.5-12.5 5.5-13.5 13.5M20 4c.2 6-3.5 10.5-11 11.2M20 4l-6.5 1.2M3.5 20.5l3-3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 4.5v5h5M4.8 14.5a7.8 7.8 0 1 0 1.6-7.8L4 9.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5l12 7.5-12 7.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7.5 5v14M16.5 5v14"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 20.5h8M12 16.5v4M7 3.5h10v5.5a5 5 0 0 1-10 0V3.5zM17 5.5h3v1.8a3.2 3.2 0 0 1-3 3.2M7 5.5H4v1.8a3.2 3.2 0 0 0 3 3.2"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18.5h6M10 21.5h4M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.6.5.8 1.2.8 2v.2h6v-.2c0-.8.3-1.5.9-2A6.5 6.5 0 0 0 12 2.5z"/></symbol>
+  <symbol id="i-lens" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5"/></symbol>
+</svg>
+
+<div id="app">
+<div id="viewport">
+<div id="stage">
+  <div id="sky"></div>
+  <div id="stars" aria-hidden="true"></div>
+  <div id="sun" aria-hidden="true"></div>
+  <svg id="hills" viewBox="0 0 1920 300" preserveAspectRatio="none" aria-hidden="true">
+    <path id="hill-back" d="M0 150 C 220 92 430 118 700 140 S 1150 74 1430 118 S 1790 150 1920 104 L1920 300 L0 300 Z"/>
+    <path id="hill-front" d="M0 214 C 280 160 560 200 880 206 S 1480 162 1920 198 L1920 300 L0 300 Z"/>
+  </svg>
+
+  <!-- 1 · cover -->
+  <section class="slide cover" id="s-cover" aria-label="Cover">
+    <div class="cover-text">
+      <p class="eyebrow">Summary lesson · Grade 10 · 4 points</p>
+      <h1 class="cover-title">Count<br>That Day<br>Lost</h1>
+      <p class="cover-poet">a poem by George Eliot</p>
+      <p class="cover-q">At set of sun, how will you count your day?</p>
+      <div><button class="btn big" data-go="next">Start the lesson <svg class="ic"><use href="#i-right"/></svg></button></div>
+    </div>
+    <div class="receipt-wrap cover-receipt" aria-hidden="true">
+      <div class="receipt">
+        <p class="rc-head">DAY RECEIPT</p>
+        <p class="rc-sub">Today · 07:00 → sunset</p>
+        <div class="rc-row"><span>Time given</span><i></i><span>86,400 s</span></div>
+        <div class="rc-row"><span>1 kind word</span><i></i><span>free</span></div>
+        <div class="rc-row"><span>1 kind glance</span><i></i><span>free</span></div>
+        <div class="rc-row"><span>1 good deed</span><i></i><span>free</span></div>
+        <div class="rc-total"><span>TOTAL</span><span>spent or lost?</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · hook -->
+  <section class="slide" id="s-hook" aria-label="Warm-up">
+    <header class="s-head"><p class="eyebrow">Warm-up</p><h2 class="s-title">How rich are you today?</h2></header>
+    <div class="hook-grid">
+      <div class="hook-num"><b id="countup">86,400</b><span>seconds in every day</span></div>
+      <div class="panel hook-panel">
+        <p class="lead">Every morning you get 86,400 seconds. For free.</p>
+        <p>At sunset they are gone. You can’t save them for tomorrow.</p>
+        <hr>
+        <h3>Talk to your partner</h3>
+        <p>Yesterday, did you do <b>one thing</b> that made someone smile? What was it?</p>
+        <div><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1-minute timer</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · goals -->
+  <section class="slide" id="s-goals" aria-label="Lesson goals">
+    <header class="s-head"><p class="eyebrow">Today’s mission</p><h2 class="s-title">Four stops before sunset</h2></header>
+    <p class="goal-lead on-sky">By the end of the lesson, I can <b>explain the message</b> of the poem and <b>support it</b> with lines from the text.</p>
+    <ol class="steps">
+      <li class="panel"><span class="step-n">1</span><h3>Remember</h3><p>the words and the ideas of the poem</p></li>
+      <li class="panel"><span class="step-n">2</span><h3>Analyze</h3><p>the structure and the literary devices</p></li>
+      <li class="panel"><span class="step-n">3</span><h3>Play</h3><p>the Sunset Challenge quiz</p></li>
+      <li class="panel"><span class="step-n">4</span><h3>Connect</h3><p>the poem to my own day</p></li>
+    </ol>
+  </section>
+
+  <!-- 4 · author -->
+  <section class="slide" id="s-author" aria-label="The poet">
+    <header class="s-head"><p class="eyebrow">Meet the poet</p><h2 class="s-title">Who wrote the poem?</h2></header>
+    <div class="author-grid">
+      <div class="panel author-card">
+        <svg class="ic quill"><use href="#i-quill"/></svg>
+        <p class="author-name">George Eliot</p>
+        <p class="author-meta">England · 1819–1880</p>
+        <p class="author-q">Was George Eliot a man or a woman?</p>
+        <div class="vote">
+          <button class="btn ghost" data-vote="man">A man</button>
+          <button class="btn ghost" data-vote="woman">A woman</button>
+        </div>
+      </div>
+      <div class="panel author-reveal">
+        <div class="ar-wait" id="arWait"><span>?</span><p>Vote with your hands first. Then click an answer.</p></div>
+        <div class="ar-answer" id="arAnswer" hidden>
+          <p class="ar-big" id="arBig">A woman!</p>
+          <p>Her real name was <b>Mary Ann Evans</b>.</p>
+          <p>In her time, many people did not take women writers seriously. So she wrote under a man’s name.</p>
+          <p class="ar-books"><span>Famous novels</span>Silas Marner · Middlemarch</p>
+          <p class="ar-think"><b>Think:</b> She wanted people to judge her by her <i>work</i>. The poem asks us to judge our day by our <i>acts</i>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · vocabulary -->
+  <section class="slide" id="s-vocab" aria-label="Vocabulary">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Remember · vocabulary</p><h2 class="s-title">Words of the day</h2></header>
+      <div class="tools"><span class="hint">Guess first, then click a card</span><button class="btn soft small" id="vFlipAll">Flip all</button></div>
+    </div>
+    <div class="vgrid" id="vgrid"></div>
+  </section>
+
+  <!-- 6 · poem -->
+  <section class="slide" id="s-poem" aria-label="The poem">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Read · look · discover</p><h2 class="s-title">The poem</h2></header>
+      <div class="lens" role="group" aria-label="Choose a lens">
+        <button class="chip" data-lens="rhyme" aria-pressed="false" style="--c:var(--hl-b)">Rhyme</button>
+        <button class="chip" data-lens="sun" aria-pressed="false" style="--c:var(--hl-a)">Sun &amp; light</button>
+        <button class="chip" data-lens="money" aria-pressed="false" style="--c:var(--hl-money)">Money words</button>
+        <button class="chip" data-lens="one" aria-pressed="false" style="--c:var(--hl-c)">“One”</button>
+        <button class="chip" data-lens="if" aria-pressed="false" style="--c:var(--hl-d)">If → Then</button>
+      </div>
+    </div>
+    <div class="poem" id="poem">
+      <div class="panel stanza-card">
+        <p class="stanza-label"><span>Stanza 1</span><span>lines 1–8</span></p>
+        <ol class="stanza">
+          <li data-r="a"><span class="t-if">If</span> you sit down at <span class="t-sun">set of <span class="r-a">sun</span></span></li>
+          <li data-r="a">And <span class="t-money">count</span> the acts that you have <span class="r-a">done</span>,</li>
+          <li data-r="b" class="ind">And, <span class="t-money">counting</span>, <span class="r-b">find</span></li>
+          <li data-r="c"><span class="t-one">One</span> self-denying deed, <span class="t-one">one</span> <span class="r-c">word</span></li>
+          <li data-r="c">That eased the heart of him who <span class="r-c">heard</span>,</li>
+          <li data-r="b" class="ind"><span class="t-one">One</span> glance most <span class="r-b">kind</span></li>
+          <li data-r="d">That fell <span class="t-sun">like sunshine</span> where it <span class="r-d">went</span> –</li>
+          <li data-r="d"><span class="t-if">Then</span> you may <span class="t-money">count</span> that day well <span class="r-d t-money">spent</span>.</li>
+        </ol>
+      </div>
+      <div class="panel stanza-card">
+        <p class="stanza-label"><span>Stanza 2</span><span>lines 9–16</span></p>
+        <ol class="stanza s2">
+          <li data-r="a">But <span class="t-if">if</span>, through all the livelong <span class="r-a">day</span>,</li>
+          <li data-r="a">You’ve cheered no heart, by yea or <span class="r-a">nay</span> –</li>
+          <li data-r="b" class="ind"><span class="t-if">If</span>, through it <span class="r-b">all</span></li>
+          <li data-r="c">You’ve nothing done that you can <span class="r-c">trace</span></li>
+          <li data-r="c">That brought <span class="t-sun">the sunshine</span> to <span class="t-one">one</span> <span class="r-c">face</span> –</li>
+          <li data-r="b" class="ind">No act most <span class="r-b">small</span></li>
+          <li data-r="d">That helped some soul and nothing <span class="r-d t-money">cost</span> –</li>
+          <li data-r="d"><span class="t-if">Then</span> <span class="t-money">count</span> that day as worse than <span class="r-d t-money">lost</span>.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="panel lens-info"><svg class="ic" id="lensIcon"><use href="#i-lens"/></svg><p id="lensText">Read the poem aloud first. Then choose a lens above to discover what is hiding in it.</p></div>
+  </section>
+
+  <!-- 7 · structure -->
+  <section class="slide" id="s-structure" aria-label="Structure">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Analyze · structure</p><h2 class="s-title">Two stanzas, two kinds of day</h2></header>
+      <div class="tools"><button class="btn sun small" id="mNext">Reveal next</button><button class="btn soft small" id="mAll">Reveal all</button></div>
+    </div>
+    <div class="mirror" id="mirror">
+      <div></div>
+      <div class="m-head s1"><svg class="ic"><use href="#i-sun"/></svg><div><small>Stanza 1 · lines 1–8</small><b>A day well spent</b></div></div>
+      <div class="m-head s2"><svg class="ic"><use href="#i-moon"/></svg><div><small>Stanza 2 · lines 9–16</small><b>A day worse than lost</b></div></div>
+      <div class="m-label">If…</div>
+      <button class="m-cell"><span class="ans">you find <b>one</b> kind act</span></button>
+      <button class="m-cell"><span class="ans">you did <b>nothing</b> kind all day</span></button>
+      <div class="m-label">What acts?</div>
+      <button class="m-cell"><span class="ans">a self-denying deed · a kind word · a kind glance</span></button>
+      <button class="m-cell"><span class="ans">cheered no heart · no act most small</span></button>
+      <div class="m-label">The sun</div>
+      <button class="m-cell"><span class="ans">a glance <i>“fell like sunshine”</i></span></button>
+      <button class="m-cell"><span class="ans">nothing <i>“brought the sunshine to one face”</i></span></button>
+      <div class="m-label">Then…</div>
+      <button class="m-cell"><span class="ans"><i>“count that day well spent”</i></span></button>
+      <button class="m-cell"><span class="ans"><i>“count that day as worse than lost”</i></span></button>
+    </div>
+    <p class="mirror-foot on-sky">Same structure, opposite result <svg class="ic"><use href="#i-right"/></svg> <b>CONTRAST</b></p>
+  </section>
+
+  <!-- 8 · three acts -->
+  <section class="slide" id="s-acts" aria-label="Three small acts">
+    <header class="s-head"><p class="eyebrow">Analyze · stanza 1</p><h2 class="s-title">Three small acts. You need only one.</h2></header>
+    <div class="acts">
+      <div class="panel act">
+        <div class="act-ic"><svg class="ic"><use href="#i-gift"/></svg></div>
+        <p class="act-verb">Do</p>
+        <p class="act-quote"><small>line 4</small>“One self-denying deed”</p>
+        <p>Give up something of yours to help someone.</p>
+      </div>
+      <div class="panel act">
+        <div class="act-ic"><svg class="ic"><use href="#i-speech"/></svg></div>
+        <p class="act-verb">Say</p>
+        <p class="act-quote"><small>lines 4–5</small>“one word / That eased the heart of him who heard”</p>
+        <p>Say something that makes someone feel better.</p>
+      </div>
+      <div class="panel act">
+        <div class="act-ic"><svg class="ic"><use href="#i-eye"/></svg></div>
+        <p class="act-verb">Look</p>
+        <p class="act-quote"><small>line 6</small>“One glance most kind”</p>
+        <p>Even a kind look or a smile is enough.</p>
+      </div>
+    </div>
+    <div class="band"><q>No act most small / That helped some soul and nothing cost</q><b>Kindness is free.</b></div>
+  </section>
+
+  <!-- 9 · devices -->
+  <section class="slide" id="s-devices" aria-label="Literary devices">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Analyze · literary devices</p><h2 class="s-title">Find it in the poem</h2></header>
+      <div class="tools"><span class="hint">Find an example, then click to check</span></div>
+    </div>
+    <div class="dgrid" id="dgrid"></div>
+  </section>
+
+  <!-- 10 · sorting -->
+  <section class="slide" id="s-sort" aria-label="Well spent or lost">
+    <header class="s-head"><p class="eyebrow">Connect · thumbs up or thumbs down</p><h2 class="s-title">Well spent or lost?</h2></header>
+    <div class="sort-grid">
+      <div class="panel sort-card">
+        <div class="sort-foot"><p class="tag" id="sortNum">Situation 1 of 8</p><div class="dots" id="sortDots"></div></div>
+        <p class="sort-text" id="sortText"></p>
+        <div class="sort-btns">
+          <button class="btn sun" id="sortSpent"><svg class="ic"><use href="#i-sun"/></svg> Day well spent</button>
+          <button class="btn dusk" id="sortLost"><svg class="ic"><use href="#i-moon"/></svg> Day lost</button>
+        </div>
+        <div class="sort-fb" id="sortFb"><svg class="ic" id="sortFbIc"><use href="#i-bulb"/></svg><p id="sortFbText">Thumbs up = a day well spent. Thumbs down = a day lost. Vote, then click.</p></div>
+        <div class="sort-foot"><span></span><button class="btn small" id="sortNext" disabled>Next situation <svg class="ic"><use href="#i-right"/></svg></button></div>
+      </div>
+      <div class="panel tally">
+        <p class="tag">The kindness sun</p>
+        <div class="meter"><div class="meter-fill" id="meterFill"></div><span id="meterPct">0</span></div>
+        <p class="muted" style="font-size:24px">kind acts found</p>
+        <div class="tally-row"><div><b id="tSpent">0</b>well spent</div><div><b id="tLost">0</b>lost</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · think deeper -->
+  <section class="slide" id="s-think" aria-label="Think deeper">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Think deeper · HOTS</p><h2 class="s-title">Think, pair, share</h2></header>
+      <div class="tabs" role="group" aria-label="Questions">
+        <button class="chip" data-think="0" aria-pressed="true" style="--c:var(--sun)">Question 1</button>
+        <button class="chip" data-think="1" aria-pressed="false" style="--c:var(--ember)">Question 2</button>
+        <button class="chip" data-think="2" aria-pressed="false" style="--c:var(--dusk)">Question 3</button>
+      </div>
+    </div>
+    <div class="panel think-card">
+      <div style="display:flex;flex-direction:column;gap:30px;min-width:0">
+        <p class="tag" id="thinkTag">Question 1 · lines 15–16</p>
+        <p class="think-q" id="thinkQ"></p>
+        <div class="tps" style="margin-top:auto">
+          <span><svg class="ic"><use href="#i-bulb"/></svg> Think alone · 30 sec</span>
+          <span><svg class="ic"><use href="#i-speech"/></svg> Pair · 1 min</span>
+          <span><svg class="ic"><use href="#i-sun"/></svg> Share with the class</span>
+        </div>
+        <div style="display:flex;gap:14px"><button class="btn ghost small" data-timer="30"><svg class="ic"><use href="#i-clock"/></svg> 30 sec</button><button class="btn ghost small" data-timer="60"><svg class="ic"><use href="#i-clock"/></svg> 1 min</button></div>
+      </div>
+      <div style="min-width:0">
+        <div class="ideas-cover" id="ideasCover"><p style="font-size:30px">Talk first. Then compare your ideas with these.</p><button class="btn sun" id="ideasBtn">Show possible ideas</button></div>
+        <ul class="ideas" id="ideas" hidden></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · quiz setup -->
+  <section class="slide" id="s-setup" aria-label="Quiz setup">
+    <header class="s-head"><p class="eyebrow">Play</p><h2 class="s-title">The Sunset Challenge</h2></header>
+    <div class="setup">
+      <div class="panel" style="display:flex;flex-direction:column;gap:26px">
+        <h3>How to play</h3>
+        <ol class="rules">
+          <li>10 questions about the poem. 20 seconds for each one.</li>
+          <li>Each team writes its answer (A, B, C or D) on a page.</li>
+          <li>When the time is up, all teams show their answer.</li>
+          <li>The teacher shows the right answer. +1 point for every team that is right.</li>
+        </ol>
+      </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:20px"><h3>Teams</h3>
+          <div class="seg" role="group" aria-label="Number of teams" id="teamSeg">
+            <button data-n="2" aria-pressed="false">2</button><button data-n="3" aria-pressed="true">3</button><button data-n="4" aria-pressed="false">4</button>
+          </div>
+        </div>
+        <div class="team-inputs" id="teamInputs">
+          <label style="--c:var(--sun)"><input id="team-name-1" value="Sunrise" aria-label="Team 1 name" maxlength="18"></label>
+          <label style="--c:var(--ember)"><input id="team-name-2" value="Sunset" aria-label="Team 2 name" maxlength="18"></label>
+          <label style="--c:var(--dusk)"><input id="team-name-3" value="Sunshine" aria-label="Team 3 name" maxlength="18"></label>
+          <label style="--c:var(--sky)" hidden><input id="team-name-4" value="Stars" aria-label="Team 4 name" maxlength="18"></label>
+        </div>
+        <div style="margin-top:auto"><button class="btn sun big" id="quizStart">Start the challenge <svg class="ic"><use href="#i-right"/></svg></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · quiz -->
+  <section class="slide" id="s-quiz" aria-label="Quiz">
+    <div class="quiz">
+      <div class="q-main">
+        <div class="q-top">
+          <div class="q-meta"><p class="eyebrow" id="qNum">Question 1 of 10</p><div class="dots" id="qDots"></div></div>
+          <div class="q-timer">
+            <div class="ring" id="ring"><svg viewBox="0 0 110 110"><circle class="bg" cx="55" cy="55" r="46"/><circle class="fg" id="ringFg" cx="55" cy="55" r="46" stroke-dasharray="289.03" stroke-dashoffset="0"/></svg><b id="ringNum">20</b></div>
+            <button class="icon-btn" id="qPause" aria-label="Pause timer"><svg class="ic"><use href="#i-pause"/></svg></button>
+          </div>
+        </div>
+        <div class="panel q-card"><p class="q-text" id="qText"></p></div>
+        <div class="q-opts" id="qOpts"></div>
+        <div class="q-bottom"><p class="q-explain hide on-sky" id="qExplain"></p><button class="btn sun" id="qNext">Show the answer</button></div>
+      </div>
+      <div class="board">
+        <p class="board-title"><svg class="ic"><use href="#i-trophy"/></svg> Score</p>
+        <div id="board" style="display:flex;flex-direction:column;gap:16px"></div>
+      </div>
+    </div>
+    <div class="panel q-final" id="qFinal" hidden>
+      <p class="tag">The Sunset Challenge · results</p>
+      <p class="q-win" id="qWin"></p>
+      <div class="results" id="results"></div>
+      <div class="q-final-btns"><button class="btn ghost" id="qAgain"><svg class="ic"><use href="#i-reset"/></svg> Play again</button><button class="btn sun" data-go="next">Continue <svg class="ic"><use href="#i-right"/></svg></button></div>
+    </div>
+  </section>
+
+  <!-- 14 · writing -->
+  <section class="slide" id="s-write" aria-label="Bagrut practice">
+    <header class="s-head"><p class="eyebrow">Optional · in class or homework</p><h2 class="s-title">Bagrut practice</h2></header>
+    <div class="write-grid">
+      <div class="panel" style="display:flex;flex-direction:column;gap:24px">
+        <p class="write-q">The speaker says that a day with no kind act is <i>“worse than lost.”</i> Explain why. Use details from the poem.</p>
+        <p class="tag">Sentence starters</p>
+        <ol class="starters">
+          <li>In the poem, the speaker says that…</li>
+          <li>This means that…</li>
+          <li>I think this is because…</li>
+          <li>For example, in line ___, the speaker says “…”</li>
+        </ol>
+      </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:22px">
+        <p class="tag">Word bank</p>
+        <div class="wbank"><span>kindness</span><span>a chance</span><span>free</span><span>“nothing cost”</span><span>sunshine</span><span>wasted</span><span>choice</span></div>
+        <div style="margin-top:auto" id="modelWrap"><button class="btn sun" id="modelBtn">Show a model answer</button></div>
+        <p class="model" id="model" hidden>In the poem, the speaker says that if we do nothing kind all day, the day is <mark>“worse than lost.”</mark> I think this is because a kind act is easy and <mark>“nothing cost.”</mark> We had a chance to bring <mark>“sunshine to one face,”</mark> but we didn’t use it. When we lose something, it is an accident. A day with no kindness is our choice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 · sunshine wall -->
+  <section class="slide" id="s-wall" aria-label="Be someone's sunshine">
+    <header class="s-head"><p class="eyebrow">Connect · the poem in action</p><h2 class="s-title">Be someone’s sunshine</h2></header>
+    <div class="wall">
+      <div class="panel" style="display:flex;flex-direction:column;gap:22px">
+        <ol class="wall-steps">
+          <li>Take a sticky note.</li>
+          <li>Write one kind sentence to a classmate.</li>
+          <li>Stick it on the board around the sun.</li>
+        </ol>
+        <div><button class="btn ghost small" data-timer="180"><svg class="ic"><use href="#i-clock"/></svg> 3-minute timer</button></div>
+        <p class="wall-quote">“one word / That eased the heart of him who heard”</p>
+      </div>
+      <div class="sunbox">
+        <div class="sunfield" id="sunfield">
+          <svg id="rays" aria-hidden="true"></svg>
+          <div class="big-sun" id="bigSun"><div><b id="rayCount">0</b><small>rays of<br>sunshine</small></div></div>
+        </div>
+        <form class="wall-input" id="wallForm"><input id="wall-text" placeholder="Type a kind sentence…" maxlength="60" autocomplete="off" aria-label="Kind sentence"><button class="btn sun" type="submit"><svg class="ic"><use href="#i-plus"/></svg> Add</button></form>
+        <div class="suggest" id="suggest">
+          <button type="button">You are a good friend</button><button type="button">Thank you for helping me</button><button type="button">You always make me laugh</button><button type="button">Good luck on the test!</button><button type="button">I like your ideas</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 · exit ticket -->
+  <section class="slide" id="s-exit" aria-label="Exit ticket">
+    <div class="s-head-row">
+      <header class="s-head"><p class="eyebrow">Exit ticket · 3 minutes</p><h2 class="s-title">Count your day: 3 · 2 · 1</h2></header>
+      <div class="tools"><button class="btn soft small" data-timer="180"><svg class="ic"><use href="#i-clock"/></svg> 3-minute timer</button></div>
+    </div>
+    <div class="exit-grid">
+      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>3</b><span>words from the poem I remember</span></div><div class="wline"></div><div class="wline"></div><div class="wline"></div></div></div>
+      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>2</b><span>literary devices + an example</span></div><div class="wline"></div><div class="wline"></div></div></div>
+      <div class="receipt-wrap"><div class="receipt"><div class="exit-n"><b>1</b><span>kind act I will do tomorrow</span></div><div class="wline"></div></div></div>
+    </div>
+    <div class="exit-foot"><q class="on-sky">If you sit down at set of sun / And count the acts that you have done…</q></div>
+  </section>
+
+  <!-- 17 · closing -->
+  <section class="slide closing" id="s-end" aria-label="Closing">
+    <div style="display:flex;flex-direction:column;gap:40px">
+      <q class="on-sky">Then you may count<br>that day well spent.</q>
+      <p class="thanks on-sky">Thank you! Go and be someone’s sunshine.</p>
+      <p class="sub">Count That Day Lost · George Eliot</p>
+    </div>
+  </section>
+
+  <!-- overlays -->
+  <canvas id="confetti" width="1920" height="1080" aria-hidden="true"></canvas>
+
+  <div class="tmr" id="tmr" hidden>
+    <div class="tmr-top"><span class="tag"><svg class="ic"><use href="#i-clock"/></svg> Timer</span><button class="tmr-x" id="tmrClose" aria-label="Close timer"><svg class="ic"><use href="#i-x"/></svg></button></div>
+    <p class="tmr-big" id="tmrBig">1:00</p>
+    <div class="tmr-bar"><i id="tmrBar"></i></div>
+    <div class="tmr-pre"><button data-pre="30">0:30</button><button data-pre="60">1:00</button><button data-pre="120">2:00</button><button data-pre="180">3:00</button><button data-pre="300">5:00</button></div>
+    <div class="tmr-ctl"><button class="btn sun small" id="tmrGo"><svg class="ic"><use href="#i-play"/></svg> Start</button><button class="btn ghost small" id="tmrReset"><svg class="ic"><use href="#i-reset"/></svg> Reset</button></div>
+  </div>
+
+  <div class="notes" id="notes" hidden><h4 id="notesHead">הערות למורה</h4><p id="notesText"></p><p class="keys">מקשים: ← → מעבר שקופיות · F מסך מלא · T טיימר · N הערות · במבחן: 1–4 לבחירת תשובה</p></div>
+
+  <div class="hud" id="hud">
+    <span class="clock" title="Time of day in the lesson"><svg class="ic" id="clockIc"><use href="#i-sun"/></svg><span id="clock">07:00</span></span>
+    <button id="prev" aria-label="Previous slide"><svg class="ic"><use href="#i-left"/></svg></button>
+    <span class="count" id="count">1 / 17</span>
+    <button id="next" aria-label="Next slide"><svg class="ic"><use href="#i-right"/></svg></button>
+    <button id="tmrBtn" aria-label="Timer" aria-pressed="false"><svg class="ic"><use href="#i-clock"/></svg><span id="tmrMini"></span></button>
+    <button id="soundBtn" aria-label="Sound on" aria-pressed="false"><svg class="ic"><use href="#i-sound" id="soundUse"/></svg></button>
+    <button id="notesBtn" aria-label="Teacher notes" aria-pressed="false"><svg class="ic"><use href="#i-notes"/></svg></button>
+    <button id="fsBtn" aria-label="Full screen"><svg class="ic"><use href="#i-full"/></svg></button>
+  </div>
+  <div class="progress"><i id="prog"></i></div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const stage=$("#stage"), vp=$("#viewport"), app=$("#app");
+const slides=$$(".slide"), N=slides.length;
+let cur=0;
+
+/* ---------- fit the 1920×1080 stage ---------- */
+function fit(){
+  const cs=getComputedStyle(app);
+  const w=app.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const h=app.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const s=Math.max(.05,Math.min(w/1920,h/1080));
+  vp.style.width=1920*s+"px"; vp.style.height=1080*s+"px";
+  stage.style.transform="scale("+s+")";
+}
+addEventListener("resize",fit); document.addEventListener("fullscreenchange",fit); fit();
+
+/* ---------- sky ---------- */
+const SKY=[[0,"#4DAEEB","#98D3F5","#E4F4FB"],[.3,"#5BA0DA","#A7CCEA","#FBE4BC"],[.55,"#6C5AA6","#E28A7A","#FFC27A"],[.75,"#392C70","#984C84","#EF7F5F"],[.9,"#1B1544","#3D2A67","#874466"],[1,"#0D0B24","#1D1743","#38244F"]];
+const SUN=[[0,"#FFFBE0","#FFDF63","#FFE478"],[.55,"#FFF0C2","#FFA23A","#FF9A40"],[.8,"#FFD8A0","#FF6A3A","#FF6A40"],[1,"#FFB08A","#E8452F","#E8452F"]];
+const HILL=[[0,"#7DB79A","#4A886A"],[.55,"#8A6A8F","#5D4571"],[.8,"#4A3466","#2E2148"],[1,"#221A3E","#130E28"]];
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{const A=rgb(a),B=rgb(b);return"#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+function sample(st,p){for(let i=0;i<st.length-1;i++){const a=st[i],b=st[i+1];if(p<=b[0]){const t=(p-a[0])/(b[0]-a[0]);return a.slice(1).map((c,k)=>mix(c,b[k+1],t))}}return st[st.length-1].slice(1)}
+function lum(h){const c=rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+const sky=$("#sky"), sun=$("#sun"), stars=$("#stars"), hb=$("#hill-back"), hf=$("#hill-front");
+for(let i=0;i<120;i++){const s=document.createElement("i");const z=Math.random()*3+1.5;s.style.cssText="left:"+(Math.random()*100)+"%;top:"+(Math.random()*72)+"%;width:"+z+"px;height:"+z+"px;animation-delay:"+(-Math.random()*3.2)+"s";stars.appendChild(s)}
+function renderSky(p){
+  const [t,m,b]=sample(SKY,p);
+  sky.style.background="linear-gradient(180deg,"+t+" 0%,"+m+" 58%,"+b+" 100%)";
+  const [c1,c2,g]=sample(SUN,p);
+  const x=1530+p*130, y=190+Math.pow(p,1.15)*880;
+  sun.style.transform="translate("+x+"px,"+y+"px)";
+  sun.style.background="radial-gradient(circle at 42% 40%,"+c1+" 0%,"+c2+" 62%,"+c2+" 100%)";
+  sun.style.boxShadow="0 0 140px 50px "+g+"88, 0 0 380px 120px "+g+"33";
+  const [h1,h2]=sample(HILL,p); hb.setAttribute("fill",h1); hf.setAttribute("fill",h2);
+  stars.style.opacity=Math.max(0,(p-.72)/.28).toFixed(3);
+}
+let skyP=0, skyAnim=0;
+function setSky(target,instant){
+  const from=skyP, t0=performance.now(), id=++skyAnim;
+  if(instant||reduced){skyP=target;renderSky(target);return}
+  (function step(now){ if(id!==skyAnim) return; const k=Math.min(1,(now-t0)/1500); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; skyP=from+(target-from)*e; renderSky(skyP); if(k<1) requestAnimationFrame(step)})(t0);
+}
+
+/* ---------- sound ---------- */
+let actx=null, soundOn=true;
+function tone(f,d,type,when,vol){ if(!soundOn) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const t=actx.currentTime+(when||0); const o=actx.createOscillator(), g=actx.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol||.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+.05);}catch(e){} }
+const sfx={ good(){tone(660,.18);tone(880,.2,"sine",.12);tone(1320,.35,"sine",.24)}, bad(){tone(230,.25,"triangle",0,.18);tone(175,.4,"triangle",.16,.18)}, done(){[0,.28,.56].forEach(w=>tone(880,.16,"square",w,.05))}, pop(){tone(740,.09,"sine",0,.08)}, fanfare(){[523,659,784,1047].forEach((f,i)=>tone(f,.35,"triangle",i*.14,.12))} };
+$("#soundBtn").addEventListener("click",()=>{soundOn=!soundOn;$("#soundUse").setAttribute("href",soundOn?"#i-sound":"#i-mute");$("#soundBtn").setAttribute("aria-label",soundOn?"Sound on":"Sound off")});
+
+/* ---------- confetti ---------- */
+const cv=$("#confetti"), cx=cv.getContext("2d"); let parts=[], craf=0;
+const CC=["#FFB627","#EE5A2F","#5A3E91","#3C8FD0","#FFF9F2","#FFDD7E"];
+function confetti(n){ if(reduced) return; for(let i=0;i<(n||180);i++) parts.push({x:960+(Math.random()-.5)*600,y:560,vx:(Math.random()-.5)*30,vy:-Math.random()*28-10,s:10+Math.random()*14,r:Math.random()*6,vr:(Math.random()-.5)*.35,c:CC[i%CC.length]}); if(!craf) craf=requestAnimationFrame(cloop) }
+function cloop(){ cx.clearRect(0,0,1920,1080); parts.forEach(p=>{p.vy+=.75;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore()}); parts=parts.filter(p=>p.y<1150); if(parts.length) craf=requestAnimationFrame(cloop); else {cx.clearRect(0,0,1920,1080);craf=0} }
+
+/* ---------- teacher notes (Hebrew) ---------- */
+const NOTES=[
+ ["פתיחה · 0:00","ברכו את הכיתה והציגו: שיעור סיכום לשיר Count That Day Lost. שימו לב לשמש בצד ימין: היא תשקע לאט במהלך השיעור, בדיוק כמו בשיר (at set of sun). בשקופית האחרונה כבר יהיה לילה. אפשר לשאול כבר עכשיו: על מה ‘הקבלה’ בצד?"],
+ ["פעילות פתיחה · 3 דק׳","שאלו: כמה שניות יש ביממה? תנו לתלמידים לנחש, ואז המספר נספר. תלמיד מקריא את הכרטיס. שיחה בזוגות דקה אחת (כפתור הטיימר), ושיתוף של 2–3 תלמידים. חיבור לשיר: היום הוא כמו כסף, אפשר ‘לבזבז’ אותו טוב (well spent) או לאבד אותו (lost)."],
+ ["מטרות השיעור · 1 דק׳","תלמיד מקריא את מטרת השיעור. ארבע התחנות הן מפת השיעור. חשוב בשיעור צפייה: מטרה ברורה בהתחלה. בסוף השיעור אפשר לחזור לכאן ולשאול: האם השגנו את המשימה?"],
+ ["המשוררת · 2 דק׳","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? אחר כך לחצו על אחת התשובות כדי לחשוף. שאלת חשיבה: למה לדעתכם היא כתבה בשם של גבר? החיבור לשיר: שופטים אדם לפי המעשים שלו."],
+ ["אוצר מילים · 3 דק׳","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. אפשר לתת לכל שולחן 2 מילים. בסוף: Flip all."],
+ ["השיר · 6 דק׳","קריאה קולית של השיר (מורה, ואז תלמיד). אחר כך עוברים על ה’עדשות’ אחת אחת, ולפני כל לחיצה שואלים את הכיתה: Rhyme – אילו מילים מתחרזות? Money words – מה משותף למילים? If → Then – מבנה של תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
+ ["מבנה · 3 דק׳","לחצו Reveal next שורה אחרי שורה. לפני כל חשיפה שאלו את הכיתה מה יופיע. מסקנה: אותו מבנה בשני הבתים, אבל תוצאה הפוכה = ניגוד (contrast)."],
+ ["שלושה מעשים קטנים · 2 דק׳","שלושה סוגי מעשים: לעשות, להגיד, להסתכל. שאלו: איזה מהם הכי קל לכם? למה? הדגישו את nothing cost: טוב לב לא עולה כסף, כל אחד יכול."],
+ ["אמצעים ספרותיים · 4 דק׳","לפני כל לחיצה בקשו מהתלמידים למצוא בשיר דוגמה לאמצעי. אפשר לעשות תחרות קטנה בין השולחנות. הלחיצה חושפת ציטוט, מספר שורה ומה זה אומר."],
+ ["Well spent or lost? · 4 דק׳","תלמיד מקריא כל מצב. כל הכיתה מצביעה: אגודל למעלה = well spent, אגודל למטה = lost. לחצו על מה שרוב הכיתה בחרה. המשוב מציג את הציטוט המתאים מהשיר, ותלמיד מקריא אותו. השמש מתמלאת בכל מעשה טוב."],
+ ["חשיבה מסדר גבוה · 3 דק׳","Think-Pair-Share: חצי דקה לבד, דקה בזוג, ואז שיתוף. רק אחרי השיתוף לחצו Show possible ideas. אם אין זמן, מספיקה שאלה 1."],
+ ["הכנה לחידון · 1 דק׳","חלקו לקבוצות לפי שורות או שולחנות. אפשר לשנות את שמות הקבוצות. כל קבוצה כותבת את האות (A/B/C/D) על דף או על לוח מחיק ומרימה כשנגמר הזמן."],
+ ["החידון · 7 דק׳","לכל שאלה 20 שניות (אפשר לעצור). כשנגמר הזמן כל הקבוצות מרימות תשובה. לחצו על התשובה הנכונה, או על התשובה של הקבוצה כדי לראות אם צדקה. תנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. בסוף: מסך מנצחים."],
+ ["תרגול בגרות · אופציונלי","אם יש זמן, או כשיעורי בית. קראו יחד את השאלה, את פתיחי המשפטים ואת מחסן המילים. אפשר לכתוב תשובה יחד על הלוח, ורק אז לחשוף את תשובת הדוגמה."],
+ ["Be someone’s sunshine · 4 דק׳","רגע השיא הרגשי של השיעור. כל תלמיד כותב משפט טוב לחבר/ה על פתק דביק ומדביק סביב שמש שמצוירת על הלוח. במקביל אפשר להקליד כמה משפטים: כל משפט מוסיף קרן לשמש שעל המסך. חיבור לשיר: one word that eased the heart."],
+ ["כרטיס יציאה · 3 דק׳","כרטיס 3-2-1 על דף. אוספים ביציאה מהכיתה. זו גם הערכה מעצבת שמראה למבקר/ת מה התלמידים הבינו בשיעור."],
+ ["סיום","השמש שקעה, בדיוק כמו בשיר. שאלו: האם השיעור היום היה well spent? תודה ולהתראות!"]
+];
+const notes=$("#notes");
+function renderNotes(){ const n=NOTES[cur]||["",""]; $("#notesHead").textContent="שקופית "+(cur+1)+" · "+n[0]; $("#notesText").textContent=n[1]; }
+function toggleNotes(){ notes.hidden=!notes.hidden; $("#notesBtn").setAttribute("aria-pressed",String(!notes.hidden)); }
+$("#notesBtn").addEventListener("click",toggleNotes);
+
+/* ---------- navigation ---------- */
+const enter={}, leave={};
+function go(i,instant){
+  i=Math.max(0,Math.min(N-1,i));
+  if(i!==cur&&leave[slides[cur].id]) leave[slides[cur].id]();
+  slides[cur].classList.remove("active"); cur=i; slides[cur].classList.add("active");
+  const p=cur/(N-1); setSky(p,instant);
+  stage.classList.toggle("ink-light",lum(sample(SKY,p)[0])<.2);
+  $("#count").textContent=(cur+1)+" / "+N;
+  $("#prog").style.width=(p*100)+"%";
+  const mins=7*60+Math.round(p*13.5*60/5)*5; $("#clock").textContent=String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
+  $("#clockIc").firstElementChild.setAttribute("href",p>.86?"#i-moon":"#i-sun");
+  $("#prev").disabled=cur===0; $("#next").disabled=cur===N-1;
+  renderNotes();
+  try{history.replaceState(null,"","#slide-"+(cur+1))}catch(e){}
+  if(enter[slides[cur].id]) enter[slides[cur].id]();
+}
+const next=()=>go(cur+1), prev=()=>go(cur-1);
+$("#next").addEventListener("click",next); $("#prev").addEventListener("click",prev);
+$$("[data-go]").forEach(b=>b.addEventListener("click",()=>{const g=b.dataset.go; g==="next"?next():go(slides.findIndex(s=>s.id===g))}));
+function isTyping(el){return el&&(el.tagName==="INPUT"||el.tagName==="TEXTAREA"||el.isContentEditable)}
+document.addEventListener("keydown",e=>{
+  if(isTyping(document.activeElement)){ if(e.key==="Escape") document.activeElement.blur(); return; }
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  const k=e.key;
+  if(k==="ArrowRight"||k==="PageDown"){e.preventDefault();next()}
+  else if(k==="ArrowLeft"||k==="PageUp"){e.preventDefault();prev()}
+  else if(k===" "){ const a=document.activeElement; if(!a||a===document.body){e.preventDefault();next()} }
+  else if(k==="Home"){go(0)} else if(k==="End"){go(N-1)}
+  else if(k==="f"||k==="F"){toggleFs()}
+  else if(k==="n"||k==="N"){toggleNotes()}
+  else if(k==="t"||k==="T"){toggleTimer()}
+  else if(slides[cur].id==="s-quiz"&&/^[1-4]$/.test(k)){quizPick(+k-1)}
+});
+let tx=0,ty=0;
+stage.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+stage.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>60&&Math.abs(dy)<50&&!isTyping(document.activeElement)){dx<0?next():prev()}},{passive:true});
+let idleT=0; function wake(){stage.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>stage.classList.add("idle"),3000)}
+document.addEventListener("mousemove",wake); wake();
+let wl=null;
+function toggleFs(){ try{ if(document.fullscreenElement){document.exitFullscreen().catch(()=>{})} else {const r=app.requestFullscreen&&app.requestFullscreen(); if(r&&r.catch) r.catch(()=>{}); try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>wl=l).catch(()=>{})}catch(e){} } }catch(e){} }
+$("#fsBtn").addEventListener("click",toggleFs);
+
+/* ---------- timer widget ---------- */
+const tmr={total:60,left:60,run:false,id:0,last:0};
+const tmrEl=$("#tmr");
+const fmt=s=>{s=Math.ceil(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+function tmrDraw(){ $("#tmrBig").textContent=fmt(tmr.left); $("#tmrBar").style.width=(tmr.left/tmr.total*100)+"%"; $("#tmrMini").textContent=tmr.run?fmt(tmr.left):""; $("#tmrGo").innerHTML=tmr.run?'<svg class="ic"><use href="#i-pause"/></svg> Pause':'<svg class="ic"><use href="#i-play"/></svg> '+(tmr.left<tmr.total&&tmr.left>0?"Resume":"Start"); }
+function tmrSet(s){ clearInterval(tmr.id); tmr.run=false; tmr.total=tmr.left=s; $("#tmrBig").classList.remove("done"); tmrDraw(); }
+function tmrStart(){ if(tmr.left<=0) tmrSet(tmr.total); tmr.run=true; tmr.last=performance.now(); clearInterval(tmr.id); tmr.id=setInterval(()=>{const now=performance.now();tmr.left=Math.max(0,tmr.left-(now-tmr.last)/1000);tmr.last=now; if(tmr.left<=0){clearInterval(tmr.id);tmr.run=false;$("#tmrBig").classList.add("done");sfx.done();tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true")} tmrDraw()},200); tmrDraw(); }
+function tmrPause(){ clearInterval(tmr.id); tmr.run=false; tmrDraw(); }
+function toggleTimer(){ tmrEl.hidden=!tmrEl.hidden; $("#tmrBtn").setAttribute("aria-pressed",String(!tmrEl.hidden)); }
+$("#tmrBtn").addEventListener("click",toggleTimer);
+$("#tmrClose").addEventListener("click",()=>{tmrEl.hidden=true;$("#tmrBtn").setAttribute("aria-pressed","false")});
+$("#tmrGo").addEventListener("click",()=>tmr.run?tmrPause():tmrStart());
+$("#tmrReset").addEventListener("click",()=>tmrSet(tmr.total));
+$$("[data-pre]").forEach(b=>b.addEventListener("click",()=>tmrSet(+b.dataset.pre)));
+$$("[data-timer]").forEach(b=>b.addEventListener("click",()=>{tmrSet(+b.dataset.timer);tmrEl.hidden=false;$("#tmrBtn").setAttribute("aria-pressed","true");tmrStart()}));
+tmrDraw();
+
+/* ---------- hook count-up ---------- */
+enter["s-hook"]=()=>{ const el=$("#countup"); if(reduced){el.textContent="86,400";return} const t0=performance.now(); (function f(now){const k=Math.min(1,(now-t0)/1700);const e=1-Math.pow(1-k,3);el.textContent=Math.round(86400*e).toLocaleString("en-US");if(k<1&&slides[cur].id==="s-hook")requestAnimationFrame(f);else el.textContent="86,400"})(t0); };
+
+/* ---------- author vote ---------- */
+$$("[data-vote]").forEach(b=>b.addEventListener("click",()=>{
+  $$("[data-vote]").forEach(x=>x.classList.toggle("chosen",x===b));
+  const ok=b.dataset.vote==="woman";
+  $("#arWait").hidden=true; $("#arAnswer").hidden=false;
+  $("#arBig").textContent=ok?"Yes! A woman.":"Surprise! A woman.";
+  ok?(sfx.good(),confetti(90)):sfx.pop();
+}));
+
+/* ---------- vocabulary ---------- */
+const VOCAB=[
+ ["set of sun","line 1","sunset; the end of the day","שקיעה"],
+ ["deed","line 4","an act; something you do","מעשה"],
+ ["self-denying","line 4","giving up what you want, to help others","מוותר על עצמו"],
+ ["eased","line 5","made someone feel better","הקל, הרגיע"],
+ ["glance","line 6","a quick look","מבט חטוף"],
+ ["livelong day","line 9","the whole long day","כל היום כולו"],
+ ["cheered","line 10","made someone happy","שימח, עודד"],
+ ["by yea or nay","line 10","by saying “yes” or “no”: in any way","בשום דרך"],
+ ["trace","line 12","find a sign or a mark of","למצוא סימן"],
+ ["soul","line 15","a person","נפש, אדם"]
+];
+const vgrid=$("#vgrid");
+VOCAB.forEach(v=>{const b=document.createElement("button");b.className="flip";b.setAttribute("aria-label",v[0]+": flip card");
+  b.innerHTML='<div class="in"><div class="face front"><span class="tag">'+v[1]+'</span><span class="v-word">'+v[0].replace("self-","self-<wbr>")+'</span></div><div class="face back"><span class="tag">'+v[0]+'</span><span class="v-mean">'+v[2]+'</span><span class="v-he" lang="he">'+v[3]+'</span></div></div>';
+  b.addEventListener("click",()=>{b.classList.toggle("flipped");sfx.pop()}); vgrid.appendChild(b)});
+$("#vFlipAll").addEventListener("click",()=>{const cards=$$("#vgrid .flip");const all=cards.every(c=>c.classList.contains("flipped"));cards.forEach((c,i)=>setTimeout(()=>c.classList.toggle("flipped",!all),reduced?0:i*60));$("#vFlipAll").textContent=all?"Flip all":"Flip back"});
+
+/* ---------- poem lenses ---------- */
+const LENS={
+ rhyme:["i-lens","<b>Rhyme scheme: AABCCBDD.</b> Both stanzas have the same pattern, like a mirror. Lines 1–2, 4–5 and 7–8 rhyme in pairs."],
+ sun:["i-sun","<b>The sun is in both stanzas.</b> “set of sun” = the end of the day. “like sunshine” (simile) and “brought the sunshine to one face” (metaphor): kindness brings light and warmth."],
+ money:["i-lens","<b>Money words:</b> count, counting, spent, cost, lost. The day is like money: you can spend it well, or lose it."],
+ one:["i-lens","<b>Repetition of “one”.</b> You don’t need many good deeds. One small act is enough to make a day well spent."],
+ if:["i-lens","<b>If → Then.</b> Each stanza is a condition and a result. If you did one kind act, then the day is well spent. If you did nothing kind, then it is worse than lost."]
+};
+const poem=$("#poem"), lensDefault=$("#lensText").innerHTML;
+$$("[data-lens]").forEach(b=>b.addEventListener("click",()=>{
+  const on=b.getAttribute("aria-pressed")!=="true";
+  $$("[data-lens]").forEach(x=>x.setAttribute("aria-pressed",String(x===b&&on)));
+  poem.className="poem"+(on?" lensed m-"+b.dataset.lens:"");
+  $("#lensText").innerHTML=on?LENS[b.dataset.lens][1]:lensDefault;
+  $("#lensIcon").firstElementChild.setAttribute("href","#"+(on?LENS[b.dataset.lens][0]:"i-lens"));
+  sfx.pop();
+}));
+
+/* ---------- structure reveal ---------- */
+const cells=$$("#mirror .m-cell");
+cells.forEach(c=>c.addEventListener("click",()=>{c.classList.add("shown");sfx.pop()}));
+$("#mNext").addEventListener("click",()=>{const c=cells.find(x=>!x.classList.contains("shown"));if(c){c.classList.add("shown");sfx.pop()}});
+$("#mAll").addEventListener("click",()=>{const all=cells.every(c=>c.classList.contains("shown"));cells.forEach(c=>c.classList.toggle("shown",!all));$("#mAll").textContent=all?"Reveal all":"Hide all"});
+
+/* ---------- devices ---------- */
+const DEV=[
+ ["Simile","compares two things with “like” or “as”","“One glance most kind / That fell like sunshine where it went”","lines 6–7","A kind look is like sunshine: warm and bright."],
+ ["Metaphor","compares two things without “like”","“That brought the sunshine to one face”","line 13","“Sunshine” = happiness, a smile."],
+ ["Repetition","the same word again and again","“One self-denying deed, one word… One glance”","lines 4–6","Even one small act is enough."],
+ ["Rhyme","words that end with the same sound","sun / done · word / heard · cost / lost","AABCCBDD","The same pattern in both stanzas."],
+ ["Contrast","two opposite things side by side","“well spent” ↔ “worse than lost”","lines 8 and 16","A day with kindness against a day without it."],
+ ["Money language","words from the world of money","count · spent · cost · lost","lines 2, 8, 15, 16","Your day is like money. Spend it well!"]
+];
+const dgrid=$("#dgrid");
+DEV.forEach(d=>{const b=document.createElement("button");b.className="flip";b.setAttribute("aria-label",d[0]+": flip card");
+  b.innerHTML='<div class="in"><div class="face front"><span class="d-name">'+d[0]+'</span><span class="d-def">'+d[1]+'</span><span class="tag">Find it · click to check</span></div><div class="face back"><span class="tag">'+d[0]+' · '+d[3]+'</span><span class="d-quote">'+d[2]+'</span><span class="d-why">'+d[4]+'</span></div></div>';
+  b.addEventListener("click",()=>{b.classList.toggle("flipped");sfx.pop()}); dgrid.appendChild(b)});
+
+/* ---------- sorting ---------- */
+const SORT=[
+ ["You smiled at a new student who was sitting alone.","spent","“One glance most kind / That fell like sunshine where it went”"],
+ ["Your friend was sad, but you were too busy to ask why.","lost","“You’ve cheered no heart, by yea or nay”"],
+ ["You gave your seat on the bus to an old man.","spent","“One self-denying deed”"],
+ ["You wrote “Good luck!” to a friend before her test.","spent","“one word / That eased the heart of him who heard”"],
+ ["A boy dropped his books, and you walked past him.","lost","“No act most small / That helped some soul”"],
+ ["You shared your sandwich with a friend who forgot his.","spent","“One self-denying deed”"],
+ ["You were on your phone all day and talked to no one.","lost","“through all the livelong day… You’ve nothing done”"],
+ ["You helped your little brother with his homework.","spent","“brought the sunshine to one face”"]
+];
+const SPENT_TOTAL=SORT.filter(s=>s[1]==="spent").length;
+const so={i:0,done:false,spent:0,lost:0};
+const sdots=$("#sortDots"); SORT.forEach(()=>sdots.appendChild(document.createElement("i")));
+function sortDraw(){
+  const s=SORT[so.i]; $("#sortNum").textContent="Situation "+(so.i+1)+" of "+SORT.length; $("#sortText").textContent=s[0];
+  [...sdots.children].forEach((d,k)=>{d.className=k<so.i?"on":k===so.i?"cur":""});
+  $("#sortSpent").classList.remove("picked"); $("#sortLost").classList.remove("picked"); $("#sortSpent").disabled=$("#sortLost").disabled=false;
+  const fb=$("#sortFb"); fb.className="sort-fb"; $("#sortFbIc").firstElementChild.setAttribute("href","#i-bulb"); $("#sortFbText").innerHTML="Thumbs up = a day well spent. Thumbs down = a day lost. Vote, then click.";
+  $("#sortNext").disabled=true; $("#sortNext").innerHTML=(so.i===SORT.length-1?"Finish":"Next situation")+' <svg class="ic"><use href="#i-right"/></svg>';
+  so.done=false;
+}
+function sortMeter(){ $("#tSpent").textContent=so.spent; $("#tLost").textContent=so.lost; $("#meterPct").textContent=so.spent; $("#meterFill").style.height=(so.spent/SPENT_TOTAL*100)+"%"; }
+function sortAnswer(choice){
+  if(so.done) return; so.done=true; const s=SORT[so.i], ok=choice===s[1];
+  (choice==="spent"?$("#sortSpent"):$("#sortLost")).classList.add("picked");
+  $("#sortSpent").disabled=$("#sortLost").disabled=true;
+  const fb=$("#sortFb"); fb.className="sort-fb "+(ok?"ok":"no");
+  $("#sortFbIc").firstElementChild.setAttribute("href",ok?"#i-check":"#i-x");
+  $("#sortFbText").innerHTML=(ok?"<b>Yes!</b> ":"<b>Not quite.</b> ")+(s[1]==="spent"?"A day well spent: ":"A day lost: ")+"<i>"+s[2]+"</i>";
+  if(s[1]==="spent") so.spent++; else so.lost++; sortMeter();
+  ok?sfx.good():sfx.bad(); $("#sortNext").disabled=false;
+  if(so.i===SORT.length-1&&so.spent===SPENT_TOTAL) setTimeout(()=>confetti(140),400);
+}
+$("#sortSpent").addEventListener("click",()=>sortAnswer("spent"));
+$("#sortLost").addEventListener("click",()=>sortAnswer("lost"));
+$("#sortNext").addEventListener("click",()=>{ if(so.i<SORT.length-1){so.i++;sortDraw()} else {so.i=0;so.spent=so.lost=0;sortMeter();sortDraw()} });
+sortDraw(); sortMeter();
+
+/* ---------- think deeper ---------- */
+const THINK=[
+ ["Question 1 · line 16","Why does the speaker say <i>“worse than lost”</i> and not only <i>“lost”</i>?",["When we lose something, it is usually an accident.","A kind act is easy and free: it “nothing cost”.","So a day with no kindness is a missed chance. It is our choice, and that is worse."]],
+ ["Question 2 · line 1","Why do we “count the acts” <i>at set of sun</i>, and not in the morning?",["Sunset is the end of the day: a time to stop and think about what we did.","It is like checking a bank account at the end of the day.","Contrast: the sun goes down, but kindness brings “sunshine” to people."]],
+ ["Question 3 · lines 4–6","Why does the poem say <i>“one”</i> deed, <i>“one”</i> word, <i>“one”</i> glance, and not many?",["The speaker wants to show that kindness is not hard.","Even one small act is enough to make a day well spent.","Everyone can do it, every day."]]
+];
+let thinkI=0;
+function thinkDraw(){ const t=THINK[thinkI]; $("#thinkTag").textContent=t[0]; $("#thinkQ").innerHTML=t[1]; const ul=$("#ideas"); ul.innerHTML=t[2].map(x=>"<li>"+x+"</li>").join(""); ul.hidden=true; $("#ideasCover").hidden=false; $$("[data-think]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.think===thinkI))); }
+$$("[data-think]").forEach(b=>b.addEventListener("click",()=>{thinkI=+b.dataset.think;thinkDraw()}));
+$("#ideasBtn").addEventListener("click",()=>{$("#ideasCover").hidden=true;$("#ideas").hidden=false;sfx.pop()});
+thinkDraw();
+
+/* ---------- quiz ---------- */
+const QUIZ=[
+ ["When does the speaker “count the acts”?",["In the morning","At set of sun (sunset)","At midnight","At lunch time"],1,"“If you sit down at set of sun” (line 1): at the end of the day."],
+ ["Who was George Eliot?",["A king of England","A famous scientist","A woman writer who used a man’s name","The speaker’s best friend"],2,"Her real name was Mary Ann Evans (1819–1880)."],
+ ["How many stanzas are there in the poem?",["One","Two","Three","Four"],1,"Two stanzas of 8 lines: a day well spent and a day lost."],
+ ["In stanza 1, a day is “well spent” if you…",["made a lot of money","studied all day","had fun with friends","did at least ONE kind act"],3,"“One self-denying deed, one word… One glance most kind.” One is enough!"],
+ ["What is a “self-denying deed”?",["Giving up something to help another person","Doing something only for yourself","Saying no to a friend","Something bad that you did"],0,"You give up what you want, to help someone else."],
+ ["“One glance most kind / That fell like sunshine where it went.” Which literary device is it?",["Simile","Metaphor","Repetition","Rhyme"],0,"It uses “like”: a kind look is compared to sunshine."],
+ ["Which group of words comes from the world of money?",["sun · day · face","heart · soul · glance","count · spent · cost · lost","word · deed · act"],2,"The day is like money: you can spend it well, or lose it."],
+ ["How much does a kind act cost, according to the poem?",["A lot of money","Nothing","One whole day","It depends on the person"],1,"“That helped some soul and nothing cost” (line 15)."],
+ ["Why is a day with no kindness “worse than lost”?",["Because you lost something important","Because the sun did not shine","Because you were sick all day","Because you had a chance to do good and didn’t use it"],3,"A kind act is free and easy, so missing the chance is worse than losing something by accident."],
+ ["What is the main message of the poem?",["Small acts of kindness make our day meaningful","Money is the most important thing","Sunsets are beautiful","Count your money every night"],0,"Even one small kind act makes a day “well spent”."]
+];
+const QT=20, CIRC=289.03, TEAM_C=["var(--sun)","var(--ember)","var(--dusk)","var(--sky)"];
+const qz={i:0,rev:false,left:QT,run:false,id:0,last:0,teams:[],started:false};
+let teamN=3;
+const qd=$("#qDots"); QUIZ.forEach(()=>qd.appendChild(document.createElement("i")));
+$$("#teamSeg button").forEach(b=>b.addEventListener("click",()=>{teamN=+b.dataset.n;$$("#teamSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$$("#teamInputs label").forEach((l,k)=>l.hidden=k>=teamN)}));
+function quizInit(){
+  qz.teams=[]; for(let k=0;k<teamN;k++){qz.teams.push({name:($("#team-name-"+(k+1)).value.trim()||("Team "+(k+1))),score:0,c:TEAM_C[k]})}
+  qz.i=0; qz.started=true; $("#qFinal").hidden=true; boardDraw(); qDraw();
+}
+function boardDraw(){
+  const bd=$("#board"); bd.innerHTML="";
+  qz.teams.forEach((t,k)=>{const d=document.createElement("div");d.className="team";d.style.setProperty("--c",t.c);
+    d.innerHTML='<span class="team-name"></span><b class="team-score">'+t.score+'</b><div class="team-ctl"><button class="plus" aria-label="Add a point"><svg class="ic"><use href="#i-plus"/></svg></button><button aria-label="Remove a point"><svg class="ic"><use href="#i-minus"/></svg></button></div>';
+    d.querySelector(".team-name").textContent=t.name;
+    const sc=d.querySelector(".team-score");
+    d.querySelector(".plus").addEventListener("click",()=>{t.score++;sc.textContent=t.score;sc.classList.add("bump");setTimeout(()=>sc.classList.remove("bump"),250);sfx.pop()});
+    d.querySelectorAll("button")[1].addEventListener("click",()=>{t.score=Math.max(0,t.score-1);sc.textContent=t.score});
+    bd.appendChild(d)});
+}
+function qDraw(){
+  const q=QUIZ[qz.i]; qz.rev=false;
+  $("#qNum").textContent="Question "+(qz.i+1)+" of "+QUIZ.length;
+  [...qd.children].forEach((d,k)=>d.className=k<qz.i?"on":k===qz.i?"cur":"");
+  $("#qText").textContent=q[0];
+  const box=$("#qOpts"); box.className="q-opts"; box.innerHTML="";
+  q[1].forEach((o,k)=>{const b=document.createElement("button");b.className="q-opt";b.innerHTML='<span class="let">'+"ABCD"[k]+'</span><span class="otext"></span><svg class="ic mark ok"><use href="#i-check"/></svg><svg class="ic mark no"><use href="#i-x"/></svg>';b.querySelector(".otext").textContent=o;b.addEventListener("click",()=>quizPick(k));box.appendChild(b)});
+  $("#qExplain").classList.add("hide"); $("#qExplain").textContent=q[3];
+  $("#qNext").textContent="Show the answer";
+  qTimerReset(); if(slides[cur].id==="s-quiz") qTimerStart();
+}
+function quizPick(k){
+  if(qz.rev||!qz.started) return; qz.rev=true; qTimerStop();
+  const q=QUIZ[qz.i], opts=$$("#qOpts .q-opt"); $("#qOpts").classList.add("done");
+  opts.forEach((o,j)=>{ if(j===q[2]) o.classList.add("right"); else if(j===k) o.classList.add("wrong"); else o.classList.add("dim"); });
+  $("#qExplain").classList.remove("hide");
+  if(k===q[2]){sfx.good();confetti(70)} else if(k>=0) sfx.bad();
+  $("#qNext").innerHTML=(qz.i===QUIZ.length-1?"See the results":"Next question")+' <svg class="ic"><use href="#i-right"/></svg>';
+}
+$("#qNext").addEventListener("click",()=>{ if(!qz.rev){quizPick(-1);return} if(qz.i<QUIZ.length-1){qz.i++;qDraw()} else quizFinal(); });
+function quizFinal(){
+  qTimerStop(); const f=$("#qFinal"); f.hidden=false;
+  const sorted=[...qz.teams].sort((a,b)=>b.score-a.score), top=sorted[0].score, winners=sorted.filter(t=>t.score===top);
+  $("#qWin").textContent=winners.length>1?"It’s a tie! "+winners.map(w=>w.name).join(" & "):winners[0].name+" wins!";
+  const max=Math.max(1,top), r=$("#results"); r.innerHTML="";
+  sorted.forEach(t=>{const d=document.createElement("div");d.className="res";d.style.setProperty("--c",t.c);d.innerHTML='<span class="rn"></span><div class="res-bar"><i></i></div><b>'+t.score+'</b>';d.querySelector(".rn").textContent=t.name;r.appendChild(d);requestAnimationFrame(()=>requestAnimationFrame(()=>{d.querySelector("i").style.width=(t.score/max*100)+"%"}))});
+  sfx.fanfare(); confetti(260); setTimeout(()=>confetti(160),700);
+}
+$("#qAgain").addEventListener("click",()=>{qz.teams.forEach(t=>t.score=0);qz.i=0;$("#qFinal").hidden=true;boardDraw();qDraw()});
+function qTimerDraw(){ $("#ringNum").textContent=Math.ceil(qz.left); $("#ringFg").setAttribute("stroke-dashoffset",(CIRC*(1-qz.left/QT)).toFixed(1)); $("#ring").classList.toggle("late",qz.left<=5); $("#qPause").firstElementChild.firstElementChild.setAttribute("href",qz.run?"#i-pause":"#i-play"); }
+function qTimerReset(){ qTimerStop(); qz.left=QT; qTimerDraw(); }
+function qTimerStart(){ if(qz.rev||qz.left<=0) return; qz.run=true; qz.last=performance.now(); clearInterval(qz.id); qz.id=setInterval(()=>{const now=performance.now();qz.left=Math.max(0,qz.left-(now-qz.last)/1000);qz.last=now;if(qz.left<=0){qTimerStop();sfx.done();$("#qNext").textContent="Time! Show the answer"}qTimerDraw()},100); qTimerDraw(); }
+function qTimerStop(){ clearInterval(qz.id); qz.run=false; qTimerDraw(); }
+$("#qPause").addEventListener("click",()=>qz.run?qTimerStop():qTimerStart());
+$("#quizStart").addEventListener("click",()=>{quizInit();go(slides.findIndex(s=>s.id==="s-quiz"))});
+enter["s-quiz"]=()=>{ if(!qz.started) quizInit(); else if(!qz.rev&&$("#qFinal").hidden) qTimerStart(); };
+leave["s-quiz"]=()=>qTimerStop();
+
+/* ---------- writing ---------- */
+$("#modelBtn").addEventListener("click",()=>{$("#modelWrap").hidden=true;$("#model").hidden=false;sfx.pop()});
+
+/* ---------- sunshine wall ---------- */
+const SLOTS=8, field=$("#sunfield"), raysSvg=$("#rays"); let rays=[], notesEls=[], rayN=0;
+function layoutRays(){
+  const w=field.clientWidth, h=field.clientHeight, cxp=w/2, cyp=h/2, rx=Math.min(390,w/2-150), ry=Math.min(235,h/2-34);
+  raysSvg.setAttribute("viewBox","0 0 "+w+" "+h);
+  if(!rays.length){ for(let k=0;k<SLOTS;k++){ const l=document.createElementNS("http://www.w3.org/2000/svg","line"); raysSvg.appendChild(l); rays.push(l); const n=document.createElement("div"); n.className="ray-note"; field.appendChild(n); notesEls.push(n);} }
+  for(let k=0;k<SLOTS;k++){ const a=-Math.PI/2+k*2*Math.PI/SLOTS, c=Math.cos(a), s=Math.sin(a);
+    rays[k].setAttribute("x1",cxp+c*150); rays[k].setAttribute("y1",cyp+s*150); rays[k].setAttribute("x2",cxp+c*(rx-40)*.78); rays[k].setAttribute("y2",cyp+s*(ry-10)*.78);
+    notesEls[k].style.left=(cxp+c*rx)+"px"; notesEls[k].style.top=(cyp+s*ry)+"px"; }
+}
+function addRay(text){ text=(text||"").trim(); if(!text) return; const k=rayN%SLOTS; rayN++; const n=notesEls[k]; n.classList.remove("show"); void n.offsetWidth; n.textContent=text; n.classList.add("show"); rays[k].classList.add("lit"); $("#rayCount").textContent=rayN; $("#bigSun").style.setProperty("--g",Math.min(rayN,24)); sfx.good(); if(rayN%SLOTS===0) confetti(120); }
+$("#wallForm").addEventListener("submit",e=>{e.preventDefault();const i=$("#wall-text");addRay(i.value);i.value=""});
+$$("#suggest button").forEach(b=>b.addEventListener("click",()=>addRay(b.textContent)));
+enter["s-wall"]=()=>requestAnimationFrame(layoutRays);
+
+/* ---------- boot ---------- */
+function start(data){
+  let i=0; const m=/^#slide-(\d+)$/.exec(location.hash||""); if(m) i=+m[1]-1; if(data&&typeof data.slide==="number") i=data.slide;
+  i=Math.max(0,Math.min(N-1,i)); slides[0].classList.add("active"); cur=0; go(i,true);
+  layoutRays();
+}
+try{ window.claude&&window.claude.hot&&window.claude.hot.snapshot&&window.claude.hot.snapshot(()=>({slide:cur})) }catch(e){}
+try{ (window.claude&&window.claude.hot&&window.claude.hot.ready) ? window.claude.hot.ready(start) : start((window.claude&&window.claude.hot&&window.claude.hot.data)||{}) }catch(e){ start({}) }
+addEventListener("hashchange",()=>{const m=/^#slide-(\d+)$/.exec(location.hash||"");if(m&&+m[1]-1!==cur) go(+m[1]-1)});
+})();
+</script>
