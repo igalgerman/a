@@ -405,7 +405,7 @@ button,input{font:inherit;color:inherit}
 .mission .ic{color:var(--sun);font-size:28px}
 .closing .sub{font:500 32px/1.4 var(--f-body);color:var(--paper-soft)}
 
-/* ---------- HUD, timer, notes ---------- */
+/* ---------- HUD ---------- */
 .hud{position:absolute;right:30px;bottom:24px;z-index:50;display:flex;align-items:center;gap:4px;padding:8px 10px;border-radius:999px;background:var(--hud);color:var(--hud-ink);font:500 22px/1 var(--f-body);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:opacity .4s}
 #stage.idle .hud{opacity:.22}
 .hud button{appearance:none;border:0;cursor:pointer;min-width:52px;height:52px;padding:0 12px;border-radius:999px;background:transparent;color:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 22px/1 var(--f-body);font-variant-numeric:tabular-nums}
@@ -430,10 +430,6 @@ button,input{font:inherit;color:inherit}
 .tmr-pre button:hover{background:var(--sun-pale)}
 .tmr-ctl{display:flex;gap:10px}
 .tmr-ctl .btn{flex:1}
-.notes{position:absolute;left:30px;bottom:100px;z-index:60;width:820px;max-height:640px;overflow:auto;padding:30px 36px;border-radius:26px;background:rgba(14,11,28,.94);color:var(--hud-ink);direction:rtl;text-align:right;font:400 28px/1.55 var(--f-body);box-shadow:var(--shadow)}
-.notes h4{margin:0 0 12px;font:700 22px/1.2 var(--f-body);letter-spacing:.06em;color:var(--sun)}
-.notes p{margin:0}
-.notes .keys{margin-top:16px;padding-top:14px;border-top:2px solid rgba(255,249,242,.15);font-size:22px;color:var(--paper-soft)}
 #confetti{position:absolute;inset:0;z-index:70;pointer-events:none}
 
 @media (prefers-reduced-motion: reduce){
@@ -454,7 +450,6 @@ button,input{font:inherit;color:inherit}
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 6l6 6-6 6"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M19.5 12h-15M10.5 6l-6 6 6 6"/></symbol>
   <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
-  <symbol id="i-notes" viewBox="0 0 24 24"><path d="M6 3.5h12v17H6zM9 8h6M9 12h6M9 16h3.5"/></symbol>
   <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l5 4v-13l-5 4H4zM16 9a4.2 4.2 0 0 1 0 6M18.6 6.4a8 8 0 0 1 0 11.2"/></symbol>
   <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l5 4v-13l-5 4H4zM16.5 9.5l5 5M21.5 9.5l-5 5"/></symbol>
   <symbol id="i-quill" viewBox="0 0 24 24"><path d="M20 4c-7.5.5-12.5 5.5-13.5 13.5M20 4c.2 6-3.5 10.5-11 11.2M20 4l-6.5 1.2M3.5 20.5l3-3"/></symbol>
@@ -748,7 +743,6 @@ button,input{font:inherit;color:inherit}
   <!-- overlays -->
   <canvas id="confetti" width="1920" height="1080" aria-hidden="true"></canvas>
 
-  <div class="notes" id="notes" hidden><h4 id="notesHead">הערות למורה</h4><p id="notesText"></p><p class="keys">מקשים: ← → מעבר שקופיות · F מסך מלא · N הערות · במבחן: 1–4 לבחירת תשובה</p></div>
 
   <div class="hud" id="hud">
     <span class="clock" title="Time of day in the lesson"><svg class="ic" id="clockIc"><use href="#i-sun"/></svg><span id="clock">07:00</span></span>
@@ -756,7 +750,6 @@ button,input{font:inherit;color:inherit}
     <span class="count" id="count">1 / 17</span>
     <button id="next" aria-label="Next slide"><svg class="ic"><use href="#i-right"/></svg></button>
     <button id="soundBtn" aria-label="Sound on" aria-pressed="false"><svg class="ic"><use href="#i-sound" id="soundUse"/></svg></button>
-    <button id="notesBtn" aria-label="Teacher notes" aria-pressed="false"><svg class="ic"><use href="#i-notes"/></svg></button>
     <button id="fsBtn" aria-label="Full screen"><svg class="ic"><use href="#i-full"/></svg></button>
   </div>
   <div class="progress"><i id="prog"></i></div>
@@ -824,26 +817,6 @@ const CC=["#FFB627","#EE5A2F","#5A3E91","#3C8FD0","#FFF9F2","#FFDD7E"];
 function confetti(n){ if(reduced) return; for(let i=0;i<(n||180);i++) parts.push({x:960+(Math.random()-.5)*600,y:560,vx:(Math.random()-.5)*30,vy:-Math.random()*28-10,s:10+Math.random()*14,r:Math.random()*6,vr:(Math.random()-.5)*.35,c:CC[i%CC.length]}); if(!craf) craf=requestAnimationFrame(cloop) }
 function cloop(){ cx.clearRect(0,0,1920,1080); parts.forEach(p=>{p.vy+=.75;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore()}); parts=parts.filter(p=>p.y<1150); if(parts.length) craf=requestAnimationFrame(cloop); else {cx.clearRect(0,0,1920,1080);craf=0} }
 
-/* ---------- teacher notes (Hebrew) ---------- */
-const NOTES={
- "s-cover":["דקה 0–1 · פתיחה","ברכו את הכיתה והציגו: שיעור סיכום לשיר Count That Day Lost. שימו לב לשמש בצד ימין: היא תשקע לאט במהלך השיעור, בדיוק כמו בשיר (at set of sun). בשקופית האחרונה כבר יהיה לילה."],
- "s-hook":["דקה 1–5 · סרטון פתיחה","לפני השיעור: בדקו שהסאונד במחשב של הכיתה עובד. קראו עם הכיתה את 3 השאלות לפני הצפייה, ואז הפעילו את הסרטון בתוך השקופית (3 דקות, עם כתוביות באנגלית; כפתור המסך המלא בנגן מגדיל אותו). אחרי הצפייה: שיחה קצרה בזוגות ושיתוף. רמז לשאלה 3: הוא נותן את כרע העוף שלו לכלב רחוב = self-denying deed."],
- "s-author":["דקה 5–7 · המשוררת","הצבעה בידיים: מי חושב שג׳ורג׳ אליוט גבר? מי אישה? לחצו על אחת התשובות כדי לחשוף. שאלה קצרה: למה לדעתכם היא כתבה בשם של גבר?"],
- "s-vocab":["דקה 7–11 · אוצר מילים","תלמיד קורא את המילה, הכיתה מנחשת את הפירוש, ורק אז הופכים את הכרטיס. מספר השורה עוזר למצוא את המילה בשיר. בסוף: Flip all."],
- "s-poem":["דקה 11–19 · השיר","קריאה קולית (מורה, ואז תלמיד). אחר כך עוברים על העדשות אחת אחת, ולפני כל לחיצה שואלים את הכיתה. Rhyme: אילו מילים מתחרזות? Money words: מה משותף למילים? (קריאה פרשנית שעוזרת לתלמידים, לא חלק ממחוון רשמי.) If → Then: תנאי ותוצאה. מספרי השורות חשובים לתשובות בבגרות."],
- "s-structure":["דקה 19–23 · מבנה · HOTS: comparing and contrasting","לחצו Reveal next שורה אחרי שורה, ולפני כל חשיפה שאלו את הכיתה. השוואה בין שני הבתים מתאימה לשאלות בסגנון הבגרות. מסקנה: אותו מבנה, תוצאה הפוכה = ניגוד (contrast)."],
- "s-acts":["דקה 23–26 · שלושה מעשים קטנים","לעשות, להגיד, להסתכל. שאלו: איזה מהם הכי קל לכם? למה? הדגישו nothing cost: טוב לב לא עולה כסף, כל אחד יכול."],
- "s-devices":["דקה 26–30 · אמצעים ספרותיים","לפני כל לחיצה בקשו מהתלמידים למצוא בשיר דוגמה לאמצעי. אפשר כתחרות קטנה בין השולחנות. הלחיצה חושפת ציטוט, מספר שורה ומה זה אומר."],
- "s-sort":["דקה 30–34 · Well spent or lost?","תלמיד מקריא מצב, וכל הכיתה מצביעה: אגודל למעלה = well spent, אגודל למטה = lost. לחצו על מה שרוב הכיתה בחרה, ותלמיד מקריא את הציטוט שבמשוב."],
- "s-setup":["דקה 34–35 · הכנה לחידון","חלקו לקבוצות לפי שורות או שולחנות. כל קבוצה כותבת את האות (A/B/C/D) על דף או על לוח מחיק, ומרימה כשאתם אומרים Show!"],
- "s-quiz":["דקה 35–42 · החידון (7 שאלות)","קוראים את השאלה, נותנים לקבוצות לחשוב ולכתוב, ואומרים Show! לחצו על התשובה הנכונה כדי לחשוף, ותנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. אם הזמן נגמר, Finish now עובר ישר למסך המנצחים."],
- "s-end":["דקה 42–45 · סיום","השמש שקעה, בדיוק כמו בשיר. שאלה אחרונה: האם השיעור היום היה well spent? תודה!"]
-};
-const notes=$("#notes");
-function renderNotes(){ const n=NOTES[slides[cur].id]||["",""]; $("#notesHead").textContent="שקופית "+(cur+1)+" · "+n[0]; $("#notesText").textContent=n[1]; }
-function toggleNotes(){ notes.hidden=!notes.hidden; $("#notesBtn").setAttribute("aria-pressed",String(!notes.hidden)); }
-$("#notesBtn").addEventListener("click",toggleNotes);
-
 /* ---------- navigation ---------- */
 const enter={}, leave={};
 function go(i,instant){
@@ -857,7 +830,6 @@ function go(i,instant){
   const mins=7*60+Math.round(p*13.5*60/5)*5; $("#clock").textContent=String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
   $("#clockIc").firstElementChild.setAttribute("href",p>.86?"#i-moon":"#i-sun");
   $("#prev").disabled=cur===0; $("#next").disabled=cur===N-1;
-  renderNotes();
   try{history.replaceState(null,"","#slide-"+(cur+1))}catch(e){}
   if(enter[slides[cur].id]) enter[slides[cur].id]();
 }
@@ -875,7 +847,6 @@ document.addEventListener("keydown",e=>{
   else if(k===" "){ const a=document.activeElement; if(!a||a===document.body){e.preventDefault();next()} }
   else if(k==="Home"){go(0)} else if(k==="End"){go(N-1)}
   else if(k==="f"||k==="F"){toggleFs()}
-  else if(k==="n"||k==="N"){toggleNotes()}
   else if(slides[cur].id==="s-quiz"&&/^[1-4]$/.test(k)){quizPick(+k-1)}
 });
 let tx=0,ty=0;
