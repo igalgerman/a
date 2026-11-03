@@ -180,7 +180,6 @@ button,input{font:inherit;color:inherit}
 .stanza{counter-reset:ln}
 .stanza.s2{counter-reset:ln 8}
 .stanza li{counter-increment:ln;position:relative;padding:0 50px 0 58px;font:400 33px/1.76 var(--f-poem);white-space:nowrap;transition:color .35s}
-.stanza li.ind{padding-left:118px}
 .stanza li::before{content:counter(ln);position:absolute;left:0;top:.5em;font:500 20px/1 var(--f-body);color:var(--muted);font-variant-numeric:tabular-nums}
 .stanza li::after{content:attr(data-r);position:absolute;right:0;top:.32em;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font:700 22px/1 var(--f-body);text-transform:uppercase;opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s}
 .stanza li[data-r="a"]::after{background:var(--hl-a)}
