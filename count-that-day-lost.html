@@ -703,7 +703,7 @@ button,input{font:inherit;color:inherit}
       <div class="panel" style="display:flex;flex-direction:column;gap:26px">
         <h3>How to play</h3>
         <ol class="rules">
-          <li>10 questions about the poem.</li>
+          <li>7 questions about the poem.</li>
           <li>Each team writes its answer (A, B, C or D) on a page.</li>
           <li>When the teacher says “Show!”, all teams show their answer.</li>
           <li>The teacher shows the right answer. +1 point for every team that is right.</li>
@@ -731,7 +731,7 @@ button,input{font:inherit;color:inherit}
     <div class="quiz">
       <div class="q-main">
         <div class="q-top">
-          <div class="q-meta"><p class="eyebrow" id="qNum">Question 1 of 10</p><div class="dots" id="qDots"></div></div>
+          <div class="q-meta"><p class="eyebrow" id="qNum">Question 1 of 7</p><div class="dots" id="qDots"></div></div>
         </div>
         <div class="panel q-card"><p class="q-text" id="qText"></p></div>
         <div class="q-opts" id="qOpts"></div>
@@ -850,8 +850,8 @@ const NOTES={
  "s-devices":["דקה 26–30 · אמצעים ספרותיים","לפני כל לחיצה בקשו מהתלמידים למצוא בשיר דוגמה לאמצעי. אפשר כתחרות קטנה בין השולחנות. הלחיצה חושפת ציטוט, מספר שורה ומה זה אומר."],
  "s-sort":["דקה 30–34 · Well spent or lost?","תלמיד מקריא מצב, וכל הכיתה מצביעה: אגודל למעלה = well spent, אגודל למטה = lost. לחצו על מה שרוב הכיתה בחרה, ותלמיד מקריא את הציטוט שבמשוב."],
  "s-setup":["דקה 34–35 · הכנה לחידון","חלקו לקבוצות לפי שורות או שולחנות. כל קבוצה כותבת את האות (A/B/C/D) על דף או על לוח מחיק, ומרימה כשאתם אומרים Show!"],
- "s-quiz":["דקה 35–43 · החידון","קוראים את השאלה, נותנים לקבוצות לחשוב ולכתוב, ואומרים Show! לחצו על התשובה הנכונה כדי לחשוף, ותנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. אם הזמן נגמר, Finish now עובר ישר למסך המנצחים."],
- "s-end":["דקה 43–45 · סיום","השמש שקעה, בדיוק כמו בשיר. שאלה אחרונה: האם השיעור היום היה well spent? תודה!"]
+ "s-quiz":["דקה 35–42 · החידון (7 שאלות)","קוראים את השאלה, נותנים לקבוצות לחשוב ולכתוב, ואומרים Show! לחצו על התשובה הנכונה כדי לחשוף, ותנו +1 לכל קבוצה שצדקה. אפשר לבחור תשובה גם במקשים 1–4. אם הזמן נגמר, Finish now עובר ישר למסך המנצחים."],
+ "s-end":["דקה 42–45 · סיום","השמש שקעה, בדיוק כמו בשיר. שאלה אחרונה: האם השיעור היום היה well spent? תודה!"]
 };
 const notes=$("#notes");
 function renderNotes(){ const n=NOTES[slides[cur].id]||["",""]; $("#notesHead").textContent="שקופית "+(cur+1)+" · "+n[0]; $("#notesText").textContent=n[1]; }
@@ -1024,11 +1024,8 @@ sortDraw(); sortMeter();
 const QUIZ=[
  ["When does the speaker “count the acts”?",["In the morning","At set of sun (sunset)","At midnight","At lunch time"],1,"“If you sit down at set of sun” (line 1): at the end of the day."],
  ["Who was George Eliot?",["A king of England","A famous scientist","A woman writer who used a man’s name","The speaker’s best friend"],2,"Her real name was Mary Ann Evans (1819–1880)."],
- ["How many stanzas are there in the poem?",["One","Two","Three","Four"],1,"Two stanzas of 8 lines: a day well spent and a day lost."],
  ["In stanza 1, a day is “well spent” if you…",["made a lot of money","studied all day","had fun with friends","did at least ONE kind act"],3,"“One self-denying deed, one word… One glance most kind.” One is enough!"],
  ["What is a “self-denying deed”?",["Giving up something to help another person","Doing something only for yourself","Saying no to a friend","Something bad that you did"],0,"You give up what you want, to help someone else."],
- ["“One glance most kind / That fell like sunshine where it went.” Which literary device is it?",["Simile","Metaphor","Repetition","Rhyme"],0,"It uses “like”: a kind look is compared to sunshine."],
- ["Which group of words comes from the world of money?",["sun · day · face","heart · soul · glance","count · spent · cost · lost","word · deed · act"],2,"The day is like money: you can spend it well, or lose it."],
  ["How much does a kind act cost, according to the poem?",["A lot of money","Nothing","One whole day","It depends on the person"],1,"“That helped some soul and nothing cost” (line 15)."],
  ["Why is a day with no kindness “worse than lost”?",["Because you lost something important","Because the sun did not shine","Because you were sick all day","Because you had a chance to do good and didn’t use it"],3,"A kind act is free and easy, so missing the chance is worse than losing something by accident."],
  ["What is the main message of the poem?",["Small acts of kindness make our day meaningful","Money is the most important thing","Sunsets are beautiful","Count your money every night"],0,"Even one small kind act makes a day “well spent”."]
