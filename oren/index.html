@@ -20,7 +20,7 @@
 [hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--sky2);color:var(--ink);font-family:var(--font);overflow:hidden;user-select:none;-webkit-user-select:none}
-button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 button:focus-visible{outline:4px solid #1f6feb;outline-offset:3px}
 svg.px{shape-rendering:crispEdges;display:block}
 
@@ -66,8 +66,8 @@ svg.px{shape-rendering:crispEdges;display:block}
 .starcount{display:flex;align-items:center;gap:8px;font-weight:900;font-size:26px;direction:ltr;background:rgba(255,255,255,.85);padding:4px 14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
 .starcount svg{width:32px}
 
-.screens{flex:1;position:relative;z-index:1;min-height:0;display:flex}
-.screen{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+.screens{flex:1;position:relative;z-index:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.screen{flex:1 0 auto;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   padding-block:8px;padding-left:var(--gut);padding-right:var(--gut);animation:fadein .5s}
 @keyframes fadein{from{opacity:.0;transform:translateY(8px)}}
 
@@ -127,7 +127,7 @@ svg.px{shape-rendering:crispEdges;display:block}
 .bubble::before{content:"";position:absolute;inset-inline-start:-14px;top:50%;margin-top:-10px;border:10px solid transparent;border-inline-end:14px solid #fff;border-inline-start:0}
 .bubble svg{width:30px;height:30px;flex:none;color:#3a8fc4}
 .bubble .t{direction:rtl;unicode-bidi:plaintext}
-.play{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:0}
+.play{flex:1 0 auto;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:0}
 
 /* number blocks */
 .choices{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
@@ -241,7 +241,8 @@ button.nb:active{transform:translateY(3px)}
 .rule .rn{font-weight:900;font-size:52px;min-width:70px;text-align:center;background:var(--stone);color:#fff;padding:0 10px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.2)}
 .rule svg{width:120px;height:44px;color:var(--gold)}
 .rule .w{font-weight:800;font-size:24px;direction:rtl}
-.nline{--w:min(52px, calc((100vw - 120px) / 21 - 4px));display:flex;gap:4px;direction:ltr;position:relative;padding-bottom:22px}
+.nlwrap{max-width:100%;overflow-x:auto;overflow-y:hidden;padding:44px 14px 8px;-webkit-overflow-scrolling:touch}
+.nline{--w:max(34px, min(52px, calc((100vw - 120px) / 21 - 4px)));width:max-content;display:flex;gap:4px;direction:ltr;position:relative;padding-bottom:22px}
 .nline::after{content:"";position:absolute;left:-10px;right:-10px;bottom:0;height:14px;background:var(--wood);box-shadow:inset 0 -4px 0 var(--wood-d)}
 .nl{position:relative;width:var(--w);height:calc(var(--w) * 1.15);display:grid;place-items:center;font-weight:900;font-size:calc(var(--w) * .5);font-variant-numeric:tabular-nums;
   background:var(--paper);color:var(--ink);box-shadow:inset -3px -3px 0 rgba(0,0,0,.15),inset 3px 3px 0 #fff,0 4px 0 rgba(0,0,0,.35);transition:transform .15s,box-shadow .2s,background .2s}
@@ -262,7 +263,8 @@ button.nl:hover{transform:translateY(-4px)}
 .checkbtn svg{width:36px;height:36px}
 
 /* overlay */
-.overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(20,30,40,.55);animation:fadein .4s}
+.overlay{position:absolute;inset:0;z-index:5;display:flex;overflow-y:auto;padding:22px 16px;background:rgba(20,30,40,.55);animation:fadein .4s}
+.overlay>*{margin:auto}
 .wincard{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--paper);padding:26px 40px;max-width:calc(100% - 32px);
   box-shadow:0 0 0 8px var(--grass),0 0 0 14px var(--dirt),0 16px 0 14px rgba(0,0,0,.25)}
 .wincard h2{margin:0;font-size:44px;font-weight:900}
@@ -289,9 +291,76 @@ button.nl:hover{transform:translateY(-4px)}
 
 #fx{position:absolute;inset:0;pointer-events:none;z-index:6}
 
-@media (max-width:700px){
-  .map{gap:16px}.tiles{grid-template-columns:repeat(2,minmax(120px,1fr))}
-  .cart{width:220px}.counter{width:100%}.nroof{border-left-width:170px;border-right-width:170px}.rooms{width:320px}.room{width:140px;grid-template-columns:repeat(5,22px)}.room i{width:22px;height:22px}
+/* touch screens: no sticky hover lifts */
+@media (hover:none){
+  .ibtn:hover,.playbtn:hover,.tile:hover,button.nb:hover,.sheep:not(.on):hover,.cart:hover,.coinbtn:hover,button.nl:not(.sel):hover,.checkbtn:hover{transform:none}
+}
+/* compact: phones (portrait or landscape) and short laptop windows */
+@media (max-width:700px),(max-height:540px){
+  .hud{padding-block:6px;min-height:0;gap:6px}
+  .hud-side{min-width:0;gap:6px}
+  .ibtn{width:40px;height:40px}.ibtn svg{width:22px;height:22px}
+  .chip{font-size:16px;padding:5px 10px}
+  .pb{width:20px;height:20px}
+  .starcount{font-size:20px}.starcount svg{width:24px}
+  .ground{flex-basis:14px}
+  .screen{gap:10px;padding-block:6px}
+  .title{font-size:clamp(34px,9vw,60px)}
+  .scene .oren svg,.scene .catbig svg{width:64px}.scene .house svg{width:180px}
+  .playbtn{font-size:26px;padding:12px 30px}.playbtn svg{width:30px;height:30px}
+  .map{gap:14px}
+  .tiles{gap:10px;grid-template-columns:repeat(3,minmax(96px,150px))}
+  .tile{min-height:110px;padding:24px 6px 8px;gap:4px}.tile .ico{height:50px}.tile .ico svg{height:44px}
+  .tile .nm{font-size:15px}.tile .num{top:16px;font-size:14px;width:22px;height:22px}.tile .got{width:28px;top:14px}
+  .reset{position:static;flex-basis:100%;max-width:max-content;margin-inline:auto}
+  .homepanel{padding:10px 14px}.homepanel .house svg{width:180px}.homepanel h2{font-size:18px}
+  .game{gap:8px}
+  .cat svg{width:46px}
+  .bubble{font-size:20px;padding:8px 14px}.bubble svg{width:22px;height:22px}
+  .play{gap:12px}
+  .choices{gap:12px}
+  .nb{min-width:64px;height:64px;font-size:34px;padding:0 8px}
+  .big{min-width:80px;height:80px;font-size:46px}
+  .slot{width:76px;height:76px;font-size:48px}
+  .sym{font-size:44px;min-width:70px}
+  .field{gap:10px 20px;padding:10px}
+  .sheep,.sheep svg{width:48px}
+  .badge{min-width:24px;height:24px;font-size:15px;top:-10px}
+  .carts{gap:22px}
+  .cart{width:210px;padding:10px 10px 16px}.cart .load{min-height:70px;gap:5px}.cart .load svg{width:28px}
+  .cart .wheels i{width:26px;height:26px}.cart .wheels{bottom:-16px}
+  .tower{height:126px}.tower i{height:5px;width:28px}
+  .shop{gap:12px}
+  .stand{padding:10px 16px}.stand .item svg{width:70px}
+  .tag{font-size:30px}
+  .counter{width:300px;padding:10px;gap:8px}
+  .tray{min-height:70px}.tray:empty::after{height:56px;background-size:40px}
+  .coin-in svg{width:38px;height:38px}
+  .bank{gap:14px;padding:8px 14px}
+  .coinbtn svg{width:54px;height:54px}
+  .nroof{border-left-width:160px;border-right-width:160px;border-bottom-width:66px}
+  .nroof span{top:16px;font-size:38px;height:48px}
+  .rooms{width:300px;padding:8px}
+  .room{width:134px;min-height:64px;padding:6px;grid-template-columns:repeat(5,22px);gap:4px}
+  .room i{width:22px;height:22px}.room .q{font-size:44px}
+  .eq{font-size:30px}
+  .car{width:84px;height:64px;font-size:36px}
+  .car::before,.car::after,.loco::before{width:22px;height:22px;bottom:-20px}
+  .loco{width:106px;height:80px}.loco::before{box-shadow:inset 0 0 0 6px #55585e,52px 0 0 0 #2f3136}
+  .loco .win{width:34px;height:28px}
+  .track{padding-bottom:20px}
+  .rule{padding:4px 14px}.rule .rn{font-size:36px;min-width:50px}.rule svg{width:84px;height:32px}
+  .nlwrap{padding-top:38px}
+  .checkbtn{font-size:22px;padding:10px 24px}.checkbtn svg{width:28px;height:28px}
+  .wincard{padding:16px 20px;gap:10px}.wincard h2{font-size:30px}.wincard .bigstar svg{width:70px}.wincard .house svg{width:190px}
+  .certcard{padding:16px 22px 12px}.cert-role{font-size:20px}.cert-stars svg{width:30px}.cert-scene .house svg{width:140px}.cert-scene .oren svg{width:36px}.cert-scene .catbig svg{width:40px}
+}
+@media (max-width:440px){
+  .tiles{grid-template-columns:repeat(2,minmax(120px,1fr))}
+  .car{width:70px;height:56px;font-size:30px}
+  .loco{width:88px;height:70px}
+  .train{gap:7px}
+  .cart{width:100%;max-width:300px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -316,7 +385,7 @@ button.nl:hover{transform:translateY(-4px)}
       <h1 class="title">העולם של אורן</h1>
       <div class="scene" id="startScene"></div>
       <button class="playbtn" id="btnStart" aria-label="התחל"><span id="playIco"></span>יוצאים לדרך</button>
-      <div class="note" id="voiceNote" hidden>לקול בעברית כדאי לפתוח את האתר בדפדפן Edge</div>
+      <div class="note" id="voiceNote" hidden>לא נמצא קול בעברית בדפדפן הזה. במחשב: פתחו ב-Edge</div>
     </section>
     <section class="screen map" id="sMap" hidden></section>
     <section class="screen game" id="sGame" hidden>
@@ -929,7 +998,9 @@ function zLine(q,d){
       return t==='gt'?`עוד לא. המספרים הגדולים מ${F[x]} נמצאים מימין ל${F[x]}, עד עשרים.`:`עוד לא. המספרים הקטנים מ${F[x]} נמצאים משמאל ל${F[x]}, עד אפס.`;
     });
   };
-  $('#play').append(rule,line,chk);
+  const wrap=h('div','nlwrap');wrap.dir='ltr';wrap.appendChild(line);
+  $('#play').append(rule,wrap,chk);
+  if(wrap.scrollWidth>wrap.clientWidth)wrap.scrollLeft=Math.max(0,btns[x].offsetLeft-wrap.clientWidth/2);
 }
 
 /* ---------- win & certificate ---------- */
