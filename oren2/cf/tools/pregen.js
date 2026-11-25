@@ -110,6 +110,14 @@ async function collect() {
       ['זמן לנוח. כל הכבוד היום, אורן! נתראה מחר.', 'הזמן של היום נגמר. כל הכבוד היום, אורן! נתראה מחר.', 'עוד דקה אחת לסיום היום', ...[2, 3, 4, 5].map(n => `עוד ${n} דקות לסיום היום`)].forEach(add);
       (D.SENT || []).forEach(s => { add(s[0]); add(s[1]); });
       (D.STORIES || []).forEach(st => { add(st.t); st.s.forEach(add); st.q.forEach(q => add(q[0])); });
+      /* the content packs: their own lists of what they say */
+      const W = window, tryf = f => { try { f(); } catch (e) {} };
+      tryf(() => (T.STORIES || []).forEach(st => { add(st.t); st.s.forEach(add); st.q.forEach(q => add(q[0])); }));
+      tryf(() => W.READBANK2.speakList().forEach(add));
+      tryf(() => W.EXPLORE2.kidTexts().forEach(s => add(sp(s))));
+      tryf(() => W.FRIEND.speakList().forEach(s => add(sp(s))));
+      tryf(() => W.HELP.allTexts().forEach(s => add(sp(s))));
+      tryf(() => W.ENGLISH2.speakList().forEach(t => { t = sp(t); if (/[א-ת]/.test(t)) add(t); else if (t) out.push({ t, v: 'en-US-Chirp3-HD-Despina', r: 0.85 }); }));
       return out; }, DATA);
     (await p.evaluate(() => window.__said)).concat(stat).forEach(x => { const c = norm(x); if (c) SAID.set(idOf(c), c); });
     console.log('collected', SAID.size, 'so far (' + (vp.isMobile ? 'phone' : 'desktop') + ')'); await ctx.close(); }

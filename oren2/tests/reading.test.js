@@ -48,13 +48,16 @@ const STUB = () => {
   ok('highlight cleared at the end', await p.evaluate(() => document.querySelectorAll('.rw.on').length === 0));
   // 3. level 1 reads by itself after the pause
   await p.evaluate(() => { window.__spoken = []; window.TAL.ACT['read-sent'].run(() => {}); });
-  await L.sleep(1500); const early = await p.evaluate(() => window.__spoken.length);
-  await L.sleep(2500); const late = await p.evaluate(() => window.__spoken.length);
+  /* the instruction may be said at once; the sentence to read is said only after the wait */
+  const sentSaid = () => p.evaluate(() => { const e = document.querySelector('#sTal .tqc .sent'); if (!e) return -1; const w = window.TAL.plainHe(e.textContent).replace(/🔊/g, '').trim().split(/\s+/).slice(0, 2).join(' ');
+    return window.__spoken.filter(t => t.replace(/[\u0591-\u05C7]/g, '').includes(w)).length; });
+  await L.sleep(1500); const early = await sentSaid();
+  await L.sleep(2500); const late = await sentSaid();
   ok('level 1: waits, then reads by itself', early === 0 && late >= 1, `${early} → ${late}`);
   // 4. level 3 never reads by itself
   await p.evaluate(() => { window.TAL.S().set.rdMode = 3; window.__spoken = []; window.TAL.ACT['read-sent'].run(() => {}); });
   await L.sleep(4000);
-  ok('level 3: no auto-read, no cue', await p.evaluate(() => window.__spoken.length === 0 && !document.querySelector('.rdcue')));
+  ok('level 3: no auto-read, no cue', await sentSaid() === 0 && await p.evaluate(() => !document.querySelector('.rdcue')));
   // 5. answering correctly without hearing counts as "solo" and moves him up a level
   await p.evaluate(() => { const T = window.TAL; T.S().set.rdMode = 'auto'; T.S().rd = { lvl: 1, solo: 24 }; T.ACT['read-sent'].run(() => {}); });
   await p.waitForSelector('.tqc .qq .rdb');

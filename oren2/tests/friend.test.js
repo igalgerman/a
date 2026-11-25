@@ -23,10 +23,12 @@ const NIK = /[ְ-ׇּׁׂ]/, HEB = /[א-ת]/;
   await p.evaluate(() => { const T = window.TAL, d = T.dailyEnsure(); d.t = ['math', 'read-first', 'read-wp', 'eng-word']; d.done = [1, 0, 0, 0]; d.ch = 'readg'; window.OREN.persist(); });
   const said = async (f, ms = 700) => { await p.evaluate(() => { speechSynthesis.log = []; window.__fast = false; }); await f(); await sleep(ms);
     return p.evaluate(() => { window.__fast = true; return speechSynthesis.log.slice(); }); };
+  const V = t => p.evaluate(t => (window.__fullSpell ? window.__fullSpell(t) : t).replace(/[\u0591-\u05C7]/g, ''), t);   // how a line sounds in the voice log
+  const has = async (s, t) => { const v = await V(t); return s.some(x => x.replace(/[\u0591-\u05C7]/g, '').includes(v)); };
   let s = await said(() => p.evaluate(() => window.TAL_step(1)), 900);
   const w = await p.evaluate(() => window.FRIEND.word || '');
-  ok('"first letter": the picture\'s word is said', !!w && s.some(x => x.includes(w)), JSON.stringify({ w, s }));
-  ok('step start: the friend ties it to the day\'s story', s.some(x => /בּוֹא|מַתְחִילִים|עוֹד צַעַד/.test(x)), JSON.stringify(s));
+  ok('"first letter": the picture\'s word is said', !!w && await has(s, w), JSON.stringify({ w, s }));
+  ok('step start: the friend ties it to the day\'s story', s.some(x => /בוא|מתחילים|עוד צעד/.test(x.replace(/[\u0591-\u05C7]/g, ''))), JSON.stringify(s));
   const ui = await p.evaluate(() => { const f = document.querySelector('.frc'), pb = document.querySelector('#hudMid #frPath');
     return { fr: !!f && !f.hidden, dots: pb ? pb.querySelectorAll('i').length : 0, on: pb ? pb.querySelectorAll('i.on').length : 0, cur: pb ? pb.querySelectorAll('i.cur').length : 0, pic: !!document.querySelector('#sTal .tqc .pic.frpic') }; });
   ok('friend is on the activity screen', ui.fr);
@@ -40,20 +42,22 @@ const NIK = /[ְ-ׇּׁׂ]/, HEB = /[א-ת]/;
   const OKL = await p.evaluate(() => window.FRIEND._lines);
   s = await said(() => pickAns(true), 300);
   let last = await p.evaluate(() => window.FRIEND.last);
-  ok('right answer: the friend says a short line', OKL.ok.includes(last) && s.some(x => x.includes(last)), JSON.stringify({ last, s }));
+  ok('right answer: the friend says a short line', OKL.ok.includes(last) && await has(s, last), JSON.stringify({ last, s }));
   ok('friend hops', await p.evaluate(() => document.querySelector('.frc').classList.contains('joy')));
-  await sleep(1300);
+  const settle = () => p.waitForFunction(() => { const q = window.__quiz; return q && q.wrap.isConnected && ![...q.wrap.querySelectorAll('.chs .chb')].some(x => x.classList.contains('ok') || x.classList.contains('show')); }, null, { timeout: 8000 }).catch(() => {});
+  await sleep(300); await settle();
   s = await said(() => pickAns(false), 300); last = await p.evaluate(() => window.FRIEND.last);
-  ok('wrong answer: a gentle line', OKL.wrong.includes(last) && s.some(x => x.includes(last)), last);
+  ok('wrong answer: a gentle line', OKL.wrong.includes(last) && await has(s, last), last);
   ok('friend looks sad', await p.evaluate(() => document.querySelector('.frc').classList.contains('sad')));
   await pickAns(true); await sleep(100); last = await p.evaluate(() => window.FRIEND.last);
   ok('fixed after a mistake: praise for trying again', OKL.effort.includes(last), last);
   // streak + variety
-  await sleep(1300); const got = [];
-  for (let k = 0; k < 4; k++) { await pickAns(true); await sleep(80); got.push(await p.evaluate(() => window.FRIEND.last)); await sleep(1300); }
+  await sleep(300); await settle(); const got = [];
+  for (let k = 0; k < 4; k++) { await pickAns(true); await sleep(80); got.push(await p.evaluate(() => window.FRIEND.last)); await sleep(300); await settle(); }
   ok('three in a row: a streak line', got[2] === 'שָׁלֹשׁ בְּרֶצֶף!', JSON.stringify(got));
   ok('lines are not repeated back to back', new Set(got).size === got.length, JSON.stringify(got));
-  // end of the step: one story line on the result card
+  // end of the step: one story line on the result card (answer the rest of the round first)
+  for (let k = 0; k < 12 && await p.evaluate(() => document.querySelector('#ov').hidden); k++) { await pickAns(true).catch(() => {}); await sleep(300); await settle(); }
   await p.waitForSelector('#ov:not([hidden]) .frstory', { timeout: 15000 }).catch(() => {});
   const st = await p.evaluate(() => { const e = document.querySelector('#ov:not([hidden]) .frstory'); return e && e.textContent; });
   ok('step done: a story line on the result card', !!st && NIK.test(st), String(st));
@@ -62,7 +66,8 @@ const NIK = /[ְ-ׇּׁׂ]/, HEB = /[א-ת]/;
   ok('home: no corner friend, no strip', await p.evaluate(() => { const f = document.querySelector('.frc'); return (!f || f.hidden) && !document.querySelector('#frPath'); }));
   // a reading question (try to read first): only the word is said, not the question
   s = await said(() => p.evaluate(() => window.TAL_step(2)), 900);
-  ok('"which picture": the word to read is not said', !s.some(x => x.includes(window.__w || '§')) && await p.evaluate(() => !window.FRIEND.word), JSON.stringify(s));
+  const wpW = await p.evaluate(() => { const e = document.querySelector('#sTal .tqc .bigw'); return e ? window.TAL.plainHe(e.textContent).trim() : '§'; });
+  ok('"which picture": the word to read is not said', !s.some(x => x.includes(wpW)) && await p.evaluate(() => !window.FRIEND.word), JSON.stringify({ wpW, s }));
   await p.evaluate(() => window.OREN.showMap()); await sleep(200);
   // --- math: the friend is there and reacts ---
   await p.evaluate(() => { const O = window.OREN; const lv = O.ALLLV.find(x => x.type !== 'learn' && x.type !== 'train'); O.save.story[lv.w.id + '-in'] = 1; O.startLevel(lv); });
@@ -71,7 +76,7 @@ const NIK = /[ְ-ׇּׁׂ]/, HEB = /[א-ת]/;
   const ansMath = async () => { const a = await p.evaluate(() => { const P = window.__oren4.play; if (P.choice) { P.choice.row.children[P.choice.ans].click(); return null; } return (P.boxes || []).filter(x => !x.done).map(x => String(x.ans)); });
     if (a) { for (const v of a) { await p.keyboard.type(v); } await p.keyboard.press('Enter'); } };
   s = await said(ansMath, 300); last = await p.evaluate(() => window.FRIEND.last);
-  ok('math right answer: the friend says a line', OKL.ok.concat(OKL.streak).includes(last) && s.some(x => x.includes(last)), JSON.stringify({ last, s }));
+  ok('math right answer: the friend says a line', OKL.ok.concat(OKL.streak).includes(last) && await has(s, last), JSON.stringify({ last, s }));
   ok('math: friend does not cover the answer pad', !await overlap());
   // --- the whole day done: one sentence, exactly two choices ---
   await p.evaluate(() => { const O = window.OREN, d = window.TAL.dailyEnsure(); d.done = d.t.map(() => 1); d.claimed = 1; O.persist(); O.showMap(); }); await sleep(300);

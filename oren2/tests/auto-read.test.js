@@ -24,9 +24,15 @@ const res = []; const ok = (n, c, i = '') => res.push((c ? 'PASS ' : 'FAIL ') + 
   ok('lesson sentence is read by itself', s.length >= 1, JSON.stringify(s));
   s = await said(() => p.evaluate(() => { const bs = [...document.querySelectorAll('#sLearn .lch .chb, #sLearn .btnrow .bigbtn')]; bs[0].click(); }));
   ok('lesson: what happens after a tap (hint or answer) is read by itself', s.length === 1 && s[0].length > 1, JSON.stringify(s));
-  // reading practice: a question Oren should try to read first is not read right away
-  s = await said(() => p.evaluate(() => { const a = window.TAL.ACT['read-sent'] || window.TAL.ACT['read-wp']; a.run(() => {}); }), 1200);
-  ok('reading practice question: not read automatically', s.length === 0 && await p.evaluate(() => !!window.__noAuto), JSON.stringify(s));
+  // reading practice: the instruction is read right away, the text Oren should read himself waits
+  s = await said(() => p.evaluate(() => { window.TAL.ACT['read-wp'].run(() => {}); }), 1200);
+  const rw = await p.evaluate(() => { const c = document.querySelector('#sTal .tqc'); const P = t => window.TAL.plainHe(t).replace(/🔊/g, '').trim();
+    return { w: P(c.querySelector('.bigw').textContent), q: P(c.querySelector('.qq').textContent) }; });
+  ok('reading practice: the instruction is read at once', s.some(x => x.includes(rw.q.split(' ')[0])), JSON.stringify({ s, rw }));
+  ok('reading practice: the word to read is not read at once', !s.some(x => x.includes(rw.w)), JSON.stringify({ s, rw }));
+  // the same instruction outside a reading activity (no reading target) is read whole
+  s = await said(() => p.evaluate(() => { window.TAL.ACT['think-pat'].run(() => {}); }), 1200);
+  ok('non-reading question: read at once', s.length >= 1, JSON.stringify(s));
   // a plain screen instruction is read; parent setting off stops it; parent screens never
   s = await said(() => p.evaluate(() => window.TAL.openHub()));
   ok('screen instruction is read by itself', s.length === 1, JSON.stringify(s));

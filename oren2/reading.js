@@ -54,8 +54,10 @@ let raf=0;const mo=new MutationObserver(()=>{if(raf)return;raf=requestAnimationF
 let Q=null;
 function heard(el){if(Q&&Q.card&&Q.card.contains(el))Q.heard=true;}
 function clearQ(){if(Q){Q.timers.forEach(clearTimeout);Q.timers=[];}}
-T.rdQ=(q,card)=>{clearQ();decorateAll();const target=card.querySelector('.qq')||card.querySelector('.sent');
-  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};window.__noAuto=!!Q.target;if(!Q.target)return;
+/* only in reading activities, and only the text to read waits (a sentence / a word); the instruction (.qq) is said right away */
+T.rdQ=(q,card,o)=>{clearQ();decorateAll();const target=o&&o.read&&!q.play?card.querySelector('.sent')||card.querySelector('.bigw'):null;
+  Q={q,card,heard:false,answered:false,timers:[],target};if(!Q.target)return;
+  const tt=T.plainHe(target.textContent.replace(/🔊/g,'')).replace(/\s+/g,' ').trim();if(tt&&O.sayNow){const ns=T.plainHe(O.sayNow).replace(/\s+/g,' ').split(tt).join(' ').trim();O.sayNow=/[א-ת]/.test(ns)?ns:'';}
   const lv=level(),btn=Q.target.querySelector('.rdb');if(lv===3)return;
   if(lv===2&&btn)btn.classList.add('pulse');
   Q.target.after(h('div','rdcue','נַסֵּה לִקְרֹא 👀'));

@@ -1748,7 +1748,7 @@ function sceneAdvance(){const p=play;if(p.done>=p.N)return;const k=p.done++;
   if(p.mode==='build'){const pl=$('#pl'+k);if(pl){pl.classList.add('on');sfx.plank();}if(p.done>=p.N){const w=$('#walker');if(w)setTimeout(()=>{w.style.right='calc(100% - 40px)';},300);}}}
 function onCorrect(){const p=play,q=p.qs[p.i];p.lock=true;p.streak++;
   sfx.ok(p.streak);burst(...center($('#qa')),22);
-  praise(p.streak>=5&&p.streak%5===0?`${p.streak} בִּרְצִיפוּת!`:pick(PRAISE));
+  praise(p.streak>=5&&p.streak%5===0?`${p.streak} בִּרְצִיפוּת!`:pick(PRAISE));if(window.FRIEND&&p.mode!=='speed')window.FRIEND.onCorrect({tries:p.tries});
   if(q.f&&p.tries===0&&p.hint===0&&!p.revealed)markFact(q.f[0],q.f[1],q.op===':'?2:1);
   const c=$('#pet');if(c){c.classList.remove('hop','tilt');void c.offsetWidth;c.classList.add('hop');}
   if(p.mode==='boss'){p.hp--;const g=$('#giant');g.classList.remove('hit','laugh');void g.offsetWidth;g.classList.add('hit');sfx.hit();const pl=$('#sPlay .play');if(pl){pl.classList.remove('quake');void pl.offsetWidth;pl.classList.add('quake');}const hp=$('#hp').children;for(let k=0;k<hp.length;k++)hp[k].classList.toggle('gone',k>=p.hp);burst(...center(g),16,1,['#8d939a','#6b7178','#6aa84f']);}
@@ -1759,7 +1759,7 @@ function onCorrect(){const p=play,q=p.qs[p.i];p.lock=true;p.streak++;
   if(p.mode==='speed'){p.score++;speedHud();p.i++;setTimeout(()=>{if(play!==p)return;nextSpeedQ();},D(450));return;}
   p.i++;hudPlay();
   setTimeout(()=>{if(play!==p)return;if(p.i>=p.qs.length)finishLevel();else showQ();},D(q.k==='word'?1300:1100));}
-function onWrong(el){const p=play;p.tries++;p.errors++;p.streak=0;hudPlay();sfx.no();
+function onWrong(el){const p=play;p.tries++;p.errors++;p.streak=0;hudPlay();sfx.no();if(window.FRIEND&&p.mode!=='speed')window.FRIEND.onWrong({final:p.tries>=3});
   if(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
   const c=$('#pet');if(c){c.classList.remove('hop','tilt');void c.offsetWidth;c.classList.add('tilt');}
   const g=$('#giant');if(g){g.classList.remove('hit','laugh');void g.offsetWidth;g.classList.add('laugh');}}
@@ -1777,14 +1777,14 @@ function choose(i,btn){const p=play;if(!p||p.lock||!p.choice||btn.disabled)retur
     return onCorrect();}
   btn.classList.add('bad');btn.disabled=true;onWrong(btn);
   if(p.mode==='speed'||p.tries>=3){return revealAndNext(()=>{const b=ch.row.children[ch.ans];if(b)b.classList.add(ch.bub?'pop':'show');setBubble('הַתְּשׁוּבָה: '+ch.opts[ch.ans]);});}
-  setBubble('כִּמְעַט! נַסֵּה שׁוּב');if(p.hint<p.tries)showHint(false);}
+  if(!window.FRIEND)setBubble('כִּמְעַט! נַסֵּה שׁוּב');if(p.hint<p.tries)showHint(false);}
 function submit(){const p=play;let allOk=true;
   p.boxes.forEach(b=>{if(b.done)return;if(parseInt(b.val,10)===b.ans){b.done=true;b.el.className='ans ok';b.el.textContent=b.ans;}else allOk=false;});
   if(allOk)return onCorrect();
   p.boxes.forEach(b=>{if(!b.done)b.el.className='ans bad';});onWrong($('#qa').querySelector('.eqcard,.wans'));
   if(p.mode==='speed'||p.tries>=3){return revealAndNext(()=>{p.boxes.forEach(b=>{if(!b.done){b.el.className='ans show';b.el.textContent=b.ans;}});});}
   setTimeout(()=>{if(play!==p)return;p.boxes.forEach(b=>{if(!b.done)b.val='';});p.bi=p.boxes.findIndex(b=>!b.done);renderBoxes();},D(600));
-  setBubble('כִּמְעַט! נַסֵּה שׁוּב');if(p.hint<p.tries)showHint(false);}
+  if(!window.FRIEND)setBubble('כִּמְעַט! נַסֵּה שׁוּב');if(p.hint<p.tries)showHint(false);}
 function showHintForce(level){const p=play,q=p.qs[p.i];const hb=$('#hint');hb.hidden=false;hb.innerHTML=hintHTML(q,level);p.hint=level;$('#hintBtn').hidden=true;}
 function colType(d){const p=play,q=p.qs[p.i],st=p.col;if(st.c>=st.R.length)return;const cb=$('#cb'+st.c);
   if(d===st.R[st.c]){sfx.key();colAdvance(q,st,d,false);if(st.c>=st.R.length){renderCol(q,st);if(!st.anyWrong)p.tries=0;return onCorrect();}colPrep(q,st);if(!q.g)$('#hint').hidden=true;return;}
@@ -2664,6 +2664,49 @@ body.hlocked #ov{position:fixed;z-index:100}
 @media (max-width:760px){.hlock .card{padding:16px 14px}.hlock h2{font-size:24px}.hlock .sub{font-size:18px}.hfr .hav svg{width:80px;height:80px}.hfr .hk{font-size:50px}
   .hcards{gap:10px}.hcards .dcard{width:calc((100vw - 90px)/2);min-height:128px}}
 @media (prefers-reduced-motion:reduce){.hjump .hav svg,.hstretch .hav svg{animation:none}}
+
+/* ===== the friend on activity screens + the day's path strip ===== */
+.frc{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start}
+.frc{direction:ltr}.frc[hidden]{display:none}
+.frbadge{display:inline-block;margin:6px auto 0;background:#4fae4f;color:#fff;font-weight:800;font-size:18px;border-radius:999px;padding:3px 14px;border:2px solid #2f7a2f}
+.frdone{gap:14px;flex-wrap:wrap;justify-content:center}
+body.pplay .frc{bottom:62px}
+.frc .frs{display:block;width:60px;height:60px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.18));animation:frbob 2.4s ease-in-out infinite}
+.frc .frs svg{width:100%;height:100%;display:block}
+.frc.joy .frs{animation:frhop .55s ease-out 2}
+.frc.sad .frs{animation:frtilt .9s ease-in-out 1}
+.frb{position:relative;margin-bottom:8px;max-width:min(240px,60vw);background:#fffdf5;color:#2b2b3a;border:3px solid #2b2b3a;border-radius:14px;padding:6px 12px;font-size:19px;font-weight:700;line-height:1.35;box-shadow:0 3px 0 rgba(0,0,0,.2);direction:rtl}
+.frb::after{content:'';position:absolute;left:20px;bottom:-11px;border:8px solid transparent;border-top-color:#2b2b3a;border-bottom:0}
+.frb[hidden]{display:none}
+.frb.pop{animation:frpop .25s ease-out}
+body.fron #screens{padding-bottom:84px}
+.frpic{cursor:pointer}
+@keyframes frbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes frhop{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px) scale(1.06)}}
+@keyframes frtilt{0%,100%{transform:rotate(0)}30%{transform:rotate(-12deg) translateY(3px)}70%{transform:rotate(-8deg) translateY(3px)}}
+@keyframes frpop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+/* the path strip in the top bar */
+.frpath{display:flex;align-items:center;gap:4px;background:rgba(255,253,245,.92);border:2px solid #2b2b3a;border-radius:999px;padding:2px 8px;flex:none}
+.frpath .fpq,.frpath .fpg{font-size:16px;line-height:1}
+.frpath .fpg{opacity:.45}.frpath .fpg.won{opacity:1}
+.frpath i{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #8d939a;box-sizing:border-box}
+.frpath i.on{background:#4fae4f;border-color:#2f7a2f}
+.frpath i.cur{background:#ffd166;border-color:#c98a00;animation:frcur 1.2s ease-in-out infinite}
+@keyframes frcur{50%{transform:scale(1.3)}}
+/* one story line on the result card */
+.frstory{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px auto 4px;font-size:19px;font-weight:700;background:#fff6d6;border-radius:12px;padding:6px 12px}
+.frstory .frq{font-size:24px}
+@media (max-width:520px){
+  .frc .frs{width:46px;height:46px}
+  .frb{font-size:17px;padding:5px 10px}
+  body.fron #screens{padding-bottom:66px}
+  .frpath{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-2px;padding:1px 6px;gap:3px;z-index:4}
+  body.frpon #screens{padding-top:16px}
+  .frpath i{width:8px;height:8px}
+  .frpath .fpq,.frpath .fpg{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){.frc .frs,.frpath i.cur{animation:none}}
+#sHome .frdone .bigbtn.huge{animation:none}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */
@@ -2742,7 +2785,7 @@ function result(o){const ov=$('#ov');ov.hidden=false;
   ov.innerHTML=`<div class="card"><h2>${o.title||'כָּל הַכָּבוֹד!'}</h2>${o.sub?`<div class="sub">${o.sub}</div>`:''}${o.stars!=null?starsHTML(o.stars):''}${o.gems?`<div class="gain">+${o.gems} ${SPR.gem}</div>`:''}${o.extra||''}</div>`;
   const row=h('div','btnrow');if(o.again){const a=h('button','bigbtn plain sm',ICON.redo+'<span>שׁוּב</span>');a.onclick=()=>{ov.hidden=true;o.again();};row.appendChild(a);}
   const b=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');b.onclick=()=>{ov.hidden=true;o.back();};row.appendChild(b);ov.firstChild.appendChild(row);
-  O.duck(true);setTimeout(()=>O.duck(false),D(2000));sfx.win();if(o.stars!=null)for(let k=0;k<o.stars;k++)setTimeout(()=>sfx.star(k),D(300+k*350));O.rain();setTimeout(()=>b.focus(),300);}
+  O.duck(true);setTimeout(()=>O.duck(false),D(2000));sfx.win();if(window.FRIEND)setTimeout(()=>window.FRIEND.stepCheck(),0);if(o.stars!=null)for(let k=0;k<o.stars;k++)setTimeout(()=>sfx.star(k),D(300+k*350));O.rain();setTimeout(()=>b.focus(),300);}
 function finishAct(id,errors,n,gems,back,again,title){const st=errors<=Math.max(1,n*.1)?3:errors<=Math.max(3,n*.3)?2:1;const bonus=5+st*2;O.addGems(bonus);record(id,st);result({title,stars:st,gems:gems+bonus,back,again});}
 /* generic multiple-choice quiz: q = {pr, opts, ans, cls, ltr, play, auto, reveal(el), explain, key} */
 function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400){const q=o.gen(qs.length);const k=q.key||(q.pr+'|'+q.ans);if(seen.has(k))continue;seen.add(k);qs.push(q);}
@@ -2750,13 +2793,13 @@ function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400
   const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq');s.appendChild(wrap);
   const render=()=>{const q=qs[i];tries=0;lock=false;hudT(o.title,progressBar(i,qs.length));const tOps=q.opts.map(x=>plainHe(String(x))).filter(x=>/[א-ת]/.test(x));O.sayNow=(q.say||plainHe(q.pr))+(!q.say&&tOps.length===q.opts.length?'. '+tOps.join(', '):'');
     wrap.innerHTML='';const card=h('div','prq tqc',q.pr);if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמַע'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
-    wrap.appendChild(card);if(window.TAL.rdQ)window.TAL.rdQ(q,card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+    wrap.appendChild(card);window.__noAuto=0;if(window.FRIEND)window.FRIEND.question(q,card);if(window.TAL.rdQ)window.TAL.rdQ(q,card,{read:/^(read-|story-|rb2-)/.test(o.id)});const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');if(q.auto&&q.play)setTimeout(()=>{if(qs[i]===q)q.play();},D(350));};
   const resolve=(q)=>{const ex=wrap.querySelector('.hintbox');if(q.explain){ex.hidden=false;ex.innerHTML=`<div class="cap">${q.explain}</div>`;}if(q.reveal)q.reveal(wrap.querySelector('.tqc'));};
   function pickA(k,b){if(lock||b.disabled)return;const q=qs[i];
-    if(k===q.ans){if(window.TAL.rdA)window.TAL.rdA(q,tries,b);lock=true;b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
-    tries++;err++;b.classList.add('bad');b.disabled=true;sfx.no();
-    if(tries>=2||q.opts.length<=2){lock=true;const c=wrap.querySelector('.chs').children[q.ans];c.classList.add('show');resolve(q);setTimeout(next,D(2600));}}
+    if(k===q.ans){if(window.TAL.rdA)window.TAL.rdA(q,tries,b);lock=true;if(window.FRIEND)window.FRIEND.onCorrect({tries});b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
+    tries++;err++;b.classList.add('bad');b.disabled=true;sfx.no();const fin=tries>=2||q.opts.length<=2;if(window.FRIEND)window.FRIEND.onWrong({final:fin});
+    if(fin){lock=true;const c=wrap.querySelector('.chs').children[q.ans];c.classList.add('show');resolve(q);setTimeout(next,D(2600));}}
   function next(){if(!wrap.isConnected)return;i++;if(i>=qs.length){KEY=null;finishAct(o.id,err,qs.length,gems,o.back,()=>quiz(o),o.doneTitle);}else render();}
   KEY=e=>{if(/^[1-9]$/.test(e.key)){const b=wrap.querySelector('.chs')&&wrap.querySelector('.chs').children[+e.key-1];if(b)b.click();}};
   window.__quiz={get ans(){return qs[i]&&qs[i].ans;},get i(){return i;},get wrap(){return wrap;}};
@@ -2866,7 +2909,7 @@ function readAloud(back){T.needPerm&&T.needPerm('dictation','כְּדֵי לִק
         d.start().catch(e=>{const c=String(e&&(e.code||e.reason||e.message)||e);$('#heard').textContent='הַמִּיקְרוֹפוֹן לֹא אֻשַּׁר';if(/not_granted|dismissed/.test(c)&&T.callParents)T.callParents('הַמִּיקְרוֹפוֹן צָרִיךְ אִשּׁוּר שֶׁל הוֹרֶה.');});$('#heard').textContent='מַקְשִׁיב...';setTimeout(()=>{try{d.stop();}catch(e){}},3500);}catch(e){$('#heard').textContent='הַמִּיקְרוֹפוֹן לֹא זָמִין כָּאן';}};};run();}
 building({id:'read',name:'הַסִּפְרִיָּה',color:'#c0392b',bg:'city',icon:()=>X.bookS,blurb:'קוֹרְאִים מִלִּים וּמִשְׁפָּטִים עִם נִקּוּד.',acts:[
   {id:'read-first',name:'אוֹת רִאשׁוֹנָה',icon:()=>X.apple,run:back=>quiz({id:'read-first',title:'אוֹת רִאשׁוֹנָה',bg:'city',back,n:8,gen:()=>{const w=pick(WORDS);const f=first(w);const opts=shuffle([f,...shuffle([...new Set(WORDS.map(first))].filter(x=>x!==f)).slice(0,2)]);
-     return {pr:`${pic(w)}<div class="qq">בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?</div>`,opts,ans:opts.indexOf(f),cls:'tx big2',say:'באיזו אות מתחילה המילה '+T.plainHe(w.w),explain:`<span class="bigw">${w.w}</span>`,key:w.w};}})},
+     return {pr:`${pic(w)}<div class="qq">בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?</div>`,opts,ans:opts.indexOf(f),cls:'tx big2',say:'באיזו אות מתחילה המילה?',word:w.w,explain:`<span class="bigw">${w.w}</span>`,key:w.w};}})},
   {id:'read-pw',name:'מִלָּה וּתְמוּנָה',icon:()=>X.cat||SPR.cat,run:back=>quiz({id:'read-pw',title:'אֵיזוֹ מִלָּה?',bg:'city',back,n:8,gen:()=>{const w=pick(WORDS);const opts=shuffle([w,...others(w,2)]);return {pr:`${pic(w)}<div class="qq">אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?</div>`,opts:opts.map(x=>x.w),ans:opts.indexOf(w),cls:'tx',key:w.w};}})},
   {id:'read-wp',name:'תְּמוּנָה לַמִּלָּה',icon:()=>X.sun,run:back=>quiz({id:'read-wp',title:'אֵיזוֹ תְּמוּנָה?',bg:'city',back,n:8,gen:()=>{const w=pick(WORDS);const opts=shuffle([w,...others(w,3)]);return {pr:`<div class="bigw">${w.w}</div><div class="qq">אֵיזוֹ תְּמוּנָה מַתְאִימָה לַמִּלָּה?</div>`,opts:opts.map(pic),ans:opts.indexOf(w),cls:'picb',key:w.w};}})},
   {id:'read-build',name:'בּוֹנִים מִלָּה',icon:()=>X.puzzle,run:buildWord},
@@ -3916,13 +3959,13 @@ function stepsOf(dm,n,used){if(dm==='math')return Array(n).fill('math');const bi
 const age=id=>{const v=(T.S().dom||{})[id];return v==null?15:Math.min(14,Math.max(0,dayNum()-v))+1;};
 function wpick(arr,n){const a=arr.slice(),out=[];while(out.length<n&&a.length){let r=Math.random()*a.reduce((x,y)=>x+age(y.id),0),k=0;for(;k<a.length-1;k++){r-=age(a[k].id);if(r<=0)break;}out.push(a.splice(k,1)[0]);}return out;}
 /* 3 steps in the chosen domain + 1 surprise from another one ("together" = 1 together step + 2 surprises) */
-function choose(dm,first){const d=T.dailyEnsure(),S0=T.S();let st=dm==='tog'?[togStep(true)]:first?[first]:[];
-  if(dm!=='tog')st=st.concat(stepsOf(dm,3-st.length,new Set([...d.t,...st])));
-  wpick(doms().filter(x=>x.id!==gid(dm)),dm==='tog'?2:1).forEach(o=>{st=st.concat(stepsOf(o.id,1,new Set([...d.t,...st])));});
+function choose(dm,first){const d=T.dailyEnsure(),S0=T.S();const bonus=(d.bs|0)>0;let st=dm==='tog'?[togStep(true)]:first?[first]:[];
+  if(dm!=='tog')st=st.concat(stepsOf(dm,(bonus?2:3)-st.length,new Set([...d.t,...st])));
+  wpick(doms().filter(x=>x.id!==gid(dm)),bonus?(dm==='tog'?1:0):(dm==='tog'?2:1)).forEach(o=>{st=st.concat(stepsOf(o.id,1,new Set([...d.t,...st])));});
   if(!st.length)st=['math'];
   /* a domain that rested yesterday: the path starts with it, where Oren stopped (once a day) */
-  if(!d.rv&&window.HEALTH){d.rv=1;const rv=window.HEALTH.review().find(x=>!d.t.includes(x)&&!st.includes(x));if(rv)st=[rv].concat(st);}
-  st=st.concat(d.cr||[]);d.cr=[];st.forEach(x=>{d.t.push(x);d.done.push(0);});d.ch=dm;
+  if(!bonus&&!d.rv&&window.HEALTH){d.rv=1;const rv=window.HEALTH.review().find(x=>!d.t.includes(x)&&!st.includes(x));if(rv)st=[rv].concat(st);}
+  if(!bonus){st=st.concat(d.cr||[]);d.cr=[];}st.forEach(x=>{d.t.push(x);d.done.push(0);});d.ch=dm;
   if(dm!=='tog'){S0.dom=S0.dom||{};S0.dom[gid(dm)]=dayNum();}O.persist();sfx.ok(2);home();}
 function lastStep(){const l=T.S().last;if(!l)return null;if(l.id==='math')return nextLevel()?'math':null;return T.dailyPool().includes(l.id)?l.id:null;}
 /* "something else": every enabled world and building, and together time */
@@ -3941,7 +3984,7 @@ function special(i,id){const [kind,k]=id.split(':');const isT=kind==='tog';const
   const box=h('div','tspec'+(isT?' tog':''),`<div class="tse bob">${a.e}</div><h1>${isT?a.n:'מְשִׂימָה בַּבַּיִת'}</h1><div class="lsent">${kid}</div>${isT?`<div class="tpar">להורה: ${par}</div>`:''}`);
   const row=h('div','btnrow');const b=h('button','bigbtn huge',`<span>${isT?'סִיַּמְנוּ':'סִיַּמְתִּי'} ✓</span>`);b.onclick=()=>{fin();sfx.win();O.rain();O.showMap();};row.appendChild(b);box.appendChild(row);s.appendChild(box);
   O.sayNow=T.spk(kid);setTimeout(()=>{if(box.isConnected)O.say(T.spk(kid));},D(400));}
-function runStep(i){const d=T.dailyEnsure();const id=d.t[i];if(/:/.test(id)){special(i,id);return;}
+function runStep(i){const d=T.dailyEnsure();const id=d.t[i];if(window.FRIEND)window.FRIEND.stepStart(i);if(/:/.test(id)){special(i,id);return;}
   if(id==='math'){const lv=nextLevel();if(!lv){O.showJourney();return;}
     if(!O.save.story[lv.w.id+'-in'])O.showWorld(lv.w);else O.startLevel(lv);return;}
   const a=ACT[id];if(a)a.run(O.showMap);}
@@ -3980,10 +4023,11 @@ function home(){const S0=T.S();
   O.setScreen('sHome','meadow',null);O.hud(`<div class="starcount">${SPR.star}<span>${O.totalStars()}</span></div>`);const s=$('#sHome');s.innerHTML='';
   const pr=S0.prof||{};const st=S0.set;const d=st.noDaily?null:T.dailyEnsure();const q=quest();const nx=d?d.done.findIndex(x=>!x):-1;const pickDay=d&&nx<0&&!d.ch;
   /* Oren, his friend, and one sentence */
-  const say=!d?`${T.hello()}, אוֹרֶן! בְּמָה נְשַׂחֵק?`:pickDay?'שָׁלוֹם אוֹרֶן! מָה בָּא לְךָ הַיּוֹם?':nx>=0?`${q.e} ${q.a}`:d.claimed?'כָּל הַכָּבוֹד! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ אֶת הַשְּׁבִיל! בּוֹא נִרְאֶה אֵיךְ נִגְמַר הַסִּפּוּר.';
+  const dayDone=!!(d&&nx<0&&d.claimed&&d.ch&&window.FRIEND);
+  const say=!d?`${T.hello()}, אוֹרֶן! בְּמָה נְשַׂחֵק?`:dayDone?window.FRIEND.homeSay(d):pickDay?'שָׁלוֹם אוֹרֶן! מָה בָּא לְךָ הַיּוֹם?':nx>=0?`${q.e} ${q.a}`:d.claimed?'כָּל הַכָּבוֹד! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ אֶת הַשְּׁבִיל! בּוֹא נִרְאֶה אֵיךְ נִגְמַר הַסִּפּוּר.';
   const tl='';
   s.appendChild(h('div','hstage',`<div class="hbub2" style="--fc:${pr.col||'#4fae4f'}">${say}${tl}</div><div class="hpair" role="button" aria-label="מָה אֶפְשָׁר לַעֲשׂוֹת כָּאן?"><span class="hav bob">${O.AV()}</span><span class="hpet2 bob" style="animation-delay:-.7s">${T.friend()}</span></div>`));
-  s.querySelector('.hpair').onclick=()=>{sfx.pop(2);tour();};
+  s.querySelector('.hpair').onclick=()=>{sfx.pop(2);if(dayDone&&d.free)window.FRIEND.bonus();else tour();};
   O.sayNow=T.spk(say);
   if(pickDay){/* "what do you feel like today?": 3 big cards (one is "continue" when there is a last activity) + something else */
     const all=doms(),ln=lastStep(),lg=ln&&domOf(ln);if(!d.o||all.some(x=>!d.o.includes(x.id))){d.o=wpick(all,all.length).map(x=>x.id);O.persist();}
@@ -3993,9 +4037,11 @@ function home(){const S0=T.S();
     list.forEach(x=>card(`<span>${x.e}</span>`,x.n,x.c,()=>choose(x.id)));
     const more=h('button','dmore','🔍 <span>מַשֶּׁהוּ אַחֵר</span>');more.onclick=()=>{sfx.pop(2);other();};
     const wrap=h('div','dpick');wrap.append(row,more);s.appendChild(wrap);}
+  /* the whole day is done: a done badge and two big choices (another small path / free time); free time = the doors */
+  else if(dayDone){if(d.free)s.appendChild(doorsEl());else{s.appendChild(window.FRIEND.badgeEl());s.appendChild(window.FRIEND.doneEl());}}
   /* the path: circles only, and one big button */
-  else if(d&&d.t.length){const card=h('div','today');const path=h('div','tpath');path.style.setProperty('--n',d.t.length+1);
-    d.t.forEach((id,i)=>{const inf=stepInfo(id);if(i)path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
+  else if(d&&d.t.length){const card=h('div','today');const path=h('div','tpath');path.style.setProperty('--n',d.t.length-(d.bs|0)+1);
+    d.t.forEach((id,i)=>{if(i<(d.bs|0))return;const inf=stepInfo(id);if(i>(d.bs|0))path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
       const b=h('div','tstep2'+(d.done[i]?' done':i===nx?' cur':'')+(/^tog:/.test(id)?' tog':''),`<span class="ti2">${d.done[i]?`<span class="qk">${q.k}</span>`:inf.ic}</span>`);b.style.setProperty('--sc',inf.c);b.title=T.plainHe(inf.n);b.setAttribute('role','img');b.setAttribute('aria-label',T.plainHe(inf.n));path.appendChild(b);});
     path.appendChild(h('i','tlink'+(nx<0?' on':'')));path.appendChild(h('span','tgoal'+(nx<0?' won':''),`<span>${nx<0?'🏆':q.e}</span>`));
     card.appendChild(path);const row=h('div','btnrow');
@@ -4273,8 +4319,10 @@ let raf=0;const mo=new MutationObserver(()=>{if(raf)return;raf=requestAnimationF
 let Q=null;
 function heard(el){if(Q&&Q.card&&Q.card.contains(el))Q.heard=true;}
 function clearQ(){if(Q){Q.timers.forEach(clearTimeout);Q.timers=[];}}
-T.rdQ=(q,card)=>{clearQ();decorateAll();const target=card.querySelector('.qq')||card.querySelector('.sent');
-  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};window.__noAuto=!!Q.target;if(!Q.target)return;
+/* only in reading activities, and only the text to read waits (a sentence / a word); the instruction (.qq) is said right away */
+T.rdQ=(q,card,o)=>{clearQ();decorateAll();const target=o&&o.read&&!q.play?card.querySelector('.sent')||card.querySelector('.bigw'):null;
+  Q={q,card,heard:false,answered:false,timers:[],target};if(!Q.target)return;
+  const tt=T.plainHe(target.textContent.replace(/🔊/g,'')).replace(/\s+/g,' ').trim();if(tt&&O.sayNow){const ns=T.plainHe(O.sayNow).replace(/\s+/g,' ').split(tt).join(' ').trim();O.sayNow=/[א-ת]/.test(ns)?ns:'';}
   const lv=level(),btn=Q.target.querySelector('.rdb');if(lv===3)return;
   if(lv===2&&btn)btn.classList.add('pulse');
   Q.target.after(h('div','rdcue','נַסֵּה לִקְרֹא 👀'));
@@ -4491,6 +4539,129 @@ H.merge=(dst,src)=>{if(!src||typeof src!=='object')return dst;dst=dst||{};
     const seen=new Map();for(const b of [...(c.breaks||[]),...(v.breaks||[])]){if(!b||!b.k)continue;const key=b.k+b.t;const e=seen.get(key);if(e){if(b.ok)e.ok=1;}else seen.set(key,Object.assign({},b));}
     c.breaks=[...seen.values()].sort((a,b)=>a.t<b.t?-1:1);}
   const ks=Object.keys(dst).sort();ks.slice(0,Math.max(0,ks.length-60)).forEach(k=>delete dst[k]);return dst;};
+})();
+
+/* ===== THE FRIEND ON ACTIVITY SCREENS + THE DAY'S PATH STRIP (injected into index.html by build) =====
+   One small friend in the corner of activity screens, with a speech bubble:
+     FRIEND.onCorrect(ctx)  a short warm line (varied; streaks; effort after a fixed mistake), a little hop
+     FRIEND.onWrong(ctx)    a gentle line, a sad tilt; ctx.final = the answer is shown now
+     FRIEND.question(q,card) a picture that stands for a word: the word is said (q.word), tapping the picture says it again
+     FRIEND.mount()/unmount() show / hide the friend (screens change → hidden; activities mount it)
+   While Oren is inside a step of the day's path:
+     FRIEND.stepStart(i)    the friend ties the step to the day's story (said before the screen's instruction)
+     FRIEND.stepCheck()     after a step is done: one story line on the result card
+     PATHBAR.render()       a thin strip in the top bar: today's quest + one dot per step
+   FRIEND.speakList() lists every line the friend may say (for the voice pregen). */
+(()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$}=O;const D=O.D||(x=>x);
+
+/* ---------- lines (kid text, full nikud) ---------- */
+const OK=['יוֹפִי!','נָכוֹן מְאוֹד!','וָאוּ, אַתָּה אַלּוּף!','כָּל הַכָּבוֹד!','מְצֻיָּן!','בְּדִיּוּק!','יֵשׁ! צָדַקְתָּ!','נָכוֹן!','הִצְלַחְתָּ!',
+ 'עֲבוֹדָה טוֹבָה!','אַתָּה מִתְקַדֵּם יָפֶה!','חָשַׁבְתָּ טוֹב!','הִסְתַּכַּלְתָּ טוֹב!','מַמָּשׁ טוֹב!','כָּכָה עוֹשִׂים!','סוּפֶּר!','תּוֹתָח!',
+ 'אֲנִי גֵּאֶה בְּךָ!','בִּדַּקְתָּ וְצָדַקְתָּ!','מְעֻלֶּה!','בְּרָבוֹ!','יָפֶה מְאוֹד!','עוֹד אֶחָד נָכוֹן!','קָלַעְתָּ!','נֶהְדָּר!','אַתָּה עוֹבֵד יָפֶה!','עָשִׂיתָ אֶת זֶה!'];
+const STREAK={3:'שָׁלֹשׁ בְּרֶצֶף!',5:'חָמֵשׁ בְּרֶצֶף! אַתָּה בִּתְנוּפָה!',8:'שְׁמוֹנֶה בְּרֶצֶף! אֵין עָלֶיךָ!'};
+const STREAK_MORE='עוֹד רֶצֶף אָרֹךְ! כָּל הַכָּבוֹד!';                 /* 10, 15, 20... */
+const EFFORT=['רָאִיתָ? נִסִּיתָ שׁוּב וְהִצְלַחְתָּ!','לֹא וִתַּרְתָּ, וְהִצְלַחְתָּ!','חָשַׁבְתָּ שׁוּב וּמָצָאתָ!','כָּכָה לוֹמְדִים: מְנַסִּים שׁוּב!','טָעִיתָ, תִּקַּנְתָּ וְהִצְלַחְתָּ!'];
+const WRONG=['כִּמְעַט! נַסֵּה שׁוּב.','לֹא נוֹרָא, נַסֵּה עוֹד פַּעַם.','הִסְתַּכֵּל שׁוּב, אַתָּה יָכוֹל!','זֶה בְּסֵדֶר לִטְעוֹת. נַסֵּה שׁוּב!','עוֹד נִסָּיוֹן אֶחָד!'];
+const SHOWN=['זֶה בְּסֵדֶר! עַכְשָׁו אַתָּה יוֹדֵעַ.','לֹא נוֹרָא, נִלְמַד אֶת זֶה יַחַד.','גַּם מִטָּעֻיּוֹת לוֹמְדִים!'];
+/* the day's story: what each step brings (by the quest's emoji, see QUESTS in talents.js) */
+const STORY={'🦸':['בּוֹא נַחְזִיר עוֹד גָּבִישׁ לָעִיר!','עוֹד גָּבִישׁ חָזַר לָעִיר!'],'🧱':['בּוֹא נוֹסִיף עוֹד חֵלֶק לַגֶּשֶׁר!','הַגֶּשֶׁר גָּדַל בְּעוֹד חֵלֶק!'],
+ '⚽':['בּוֹא נַבְקִיעַ עוֹד גּוֹל!','גּוֹל! הַקְּבוּצָה שֶׁלְּךָ מוֹבִילָה!'],'🌊':['בּוֹא נִתְקָרֵב עוֹד קְצָת אֶל הַדָּג!','הִתְקָרַבְנוּ אֶל הַדָּג הַקָּטָן!'],
+ '🎵':['בּוֹא נַחְזִיר עוֹד תָּו לַשִּׁיר!','עוֹד תָּו חָזַר לַשִּׁיר!'],'🏀':['בּוֹא נִקְלַע עוֹד סַל!','סַל! עוֹד שְׁתֵּי נְקֻדּוֹת!'],
+ '🗝️':['בּוֹא נִפְתַּח עוֹד מַנְעוּל!','עוֹד מַנְעוּל נִפְתַּח!'],'🚀':['בּוֹא נָבִיא עוֹד כּוֹכָב לַחֲלָלִית!','הַחֲלָלִית קִבְּלָה עוֹד כּוֹכָב!']};
+const STORY0=['בּוֹא נִתְקַדֵּם בַּסִּפּוּר!','הִתְקַדַּמְנוּ בַּסִּפּוּר!'];
+const FIRST='מַתְחִילִים אֶת הַמַּסָּע שֶׁל הַיּוֹם!',LAST='עוֹד צַעַד אֶחָד וְנַגִּיעַ לַסּוֹף!',ALL='סִיַּמְנוּ אֶת כָּל הַשְּׁבִיל!';
+
+/* ---------- picking lines: a shuffled bag, never the same line twice close together ---------- */
+const bags={},recent=[];
+function draw(list){const k=list[0];let b=bags[k];if(!b||!b.length){b=bags[k]=O.shuffle(list.slice());if(b.length>3&&recent.includes(b[b.length-1]))b.unshift(b.pop());}
+  let j=b.length-1;while(j>0&&recent.includes(b[j]))j--;const t=b.splice(j,1)[0];recent.push(t);if(recent.length>10)recent.shift();return t;}
+
+/* ---------- the friend in the corner ---------- */
+const sprite=()=>T.friend?T.friend():O.PET().s();
+let el=null,bub=null,bubT=0,streak=0,missed=false,last='';
+const FR={get last(){return last;},log:[]};
+function ensure(){if(el&&el.isConnected)return el;el=h('div','frc','<div class="frb" hidden></div><span class="frs"></span>');el.setAttribute('aria-hidden','true');
+  document.body.appendChild(el);bub=el.querySelector('.frb');return el;}
+const petOnScreen=()=>{const p=$('#sPlay #pet');return !!(p&&!$('#sPlay').hidden&&p.offsetParent);};
+FR.mount=()=>{if(petOnScreen())return FR.unmount();ensure();const s=el.querySelector('.frs');const sp=sprite();if(s._sp!==sp){s.innerHTML=sp;s._sp=sp;}
+  el.hidden=false;document.body.classList.add('fron');};
+FR.unmount=()=>{if(el){el.hidden=true;el.classList.remove('joy','sad');if(bub)bub.hidden=true;}document.body.classList.remove('fron');};
+FR.shown=()=>!!(el&&!el.hidden&&el.isConnected);
+function anim(c){if(!el)return;el.classList.remove('joy','sad');void el.offsetWidth;el.classList.add(c);}
+/* show a line in the bubble (and on the math screen's own bubble when the friend there talks) */
+function bubble(t,ms){if(petOnScreen()){const b=$('#bText');if(b)b.innerHTML=t;return;}if(!FR.shown())return;
+  bub.innerHTML=t;bub.hidden=false;bub.classList.remove('pop');void bub.offsetWidth;bub.classList.add('pop');clearTimeout(bubT);bubT=setTimeout(()=>{if(bub)bub.hidden=true;},D(ms||2200));}
+const onAct=()=>['sTal','sPlay'].some(id=>{const e=$('#'+id);return e&&!e.hidden;});
+function talk(t,o){o=o||{};last=t;FR.log.push(t);if(FR.log.length>50)FR.log.shift();if(!FR.shown()&&onAct())FR.mount();if(!o.nobub)bubble(t,o.ms);if(!o.quiet)O.say(T.spk(t));return t;}
+
+/* ---------- reactions ---------- */
+/* ctx: {tries} = wrong tries on this question before the right answer; {quiet} = bubble only (something else is about to speak);
+   {nobub} = no bubble (the screen shows the line itself). Returns the line. */
+FR.onCorrect=ctx=>{ctx=ctx||{};if(!FR.shown()&&onAct())FR.mount();const fixed=(ctx.tries|0)>0||missed;missed=false;
+  if(fixed)streak=0;else streak++;anim('joy');
+  let t;if(fixed)t=draw(EFFORT);else if(STREAK[streak])t=STREAK[streak];else if(streak>=10&&streak%5===0)t=STREAK_MORE;else t=draw(OK);
+  return talk(t,ctx);};
+FR.onWrong=ctx=>{ctx=ctx||{};if(!FR.shown()&&onAct())FR.mount();streak=0;missed=!ctx.final;anim('sad');if(ctx.final)missed=false;return talk(draw(ctx.final?SHOWN:WRONG),ctx);};
+FR.reset=()=>{streak=0;missed=false;};
+
+/* ---------- a picture that stands for a word: say the word ---------- */
+let lead='';                                   /* a story line waiting to be said before the next instruction */
+FR.question=(q,card)=>{FR.mount();missed=false;const w=q&&q.word?T.spk(q.word):'';FR.word=w;const pre=[takeLead(),w].filter(Boolean).join(' ');
+  if(w&&card){const p=card.querySelector('.pic');if(p&&!p._fw){p._fw=1;p.classList.add('frpic');p.onclick=()=>{O.sfx.pop&&O.sfx.pop(1);O.say(w);};}}
+  if(!pre)return;
+  if(window.__noAuto)setTimeout(()=>{if(!card||card.isConnected)O.say(pre);},D(300));   /* reading practice: only the word (the question waits for him) */
+  else O.sayNow=pre+' '+(O.sayNow||'');};
+function takeLead(){const t=lead;lead='';if(t)bubble(t,3500);return t;}
+/* other screens of a step: put the story line before whatever the screen says */
+function leadOnScreen(){if(!lead)return;if(window.__noAuto){O.say(takeLead());return;}const t=takeLead();O.sayNow=t+' '+(O.sayNow||'');}
+
+/* ---------- the day's path ---------- */
+let cur=null;                                  /* {i, d: the day, done: announced} while inside a path step */
+const daily=()=>{try{return T.S().set.noDaily?null:T.dailyEnsure();}catch(e){return null;}};
+const quest=()=>(T.quest&&T.quest())||{e:'⭐',k:'⭐'};
+const story=()=>STORY[quest().e]||STORY0;
+FR.stepStart=i=>{const d=daily();if(!d||i==null||i<0||i>=d.t.length){cur=null;return;}cur={i,d:d.d,id:d.t[i]};
+  const dn=d.done.slice(d.bs|0),left=dn.filter(x=>!x).length,first=!dn.some(Boolean);
+  lead=(first?FIRST+' ':left<=1?LAST+' ':'')+story()[0];PATHBAR.render();};
+FR.stepCheck=()=>{if(!cur)return;const d=daily();if(!d||d.d!==cur.d||d.t[cur.i]!==cur.id||!d.done[cur.i]||cur.done)return;cur.done=1;PATHBAR.render();
+  const t=d.done.slice(d.bs|0).every(Boolean)?story()[1]+' '+ALL:story()[1];
+  const card=$('#ov:not([hidden]) .card');if(card&&!card.querySelector('.frstory')){const s=h('div','frstory',`<span class="frq">${quest().k}</span><span>${t}</span>`);
+    const row=card.querySelector('.btnrow');if(row)card.insertBefore(s,row);else card.appendChild(s);setTimeout(()=>{if(s.isConnected){last=t;O.say(T.spk(t));}},D(1200));}
+  else talk(t,{ms:3500});};
+/* the whole day is done (after the story's finale): one clear sentence and exactly two big choices on home */
+const DONE='סִיַּמְתָּ אֶת כָּל הַמְּשִׂימוֹת שֶׁל הַיּוֹם! 🎉',FREE='זְמַן חוֹפְשִׁי! בְּחַר מָה שֶׁבָּא לְךָ.',MORE='רוֹצֶה עוֹד מַסְלוּל? גַּע בִּי.';
+const BONUS='עוֹד מַסְלוּל קָטָן',FREEB='זְמַן חוֹפְשִׁי',BADGE='הַיּוֹם הֻשְׁלַם';
+FR.bonus=()=>{const d=daily();if(!d)return;d.bs=d.t.length;d.ch=null;d.free=0;O.persist();T.home();};
+FR.free=()=>{const d=daily();if(!d)return;d.free=1;O.persist();T.home();};
+/* what the friend says on home when the day is done; in free time the friend reminds once (on a later visit) that tapping it brings another path */
+FR.homeSay=d=>{if(!d.free)return DONE;d.fv=(d.fv|0)+1;if(d.fv>=2&&!d.rem){d.rem=1;O.persist();return FREE+' '+MORE;}O.persist();return FREE;};
+FR.doneEl=()=>{const row=h('div','btnrow frdone');const a=h('button','bigbtn huge','➕ <span>'+BONUS+'</span>');a.onclick=()=>{O.sfx.pop(3);FR.bonus();};
+  const b=h('button','bigbtn huge blue','🎈 <span>'+FREEB+'</span>');b.onclick=()=>{O.sfx.pop(3);FR.free();};row.append(a,b);return row;};
+FR.badgeEl=()=>h('div','frbadge','✓ '+BADGE);
+FR.inStep=()=>!!cur;FR.lead=t=>{lead=t;};
+
+const PATHBAR={render(){let b=$('#frPath');const d=cur&&daily();
+  document.body.classList.toggle('frpon',!!(d&&d.d===cur.d));if(!d||d.d!==cur.d){if(b)b.remove();return;}
+  const mid=$('#hudMid');if(!mid)return;if(!b){b=h('div','frpath');b.id='frPath';b.setAttribute('role','img');}if(b.parentNode!==mid)mid.appendChild(b);
+  const q=quest();const o=d.bs|0,t=d.t.slice(o),dn=d.done.slice(o),n=t.length,k=dn.filter(Boolean).length;
+  b.setAttribute('aria-label',`${k}/${n}`);
+  b.innerHTML=`<span class="fpq">${q.e}</span>`+t.map((_,j)=>`<i class="${dn[j]?'on':j+o===cur.i?'cur':''}"></i>`).join('')+`<span class="fpg${k>=n?' won':''}">🎁</span>`;}};
+
+/* the top bar is rewritten by every screen: keep the strip in it while inside a step */
+(()=>{const mid=$('#hudMid');if(mid)new MutationObserver(()=>{const b=$('#frPath');if(cur&&(!b||b.parentNode!==mid))PATHBAR.render();}).observe(mid,{childList:true});})();
+/* screens: the friend is on the math play screen and on any screen of a path step; quizzes and activities mount it themselves */
+const ACTS=['sTal','sPlay','sLearn'];
+O.on('screen',id=>{FR.reset();
+  if(cur&&!ACTS.includes(id)&&id!=='sWorld'){cur=null;lead='';}
+  PATHBAR.render();
+  if(id==='sPlay'||(cur&&id==='sTal'))setTimeout(()=>{if(!$('#'+id).hidden){FR.mount();if(id==='sPlay'||id==='sTal')leadOnScreen();}},0);
+  else FR.unmount();});
+O.on('levelDone',()=>setTimeout(FR.stepCheck,D(600)));
+
+FR.speakList=()=>[DONE,FREE,FREE+' '+MORE,...OK,...Object.values(STREAK),STREAK_MORE,...EFFORT,...WRONG,...SHOWN,FIRST,LAST,ALL,
+  ...[...Object.values(STORY),STORY0].flatMap(([a,b])=>[a,FIRST+' '+a,LAST+' '+a,b,b+' '+ALL])];
+FR._cur=()=>cur;FR._lines={ok:OK,streak:[...Object.values(STREAK),STREAK_MORE],effort:EFFORT,wrong:WRONG,shown:SHOWN};
+window.FRIEND=FR;window.PATHBAR=PATHBAR;
 })();
 
 </script>

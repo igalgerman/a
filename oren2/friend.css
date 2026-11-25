@@ -39,3 +39,4 @@ body.fron #screens{padding-bottom:84px}
   .frpath .fpq,.frpath .fpg{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){.frc .frs,.frpath i.cur{animation:none}}
+#sHome .frdone .bigbtn.huge{animation:none}
