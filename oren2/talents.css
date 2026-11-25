@@ -472,3 +472,5 @@ button:focus:not(:focus-visible){outline:none}
 /* password fields wide enough for their hint; no focus ring on big buttons focused by the game itself */
 .plog .pgin{width:min(260px,70vw);font-size:22px}
 .bigbtn:focus:not(:focus-visible),.bigbtn:focus{outline:none}
+.pissok{width:min(900px,100%);box-sizing:border-box;padding:6px 18px;font-size:15px;color:#2e7d32;font-weight:700}
+.piss>summary{color:#b54708}.piss .prow{padding:6px 18px;display:flex;gap:12px}.piss .pn{flex:1;max-width:none}

@@ -43,6 +43,11 @@ const { chromium } = require('playwright');
     // hint sentences with numbers used to break into one line per number
     const capLines = await p.evaluate(() => { const d = document.createElement('div'); d.style.width = '600px'; document.body.appendChild(d); d.innerHTML = '<div class="cap"><span>כּוֹתְבִים <span class="ltr">2</span> וּמַעֲבִירִים 1</span></div>'; const h = d.querySelector('.cap span').getBoundingClientRect().height; d.remove(); return h; });
     ok('hint sentence stays on one line', capLines < 50, String(capLines));
+    // problem log: counted per day, merged across devices, shown in the parent summary
+    const iss = await p.evaluate(() => { const O = window.OREN; window.__fast = false; window.dispatchEvent(new ErrorEvent('error', { message: 'boom' })); window.dispatchEvent(new ErrorEvent('error', { message: 'boom' })); window.__fast = true;
+      const d = O.today(); O.mergeIn({ iss: [{ d, k: 'voice', n: 2 }] }); O.mergeIn({ iss: [{ d, k: 'voice', n: 1 }] });
+      const e = O.save.iss.find(x => x.k === 'err'), v = O.save.iss.find(x => x.k === 'voice'); return { e: e && e.n, v: v && v.n }; });
+    ok('problem log counts and merges', iss.e === 2 && iss.v === 2, JSON.stringify(iss));
     await ctx.close();
   }
   await b.close();
