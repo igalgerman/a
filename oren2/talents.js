@@ -82,11 +82,11 @@ function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400
   const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq');s.appendChild(wrap);
   const render=()=>{const q=qs[i];tries=0;lock=false;hudT(o.title,progressBar(i,qs.length));O.sayNow=q.say||plainHe(q.pr);
     wrap.innerHTML='';const card=h('div','prq tqc',q.pr);if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמַע'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
-    wrap.appendChild(card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+    wrap.appendChild(card);if(T.rdQ)T.rdQ(q,card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');if(q.auto&&q.play)setTimeout(()=>{if(qs[i]===q)q.play();},D(350));};
   const resolve=(q)=>{const ex=wrap.querySelector('.hintbox');if(q.explain){ex.hidden=false;ex.innerHTML=`<div class="cap">${q.explain}</div>`;}if(q.reveal)q.reveal(wrap.querySelector('.tqc'));};
   function pickA(k,b){if(lock||b.disabled)return;const q=qs[i];
-    if(k===q.ans){lock=true;b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
+    if(k===q.ans){if(T.rdA)T.rdA(q,tries,b);lock=true;b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
     tries++;err++;b.classList.add('bad');b.disabled=true;sfx.no();
     if(tries>=2||q.opts.length<=2){lock=true;const c=wrap.querySelector('.chs').children[q.ans];c.classList.add('show');resolve(q);setTimeout(next,D(2600));}}
   function next(){if(!wrap.isConnected)return;i++;if(i>=qs.length){KEY=null;finishAct(o.id,err,qs.length,gems,o.back,()=>quiz(o),o.doneTitle);}else render();}
@@ -248,8 +248,8 @@ function readStory(k,back){const st=STORIES[k];O.setScreen('sTal','final',back);
   const page=h('div','story');page.innerHTML=`<div class="sth"><span>${ALLSPR(st.spr[0])}</span><h2>${st.t}</h2><span>${ALLSPR(st.spr[1])}</span></div>`+st.s.map((x,i)=>`<p class="sl" data-i="${i}">${x}</p>`).join('');s.appendChild(page);
   const row=h('div','btnrow');const rd=h('button','bigbtn blue sm',ICON.say+'<span>הַקְרֵא לִי</span>');const go=h('button','bigbtn',ICON.play+'<span>לַשְּׁאֵלוֹת</span>');row.append(rd,go);s.appendChild(row);
   const mark=i=>{page.querySelectorAll('.sl').forEach(p=>p.classList.toggle('cur',+p.dataset.i===i));};
-  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);O.say(T.spk(p.textContent));});
-  rd.onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(window.__fullSpell?window.__fullSpell(x):T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
+  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);if(T.readEl)T.readEl(p);else O.say(T.spk(p.textContent));});
+  rd.onclick=()=>{if(T.readSeq){T.readSeq([...page.querySelectorAll('.sl')],mark);return;}if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(window.__fullSpell?window.__fullSpell(x):T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
   go.onclick=()=>{O.hush();let qi=0;quiz({id:'story-'+k,title:st.t,bg:'final',back:()=>openStories(back),n:st.q.length,gen:()=>{const [q,a,ds]=st.q[qi++];const opts=shuffle([a,...ds]);return {pr:`<div class="sent">${q}</div>`,opts,ans:opts.indexOf(a),cls:'tx',key:q};}});};}
 function openStories(back){O.setScreen('sTal','final',back);T.hudT('סִפּוּרֵי עֶרֶב');const s=$('#sTal');s.innerHTML='';s.appendChild(h('div','whead',`<span class="gd">${X.moon}</span><h1>סִפּוּרֵי עֶרֶב</h1>`));
   const g=h('div','acts');STORIES.forEach((st,k)=>{const n=(T.S().tl['story-'+k]||{}).s|0;const c=h('button','actc',`<span class="ai">${ALLSPR(st.spr[0])}</span><span class="an">${st.t}</span><span class="st">${[0,1,2].map(j=>j<n?SPR.star:SPR.starOff).join('')}</span>`);c.onclick=()=>readStory(k,()=>openStories(back));g.appendChild(c);});s.appendChild(g);}
@@ -934,7 +934,7 @@ function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(
   s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>{openSec=null;panel(id);};tb.appendChild(b);});s.appendChild(tb);
   const body=h('div','pbody');s.appendChild(body);
   if(curTab==='sum')sumTab(body);
-  else if(curTab==='day'){timeTab(body);planTab(body);}
+  else if(curTab==='day'){timeTab(body);planTab(body);if(T.rdSettings)T.rdSettings(body,sec,()=>panel('day'));}
   else MORE.forEach(([id,n])=>{const d=document.createElement('details');d.className='pdet';const sm=document.createElement('summary');sm.textContent=n;d.appendChild(sm);const inner=h('div','pdin');d.appendChild(inner);let done=false;
     const fill=()=>{if(done)return;done=true;FN[id](inner);};d.addEventListener('toggle',()=>{if(d.open){openSec=id;fill();}});if(openSec===id){d.open=true;fill();}body.appendChild(d);});
   const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;
