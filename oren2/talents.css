@@ -308,3 +308,14 @@
   .tstep2{width:92px}.tstep2 .tl{font-size:12px}.tstep2 .ti2 svg{width:34px;height:34px}.tlink{max-width:24px}.bigbtn.huge{font-size:20px;padding:12px 18px}
   .hgrp .hub{grid-template-columns:repeat(2,1fr)}.hav svg{width:56px}
 }
+.tlock{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(20,30,50,.72);backdrop-filter:blur(3px);padding:16px}
+.tlock .card{display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--paper);padding:22px 28px;max-width:520px;text-align:center;box-shadow:0 0 0 6px var(--ink),0 14px 0 6px rgba(0,0,0,.3)}
+.tlock h2{margin:0;font-size:32px}.tlock .sub{font-family:var(--read);font-size:22px;line-height:1.6}
+.tleft{font-size:17px;background:#eef6fb;padding:2px 8px}
+.psel{font-family:var(--font);font-size:15px;padding:4px 6px;max-width:min(420px,70vw)}
+.tdrow{flex-wrap:wrap}.tdrow .pn{width:auto;flex:1;min-width:180px}
+body.tlocked #ov{position:fixed;z-index:100}
+.pbar2{position:fixed;bottom:0;left:0;right:0;z-index:70;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;background:#23303b;color:#fff;padding:6px 10px;box-shadow:0 -4px 0 #ffd166}
+.pbar2 .pbt{font-weight:800;font-size:14px}.pbar2 .pchip{font-size:13px}
+body.pplay #screens{padding-bottom:52px}
+.vnow{font-size:15px;margin:6px 0}.vsample{font-family:var(--read);font-size:22px;background:#f6f2e8;padding:8px 12px;line-height:1.6}

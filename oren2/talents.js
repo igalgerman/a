@@ -120,7 +120,7 @@ function openBuilding(b){KEY=null;O.setScreen('sTal',b.bg,openHub);hudT(b.name);
 const dailyPool=()=>Object.keys(ACT).filter(id=>bState(ACT[id].b)==='on'&&!actOff(id)&&!ACT[id].noDaily&&(!ACT[id].avail||ACT[id].avail()));
 function dailyEnsure(){const s=S();if(s.daily&&s.daily.d===today()){const d=s.daily,pool=dailyPool();for(let i=0;i<d.t.length;i++)if(d.t[i]!=='math'&&!d.done[i]&&!pool.includes(d.t[i])){const alt=pool.filter(x=>!d.t.includes(x));if(alt.length)d.t[i]=pick(alt);}return d;}const ids=dailyPool();const pickIds=shuffle(ids).slice(0,2);if(!ids.length)pickIds.length=0;
   const plan=S().set.plan;let t=['math',...pickIds];
-  if(plan&&plan.length){const used=new Set();t=plan.map(sp=>{if(sp==='math')return 'math';const pool=dailyPool().filter(id=>!used.has(id)&&(sp==='any'||ACT[id].b.id===sp));const id=pool.length?pick(pool):pick(dailyPool().filter(x=>!used.has(x))||['math']);used.add(id);return id||'math';});}
+  if(plan&&plan.length){const used=new Set();t=plan.map(sp=>{if(sp==='math')return 'math';if(String(sp).startsWith('act:')){const aid=sp.slice(4);if(ACT[aid]&&dailyPool().includes(aid)&&!used.has(aid)){used.add(aid);return aid;}sp='any';}const pool=dailyPool().filter(id=>!used.has(id)&&(sp==='any'||ACT[id].b.id===sp));const id=pool.length?pick(pool):pick(dailyPool().filter(x=>!used.has(x))||['math']);used.add(id);return id||'math';});}
   s.daily={d:today(),t,done:t.map(()=>0),claimed:0};O.persist();return s.daily;}
 function dailyMark(id){const d=dailyEnsure();const i=d.t.indexOf(id);if(i>=0&&!d.done[i]){d.done[i]=1;}}
 O.on('levelDone',(lv)=>{if(!lv||lv.type==='train')return;const d=dailyEnsure();const i=d.t.findIndex((x,k)=>x==='math'&&!d.done[k]);if(i>=0){d.done[i]=1;O.persist();}});
@@ -786,11 +786,12 @@ building({id:'write',name:'בֵּית הַכְּתִיבָה',color:'#c27c4e',bg
 (()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,ICON,SPR,pick,shuffle}=O;const {X,FACES,BUILD,ACT,ALLSPR}=T;const sfx=O.sfx,D=O.D;
 const SET=()=>{const s=T.S().set;s.offA=s.offA||{};s.offW=s.offW||{};s.grad=s.grad||{on:0,every:2,base:0,extra:0,order:null,seen:0};return s;};
 const plain=T.plainHe;
+const RSET=()=>{const s=O.realSave;s.set=s.set||{};return s.set;};
 /* ---------- password (hashed; kid-proofing, not bank security) ---------- */
 async function hash(pw){const t='oren4|'+pw;try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
   catch(e){let x=2166136261;for(const c of t){x^=c.charCodeAt(0);x=Math.imul(x,16777619);}return 'f'+(x>>>0).toString(16);}}
 let parentOn=false;
-function login(then){const st=SET();const ov=$('#ov');ov.hidden=false;const first=!st.pw;
+function login(then){if(O.isParentPlay){parentOn=true;then&&then();return;}const st=RSET();const ov=$('#ov');ov.hidden=false;const first=!st.pw;
   ov.innerHTML=`<div class="card plog"><div class="pli">${first?'🔑':'🔒'}</div><h2>${first?'יצירת משתמש הורה':'כניסת הורה'}</h2>
     <div class="sub">${first?'בחרו סיסמה קבועה (לפחות 4 תווים). היא תשמש אתכם לכניסה ללוח ההורים, בכל מכשיר.':'הקלידו את סיסמת ההורה'}</div>
     <input id="pw1" type="password" class="pgin" autocomplete="off" aria-label="סיסמה">${first?'<input id="pw2" type="password" class="pgin" autocomplete="off" placeholder="שוב" aria-label="אימות סיסמה">':''}<div class="pgerr" id="pgErr"></div></div>`;
@@ -803,7 +804,7 @@ function login(then){const st=SET();const ov=$('#ov');ov.hidden=false;const firs
   ok.onclick=go;[p1,p2].forEach(x=>x&&(x.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();}));}
 function forgot(then){const ov=$('#ov');ov.innerHTML=`<div class="card plog"><h2>איפוס סיסמה</h2><div class="sub">כדי לוודא שזה מבוגר: כמה זה 37 × 24?<br>(ההתקדמות של אורן לא תימחק — רק הסיסמה)</div><input id="fq" class="pgin" inputmode="numeric" autocomplete="off" aria-label="תשובה"><div class="pgerr" id="pgErr"></div></div>`;
   const row=h('div','btnrow');const no=h('button','bigbtn plain sm','<span>ביטול</span>');no.onclick=()=>{ov.hidden=true;};const ok=h('button','bigbtn sm','<span>המשך</span>');row.append(no,ok);ov.firstChild.appendChild(row);
-  const q=$('#fq');setTimeout(()=>q.focus(),60);const go=()=>{if(q.value.trim()==='888'){delete SET().pw;O.persist();login(then);}else{$('#pgErr').textContent='לא נכון';sfx.no();}};ok.onclick=go;q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};}
+  const q=$('#fq');setTimeout(()=>q.focus(),60);const go=()=>{if(q.value.trim()==='888'){delete RSET().pw;O.persist();login(then);}else{$('#pgErr').textContent='לא נכון';sfx.no();}};ok.onclick=go;q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};}
 const asParent=fn=>()=>parentOn?fn():login(fn);
 window.TAL_parentGate=()=>login(()=>panel('sum'));
 /* ---------- permissions ---------- */
@@ -917,18 +918,19 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const BAR=(v,max,col)=>`<span class="pbar"><i style="width:${max?Math.min(100,v/max*100):0}%;background:${col||'#4fae4f'}"></i></span>`;
 const fmtMin=sec=>{const m=Math.round(sec/60);return m<60?m+' דק׳':(m/60).toFixed(1)+' שע׳';};
 function lastDays(n){const out=[];const d=new Date();for(let i=n-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);const k=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([k,x]);}return out;}
-const TABS=[['sum','📊 סיכום'],['plan','📅 היום של אורן'],['voice','🔊 קול'],['perm','🎤 הרשאות'],['parts','🧩 חלקי המערכת'],['prog','⏭️ התקדמות ואיפוס'],['msg','💌 הודעה לאורן'],['set','⚙️ הגדרות']];
+const TABS=[['sum','📊 סיכום'],['try','🎮 נסו בעצמכם'],['plan','📅 משימות'],['time','⏱️ זמן'],['voice','🔊 קול'],['perm','🎤 הרשאות'],['parts','🧩 חלקי המערכת'],['prog','⏭️ התקדמות ואיפוס'],['msg','💌 הודעה לאורן'],['set','⚙️ הגדרות']];
 let curTab='sum';
 const exitParent=()=>{parentOn=false;O.showMap();};T.exitParent=exitParent;
-function panel(tab){if(!parentOn)return login(()=>panel(tab));curTab=tab||curTab;O.setScreen('sPar','valley',exitParent);O.hud('<div class="chip">לוח הורים</div>');const s=$('#sPar');s.innerHTML='';
+function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(dl&&!dl.hidden)dl.hidden=true;if(!parentOn)return login(()=>panel(tab));curTab=tab||curTab;O.setScreen('sPar','valley',exitParent);O.hud('<div class="chip">לוח הורים</div>');const s=$('#sPar');s.innerHTML='';
   s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>panel(id);tb.appendChild(b);});s.appendChild(tb);
-  const body=h('div','pbody');s.appendChild(body);({sum:sumTab,plan:planTab,voice:voiceTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab}[curTab])(body);
+  const body=h('div','pbody');s.appendChild(body);({sum:sumTab,try:tryTab,plan:planTab,time:timeTab,voice:voiceTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab}[curTab])(body);
   const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;}
 T.parentPanel=t=>{parentOn=true;panel(t);};
 const sec=(box,t,html)=>{const d=h('section','psec',`<h3>${t}</h3>`);if(html)d.insertAdjacentHTML('beforeend',html);box.appendChild(d);return d;};
 /* --- summary --- */
 function sumTab(box){const s0=T.S(),sv=O.save;
   permStates().then(st=>{if(st&&Object.values(st).some(v=>v==='prompt'||v==='denied')){const w=h('button','pwarn','⚠️ יש הרשאות שעוד לא אושרו (למשל מיקרופון). לחצו כאן כדי לאשר מראש, כדי שאורן לא ייתקע באמצע.');w.onclick=()=>panel('perm');box.prepend(w);}});
+  if(!SET().voiceOk){const w=h('button','pwarn','🔊 עוד לא בדקתם את הקול של המשחק. לחצו כאן — לוקח דקה: שומעים דוגמה ואומרים אוקי.');w.onclick=()=>panel('voice');box.appendChild(w);}
   const acc=sv.ans?Math.round((sv.ok|0)/sv.ans*100):0;const totT=Object.values(s0.time).reduce((a,v)=>a+(v|0),0);const talSt=Object.values(s0.tl).reduce((a,c)=>a+(c.s|0),0);
   sec(box,'במבט אחד',`<div class="ptiles">
     <div><b>${(sv.days||[]).length}</b><span>ימי משחק</span></div><div><b>${O.dayStreak()}</b><span>רצף ימים</span></div>
@@ -950,14 +952,79 @@ function sumTab(box){const s0=T.S(),sv=O.save;
     ${md.length?`<div class="pmood">${md.map(m=>FACES[m.f]?`<span title="${m.d}">${FACES[m.f].s}<small>${m.d.slice(5).replace('-','/')}</small></span>`:'').join('')}</div>`:'<div class="pnote">עוד לא נרשמו רגשות.</div>'}<div class="pnote">בצנצנת התודה: ${jarN} דברים טובים.</div>`);}
 /* --- today's plan --- */
 function planTab(box){const st=SET();let plan=(st.plan&&st.plan.slice())||['math','any','any'];
-  const ps=sec(box,'מה יהיה בכל יום',`<div class="pnote">אורן רואה במסך הבית שביל של צעדים ("הַיּוֹם שֶׁלִּי") עם כפתור אחד גדול: "מַמְשִׁיכִים". כאן אתם קובעים מה יהיה בשביל. "לבחירת המשחק" = פעילות מתחלפת. בסוף השביל אורן מקבל 15 יהלומים ואז זמן חופשי.</div>`);
-  const nr=h('div','popt','<span>מספר צעדים ביום:</span>');[2,3,4].forEach(n=>{const b=h('button','pchip'+(plan.length===n?' on':''),String(n));b.onclick=()=>{while(plan.length<n)plan.push('any');plan=plan.slice(0,n);draw();};nr.appendChild(b);});ps.appendChild(nr);
-  const rows=h('div','');ps.appendChild(rows);const opts=[['math','🧮 חשבון'],['any','🎲 לבחירת המשחק'],...BUILD.filter(b=>!st.hide[b.id]).map(b=>[b.id,plain(b.name)])];
-  const draw=()=>{nr.querySelectorAll('.pchip').forEach(b=>b.classList.toggle('on',+b.textContent===plan.length));rows.innerHTML='';plan.forEach((v,i)=>{const r=h('div','popt plrow',`<span>צעד ${i+1}:</span>`);opts.forEach(([k,n])=>{const b=h('button','pchip'+(v===k?' on':''),n);b.onclick=()=>{plan[i]=k;draw();};r.appendChild(b);});rows.appendChild(r);});};draw();
-  const row=h('div','btnrow');const sv=h('button','bigbtn sm','<span>שמירה</span>');sv.onclick=()=>{st.plan=plan.slice();const d=T.S().daily;let now=false;if(!d||!d.done.some(Boolean)){delete T.S().daily;now=true;}O.persist();sfx.ok(1);O.floatText(sv,now?'נשמר — כבר מהיום':'נשמר — יתחיל ממחר');};
+  /* today's path: live control */
+  const d=T.dailyEnsure();const ts=sec(box,'המשימות של היום (עכשיו)','<div class="pnote">אפשר לסמן משימה כבוצעה, לדלג עליה, להחליף אותה או לשנות את הסדר — זה משפיע מיד על המסך של אורן.</div>');
+  d.t.forEach((id,i)=>{const nm=id==='math'?'🧮 שלב בחשבון':ACT[id]?plain(ACT[id].b.name)+' — '+plain(ACT[id].name):id;
+    const r=h('div','prow tdrow',`<span class="pn">${i+1}. ${nm}</span><span class="pst ${d.done[i]?'ok':'warn'}">${d.done[i]?'בוצע ✓':'עוד לא'}</span>`);
+    const ch=(l,f)=>{const b=h('button','pchip',l);b.onclick=()=>{f();O.persist();panel('plan');};r.appendChild(b);};
+    if(i>0)ch('▲',()=>{[d.t[i-1],d.t[i]]=[d.t[i],d.t[i-1]];[d.done[i-1],d.done[i]]=[d.done[i],d.done[i-1]];});
+    ch(d.done[i]?'↺ לא בוצע':'✓ בוצע',()=>{d.done[i]=d.done[i]?0:1;});
+    if(id!=='math')ch('🔄 החלף',()=>{const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(pool.length)d.t[i]=O.pick(pool);});
+    ch('▶ נסו',()=>{});r.lastChild.onclick=()=>tryIt(id);
+    if(d.t.length>1)ch('✕ הסר',()=>{d.t.splice(i,1);d.done.splice(i,1);});ts.appendChild(r);});
+  if(d.t.length<5){const ar=h('div','popt','<span>הוספת משימה להיום:</span>');[['math','🧮 חשבון'],['any','🎲 אקראית']].forEach(([k,n])=>{const b=h('button','pchip',n);b.onclick=()=>{let id='math';if(k==='any'){const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;id=O.pick(pool);}d.t.push(id);d.done.push(0);d.claimed=0;O.persist();panel('plan');};ar.appendChild(b);});ts.appendChild(ar);}
+  /* the template for every day */
+  const ps=sec(box,'התבנית לכל יום',`<div class="pnote">מכאן נבנה השביל של כל יום חדש. לכל צעד: חשבון, פעילות לבחירת המשחק, בניין מסוים או פעילות מסוימת. בסוף השביל אורן מקבל 15 יהלומים ואז זמן חופשי.</div>`);
+  const rows=h('div','');ps.appendChild(rows);
+  const opts=[['math','🧮 חשבון'],['any','🎲 לבחירת המשחק'],...BUILD.filter(b=>!st.hide[b.id]).map(b=>[b.id,'🏠 '+plain(b.name)+' (פעילות כלשהי)']),...BUILD.filter(b=>!st.hide[b.id]).flatMap(b=>b.acts.filter(a=>!st.offA[a.id]).map(a=>['act:'+a.id,'· '+plain(b.name)+' — '+plain(a.name)]))];
+  const draw=()=>{rows.innerHTML='';plan.forEach((v,i)=>{const r=h('div','popt plrow',`<span>צעד ${i+1}:</span>`);const sel=document.createElement('select');sel.className='psel';sel.setAttribute('aria-label','צעד '+(i+1));
+      opts.forEach(([k,n])=>{const o=document.createElement('option');o.value=k;o.textContent=n;if(k===v)o.selected=true;sel.appendChild(o);});sel.onchange=()=>{plan[i]=sel.value;};r.appendChild(sel);
+      const up=h('button','pchip','▲');up.disabled=i===0;up.onclick=()=>{[plan[i-1],plan[i]]=[plan[i],plan[i-1]];draw();};const rm=h('button','pchip','✕');rm.disabled=plan.length<2;rm.onclick=()=>{plan.splice(i,1);draw();};r.append(up,rm);rows.appendChild(r);});
+    if(plan.length<5){const add=h('button','pchip','+ הוספת צעד');add.onclick=()=>{plan.push('any');draw();};rows.appendChild(add);}};draw();
+  const row=h('div','btnrow');const sv=h('button','bigbtn sm','<span>שמירת התבנית</span>');sv.onclick=()=>{st.plan=plan.slice();const dd=T.S().daily;let now=false;if(!dd||!dd.done.some(Boolean)){delete T.S().daily;now=true;}O.persist();sfx.ok(1);O.floatText(sv,now?'נשמר — כבר מהיום':'נשמר — יתחיל ממחר');setTimeout(()=>panel('plan'),900);};
   const df=h('button','bigbtn plain sm','<span>חזרה לברירת מחדל</span>');df.onclick=()=>{delete st.plan;O.persist();panel('plan');};row.append(df,sv);ps.appendChild(row);}
-/* --- voice --- */
-function voiceTab(box){const tts=window.__tts||{};const vp=Object.assign({eng:'auto',name:'',rate:1},(T.S().set.voice)||{});
+/* --- try it yourself (parent sandbox) --- */
+function enterTry(fresh){parentOn=false;O.parentPlay(true,fresh);}
+function tryIt(id){enterTry();if(id==='math'){O.showJourney();return;}const a=ACT[id];if(a)a.run(O.showMap);else O.showMap();}
+T.tryIt=tryIt;
+function tryTab(box){const ts=sec(box,'משתמש הורה — לשחק ולנסות',`<div class="pnote">כאן אתם נכנסים למשחק <b>כמשתמש נפרד</b>: הכל פתוח, יש 500 יהלומים, ואפשר לדלג על כל שלב. שום דבר שתעשו לא משפיע על ההתקדמות של אורן. בתחתית המסך יופיע פס הורה עם "⏭ דלג" ו"חזרה ללוח".</div>`);
+  const r=h('div','btnrow');const go=h('button','bigbtn','🎮 <span>כניסה למשחק כהורה</span>');go.onclick=()=>{enterTry();O.showMap();};const rs=h('button','bigbtn plain sm','↺ <span>להתחיל את הניסיון מחדש</span>');rs.onclick=()=>{try{localStorage.removeItem('oren4-v1-parent');}catch(e){}O.floatText(rs,'אופס ✓');};r.append(go,rs);ts.appendChild(r);
+  const ws=sec(box,'עולמות החשבון');const wr=h('div','popt');O.WORLDS.forEach(w=>{const b=h('button','pchip','▶ '+w.name);b.onclick=()=>{enterTry();O.showWorld(w);};wr.appendChild(b);});ws.appendChild(wr);
+  const bs=sec(box,'כל הפעילויות בעיר הכשרונות');BUILD.forEach(b=>{const row=h('div','pbld',`<b>${b.name}</b>`);const a2=h('div','pacts');b.acts.forEach(a=>{const c=h('button','pchip','▶ '+plain(a.name));c.onclick=()=>tryIt(a.id);a2.appendChild(c);});row.appendChild(a2);bs.appendChild(row);});}
+(()=>{const bar=h('div','pbar2',`<span class="pbt">👤 מצב הורה — ניסיון. אורן לא מושפע.</span>`);bar.hidden=true;
+  const sk=h('button','pchip','⏭ דלג / סיים');sk.onclick=()=>{$('#ov').hidden=true;if(O.skipLevel())return toast('דילגת על השלב ✓');if(!$('#sTal').hidden){const l=T.S().last;if(l&&ACT[l.id]){T.record(l.id,3);toast('סומן כהושלם ✓');}$('#btnBack').click();}else $('#btnBack').click();};
+  const hm=h('button','pchip','🏠 בית');hm.onclick=()=>O.showMap();const ex=h('button','pchip on','🚪 חזרה ללוח ההורים');ex.onclick=()=>{O.parentPlay(false);parentOn=true;panel('try');};
+  bar.append(sk,hm,ex);document.body.appendChild(bar);O.on('mode',on=>{bar.hidden=!on;});})();
+/* --- screen time --- */
+const LIM=()=>{const st=SET();st.lim=st.lim||{daily:0,bed:0,today:null};return st.lim;};
+const usedMin=()=>Math.floor(((T.S().time||{})[O.today()]|0)/60);
+function limitToday(){const l=LIM();if(l.today&&l.today.d===O.today())return l.today.min;return l.daily|0;}
+T.timeLeft=()=>{const lim=limitToday();return lim?Math.max(0,lim-usedMin()):null;};
+function timeTab(box){const l=LIM(),st=SET();const lim=limitToday(),used=usedMin();
+  const ts=sec(box,'זמן משחק היום',`<div class="ptiles"><div><b>${used} דק׳</b><span>שוחקו היום</span></div><div><b>${lim?lim+' דק׳':'ללא הגבלה'}</b><span>מוגדר להיום${l.today&&l.today.d===O.today()?' (שונה במיוחד להיום)':''}</span></div><div><b>${lim?Math.max(0,lim-used)+' דק׳':'—'}</b><span>נשאר</span></div><div><b>${l.bed?l.bed+':00':'—'}</b><span>שעת סיום</span></div></div>`);
+  const tr=h('div','popt','<span>רק להיום:</span>');[[-10,'−10 דק׳'],[10,'+10 דק׳'],[20,'+20 דק׳']].forEach(([v,n])=>{const b=h('button','pchip',n);b.onclick=()=>{const base=limitToday()||Math.max(used,30);l.today={d:O.today(),min:Math.max(used+1,base+v)};if(v<0)l.today.min=Math.max(5,base+v);O.persist();panel('time');};tr.appendChild(b);});
+  const end=h('button','pchip bad','⏹ לסיים להיום עכשיו');end.onclick=()=>{l.today={d:O.today(),min:Math.max(1,used)};O.persist();panel('time');};tr.appendChild(end);
+  if(l.today&&l.today.d===O.today()){const rs=h('button','pchip','↺ ביטול השינוי של היום');rs.onclick=()=>{l.today=null;O.persist();panel('time');};tr.appendChild(rs);}ts.appendChild(tr);
+  const ds=sec(box,'הגבלה קבועה לכל יום','<div class="pnote">נספר רק זמן פעיל. 5 דקות לפני הסוף אורן מקבל תזכורת עדינה, ובסוף הזמן מופיע מסך "נתראה מחר" (אם הוא באמצע שלב — הוא יכול לסיים אותו). רק הורה עם סיסמה יכול להוסיף זמן.</div>');
+  const dr=h('div','popt','<span>דקות ביום:</span>');[[0,'ללא'],[20,'20'],[30,'30'],[45,'45'],[60,'60'],[90,'90']].forEach(([v,n])=>{const b=h('button','pchip'+((l.daily|0)===v?' on':''),n);b.onclick=()=>{l.daily=v;O.persist();panel('time');};dr.appendChild(b);});
+  const ci=h('input','pgin sm');ci.type='number';ci.min=5;ci.max=240;ci.placeholder='אחר';ci.setAttribute('aria-label','דקות');ci.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){const v=Math.max(5,Math.min(240,+ci.value|0));l.daily=v;O.persist();panel('time');}};dr.appendChild(ci);ds.appendChild(dr);
+  const br=h('div','popt','<span>לא לשחק אחרי:</span>');[[0,'ללא'],[18,'18:00'],[19,'19:00'],[20,'20:00'],[21,'21:00']].forEach(([v,n])=>{const b=h('button','pchip'+((l.bed|0)===v?' on':''),n);b.onclick=()=>{l.bed=v;O.persist();panel('time');};br.appendChild(b);});ds.appendChild(br);
+  const bk=h('div','popt','<span>תזכורת הפסקה אחרי:</span>');[[0,'כבוי'],[15,'15 דק׳'],[25,'25 דק׳'],[40,'40 דק׳']].forEach(([v,n])=>{const b=h('button','pchip'+((st.brk|0)===v?' on':''),n);b.onclick=()=>{st.brk=v;O.persist();panel('time');};bk.appendChild(b);});ds.appendChild(bk);}
+/* enforcement on the kid side */
+let warned='',lockEl=null;
+function timeUp(kind){if(lockEl&&lockEl.isConnected)return;O.hush&&O.hush();O.musicStop();const d=T.S().daily;const n=d?d.done.filter(Boolean).length:0;
+  lockEl=h('div','tlock',`<div class="card"><div class="callp">${kind==='bed'?'🌙':'⏰'}</div><h2>${kind==='bed'?'זְמַן לָנוּחַ':'הַזְּמַן שֶׁל הַיּוֹם נִגְמַר'}</h2><div class="sub">כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן!${n?` סִיַּמְתָּ ${n} ${n===1?'מְשִׂימָה':'מְשִׂימוֹת'}.`:''}<br>הַכֹּל שָׁמוּר. נִתְרָאֶה מָחָר 👋</div></div>`);
+  const row=h('div','btnrow');const pb=h('button','bigbtn plain sm','🔒 <span>הוֹרֶה: עוֹד זְמַן</span>');pb.onclick=()=>login(()=>{const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card"><h2>כמה זמן להוסיף להיום?</h2></div>';const r=h('div','btnrow');
+      [[10,'+10 דק׳'],[20,'+20 דק׳'],[30,'+30 דק׳']].forEach(([v,n2])=>{const b=h('button','bigbtn sm','<span>'+n2+'</span>');b.onclick=()=>{const l=LIM();l.today={d:O.today(),min:usedMin()+v};if(kind==='bed')l.bedOff=O.today();O.persist();ov.hidden=true;parentOn=false;lockEl.remove();lockEl=null;document.body.classList.remove('tlocked');if((O.save.snd|0)>=2)O.musicStart();};r.appendChild(b);});
+      const c=h('button','bigbtn plain sm','<span>ביטול</span>');c.onclick=()=>{ov.hidden=true;parentOn=false;};r.appendChild(c);ov.firstChild.appendChild(r);});
+  row.appendChild(pb);lockEl.firstChild.appendChild(row);document.body.appendChild(lockEl);document.body.classList.add('tlocked');O.say(kind==='bed'?'זמן לנוח. כל הכבוד היום, אורן! נתראה מחר.':'הזמן של היום נגמר. כל הכבוד היום, אורן! נתראה מחר.');}
+setInterval(()=>{if(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidden)return;const l=LIM();const lim=limitToday(),used=usedMin();
+  if(l.bed&&new Date().getHours()>=l.bed&&l.bedOff!==O.today()){if($('#sPlay').hidden)timeUp('bed');return;}
+  if(!lim)return;const left=lim-used;
+  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ עוֹד ${left} דַּקּוֹת לְסִיּוּם הַיּוֹם`);O.say(`עוד ${left} דקות לסיום היום`);}
+  if(left<=0){if(!$('#sPlay').hidden&&used<lim+3)return;timeUp('time');}},5000);
+/* --- voice --- *//* --- voice --- */
+const SAMPLE='שָׁלוֹם אוֹרֶן! הַיּוֹם נִלְמַד יַחַד. הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא. כַּמָּה זֶה שָׁלוֹשׁ וְעוֹד אַרְבַּע? נָכוֹן, שֶׁבַע!';
+function voiceCands(){const tts=window.__tts||{};const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];const c=[];if(tts.ns&&!tts.blocked)c.push({eng:'claude',name:'',lbl:'קול Claude'});vs.forEach(v=>c.push({eng:'browser',name:v.name,lbl:v.name.replace(/Microsoft |Google /g,'').replace(/ Online \(Natural\).*/,' (טבעי)')}));return c;}
+function voiceCheck(box){const st=SET();const vp=Object.assign({eng:'auto',name:'',rate:1},st.voice||{});const c=voiceCands();
+  const cur=vp.eng==='auto'?'אוטומטי':(c.find(x=>x.eng===vp.eng&&(x.eng==='claude'||x.name===vp.name))||{lbl:vp.name||vp.eng}).lbl;
+  const vc=sec(box,'בדיקת קול — דקה אחת',`<div class="pnote">לחצו "השמיעו דוגמה". אם הקול נשמע טוב — "אוקי, הקול טוב" וסיימתם. אם לא — "קול אחר" עובר לקול הבא ומשמיע שוב.</div><div class="vnow">קול נוכחי: <b>${cur}</b>${st.voiceOk?' · <span class="pst ok">אושר ✓</span>':''}</div><div class="vsample">${SAMPLE}</div>`);
+  const r=h('div','btnrow');const pl=h('button','bigbtn','🔊 <span>השמיעו דוגמה</span>');pl.onclick=()=>O.say(SAMPLE);
+  const okb=h('button','bigbtn sm','👍 <span>אוקי, הקול טוב</span>');okb.onclick=()=>{st.voiceOk={t:Date.now(),v:Object.assign({},st.voice||{})};O.persist();sfx.win();panel('voice');};
+  const nx=h('button','bigbtn plain sm','👎 <span>קול אחר</span>');nx.disabled=c.length<2&&vp.eng!=='auto';nx.onclick=()=>{if(!c.length){O.floatText(nx,'אין קולות נוספים בדפדפן הזה');return;}let i=c.findIndex(x=>x.eng===vp.eng&&(x.eng==='claude'||x.name===vp.name));const n=c[(i+1)%c.length];O.setVoicePref({eng:n.eng,name:n.name});delete st.voiceOk;O.persist();panel('voice');setTimeout(()=>O.say(SAMPLE),300);};
+  r.append(pl,okb,nx);vc.appendChild(r);
+  if(!c.length)vc.appendChild(h('div','pnote','⚠️ בדפדפן הזה אין קול עברי. הכי מומלץ לפתוח את המשחק ב-Edge במחשב (שם יש קולות עבריים טבעיים בחינם).'));}
+function voiceTab(box){voiceCheck(box);const tts=window.__tts||{};const vp=Object.assign({eng:'auto',name:'',rate:1},(T.S().set.voice)||{});
   const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];
   const vsx=sec(box,'הקול של המשחק',`<div class="pnote">כל הקולות כאן חינמיים, בלי הקלטות. <b>אוטומטי</b> בוחר את הכי טוב שיש: הקול של Claude אם הוא מדבר עברית בדפדפן הזה, ואחרת הקול העברי הכי טבעי שיש בדפדפן.</div>
     <div class="pnote">מצב נוכחי: קול Claude — ${tts.ns?(tts.he?'זמין, כולל עברית ✓':'זמין, אבל לא אישר עברית (יוקרא באנגלית בלבד)'):'לא זמין בתצוגה הזו'} · קולות עבריים בדפדפן: ${vs.length?vs.map(v=>v.name.replace(/Microsoft |Online \(Natural\) - /g,'')).join(', '):'אין'}</div>`);
@@ -1020,7 +1087,6 @@ function msgTab(box){const st=SET();const m=st.msg;
   const row=h('div','btnrow');const sd=h('button','bigbtn sm','💌 <span>שליחה</span>');sd.onclick=()=>{const t=ta.value.trim();if(!t){O.floatText(sd,'כתבו משהו');return;}st.msg={text:t.slice(0,300),gems:gift,t:Date.now(),seen:0};O.persist();sfx.win();panel('msg');};row.appendChild(sd);ms.appendChild(row);}
 /* --- settings --- */
 function setTab(box){const st=SET();
-  const bs=sec(box,'זמן מסך');const brk=h('div','popt','<span>תזכורת הפסקה אחרי:</span>');[[0,'כבוי'],[15,'15 דק׳'],[25,'25 דק׳'],[40,'40 דק׳']].forEach(([v,n])=>{const b=h('button','pchip'+((st.brk|0)===v?' on':''),n);b.onclick=()=>{st.brk=v;O.persist();panel('set');};brk.appendChild(b);});bs.appendChild(brk);
   const ps=sec(box,'סיסמת הורה','<div class="pnote">החלפת הסיסמה. (אם תשכחו: במסך הכניסה יש "שכחתי סיסמה".)</div>');const p1=h('input','pgin sm');p1.type='password';p1.placeholder='סיסמה חדשה';const p2=h('input','pgin sm');p2.type='password';p2.placeholder='שוב';
   [p1,p2].forEach(x=>{x.autocomplete='off';x.onkeydown=e=>e.stopPropagation();});const pb=h('button','pchip','שמירת סיסמה');pb.onclick=async()=>{if(p1.value.length<4||p1.value!==p2.value){O.floatText(pb,p1.value.length<4?'לפחות 4 תווים':'לא זהות');sfx.no();return;}st.pw=await hash(p1.value);st.pwT=Date.now();O.persist();O.floatText(pb,'נשמר ✓');p1.value=p2.value='';};
   const pr=h('div','popt');pr.append(p1,p2,pb);ps.appendChild(pr);
@@ -1047,7 +1113,7 @@ function home(){const S0=T.S();
   /* greeting */
   const d=st.noDaily?null:T.dailyEnsure();const left=d?d.done.filter(x=>!x).length:0;
   const sub=!d?'מָה נַעֲשֶׂה הַיּוֹם?':left===0?(d.claimed?'סִיַּמְתָּ אֶת הַיּוֹם שֶׁלְּךָ! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ הַכֹּל! קַח אֶת הַפְּרָס 🎁'):left===1?'עוֹד צַעַד אֶחָד לַפְּרָס 🌟':`עוֹד ${left} צְעָדִים לַפְּרָס 🌟`;
-  const hd=h('div','hmhead',`<span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}<div class="hbub" style="--fc:${pr.col||'#4fae4f'}"><b>${T.hello()}, אוֹרֶן!</b><span>${sub}</span></div>`);s.appendChild(hd);
+  const hd=h('div','hmhead',`<span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}<div class="hbub" style="--fc:${pr.col||'#4fae4f'}"><b>${T.hello()}, אוֹרֶן!</b><span>${sub}</span>${T.timeLeft&&T.timeLeft()!=null?`<span class="tleft">⏱️ נִשְׁאֲרוּ ${T.timeLeft()} דַּקּוֹת לְהַיּוֹם</span>`:''}</div>`);s.appendChild(hd);
   O.sayNow=T.plainHe(T.hello()+' אורן. '+sub);
   /* today's path */
   if(d){const card=h('div','today');card.appendChild(h('div','tdh','📅 הַיּוֹם שֶׁלִּי'));const path=h('div','tpath');
