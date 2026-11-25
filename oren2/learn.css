@@ -36,3 +36,5 @@
  .lnpaper .lnbig{font-size:24px}.lnpaper .lnbig.lnnum{font-size:38px}.lnkeys{grid-template-columns:repeat(3,60px)}.lnk{height:50px}
  .lnhc{font-size:11px}.lnchk{font-size:18px}.lnsol .lncol{font-size:24px}
 }
+/* answer options: a row of 2–3, or 2×2 — never 3+1 */
+.lnr .chs{display:grid;grid-template-columns:repeat(2,minmax(96px,auto));justify-content:center}

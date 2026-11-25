@@ -124,19 +124,19 @@ const ex=(...lines)=>lines.map(l=>`<div>${L(l)}</div>`).join('');
 const MM={
  'mm-ten':lv=>{
   if(lv===1){const a=ri(1,9);return Q('mm-ten',1,{v:10-a,html:`<div class="lnx">${L(`${a} + ? = 10`)}</div>`,text:'כַּמָּה חָסֵר עַד 10?',ds:[a,11-a,9-a],ex:ex(`${a} + ${10-a} = 10`),key:'t1'+a});}
-  if(lv===2){const a=ri(6,9),b=ri(11-a,9),c=10-a;return Q('mm-ten',2,{v:a+b,html:`<div class="lnx">${L(`${a} + ${b} = ?`)}</div>`,text:'קֹדֶם מַשְׁלִימִים לְ-10.',ds:[a+b-1,a+b+1,a+b-10],ex:ex(`${a} + ${c} = 10`,`10 + ${b-c} = ${a+b}`),key:'t2'+a+'+'+b});}
+  if(lv===2){const a=ri(6,9),b=ri(11-a,9),c=10-a;return Q('mm-ten',2,{v:a+b,html:`<div class="lnx">${L(`${a} + ${b} = ?`)}</div>`,tip:'קֹדֶם מַשְׁלִימִים לְ-10.',ds:[a+b-1,a+b+1,a+b-10],ex:ex(`${a} + ${c} = 10`,`10 + ${b-c} = ${a+b}`),key:'t2'+a+'+'+b});}
   if(lv===3){const t=ri(1,9)*10,a=t+ri(1,9),nx=Math.ceil(a/10)*10;return Q('mm-ten',3,{v:nx-a,html:`<div class="lnx">${L(`${a} + ? = ${nx}`)}</div>`,text:'כַּמָּה חָסֵר עַד הָעֶשֶׂרֶת הַבָּאָה?',ds:[10-(nx-a),nx-a+1,nx-a-1],ex:ex(`${a} + ${nx-a} = ${nx}`),key:'t3'+a});}
-  if(lv===4){const a=ri(1,8)*10+ri(3,9),b=ri(11-a%10,9),c=10-a%10;return Q('mm-ten',4,{v:a+b,html:`<div class="lnx">${L(`${a} + ${b} = ?`)}</div>`,text:'מַשְׁלִימִים לָעֶשֶׂרֶת הַבָּאָה, וּמוֹסִיפִים אֶת הַשְּׁאָר.',ds:[a+b-10,a+b+1,a+b-1],ex:ex(`${a} + ${c} = ${a+c}`,`${a+c} + ${b-c} = ${a+b}`),key:'t4'+a+'+'+b});}
+  if(lv===4){const a=ri(1,8)*10+ri(3,9),b=ri(11-a%10,9),c=10-a%10;return Q('mm-ten',4,{v:a+b,html:`<div class="lnx">${L(`${a} + ${b} = ?`)}</div>`,tip:'מַשְׁלִימִים לָעֶשֶׂרֶת הַבָּאָה, וּמוֹסִיפִים אֶת הַשְּׁאָר.',ds:[a+b-10,a+b+1,a+b-1],ex:ex(`${a} + ${c} = ${a+c}`,`${a+c} + ${b-c} = ${a+b}`),key:'t4'+a+'+'+b});}
   const a=ri(1,7)*10+ri(1,9),u=a%10,c=10-u,b=ri(3,9);const parts=shuf([a,b,c]);const s=a+b+c;
-  return Q('mm-ten',5,{v:s,html:`<div class="lnx">${L(parts.join(' + ')+' = ?')}</div>`,text:'מְחַפְּשִׂים שְׁנֵי מִסְפָּרִים שֶׁמַּשְׁלִימִים לְעֶשֶׂרֶת.',ds:[s-10,s+10,s-1],ex:ex(`${a} + ${c} = ${a+c}`,`${a+c} + ${b} = ${s}`),key:'t5'+parts.join('+')});},
+  return Q('mm-ten',5,{v:s,html:`<div class="lnx">${L(parts.join(' + ')+' = ?')}</div>`,tip:'מְחַפְּשִׂים שְׁנֵי מִסְפָּרִים שֶׁמַּשְׁלִימִים לְעֶשֶׂרֶת.',ds:[s-10,s+10,s-1],ex:ex(`${a} + ${c} = ${a+c}`,`${a+c} + ${b} = ${s}`),key:'t5'+parts.join('+')});},
  'mm-dbl':lv=>{
-  if(lv<=2){const n=lv===1?ri(1,5):ri(6,10);return Q('mm-dbl',lv,{v:2*n,html:`<div class="lnx">${L(`${n} + ${n} = ?`)}</div>`,text:'כָּפוּל: מִסְפָּר וְעוֹד אוֹתוֹ מִסְפָּר.',ds:[2*n-1,2*n+1,2*n+2],ex:ex(`${n} + ${n} = ${2*n}`),key:'d'+n});}
-  if(lv===3){const n=ri(3,9),d=pk([1,-1]),m=n+d;return Q('mm-dbl',3,{v:n+m,html:`<div class="lnx">${L(`${n} + ${m} = ?`)}</div>`,text:'כִּמְעַט כָּפוּל!',ds:[2*n,2*m,n+m+2],ex:ex(`${n} + ${n} = ${2*n}`,`${2*n} ${d>0?'+':'−'} 1 = ${n+m}`),key:'d3'+n+m});}
-  if(lv===4){const n=pk([ri(11,25),ri(2,5)*10,25,15,35,45]);return Q('mm-dbl',4,{v:2*n,html:`<div class="lnx">${L(`${n} + ${n} = ?`)}</div>`,text:'כָּפוּל שֶׁל מִסְפָּר גָּדוֹל: עֲשָׂרוֹת כָּפוּל, וַאֲחָדוֹת כָּפוּל.',ds:[2*n-10,2*n+10,2*n+1],ex:ex(`${n-n%10} + ${n-n%10} = ${2*(n-n%10)}`,`${n%10} + ${n%10} = ${2*(n%10)}`,`${2*(n-n%10)} + ${2*(n%10)} = ${2*n}`),key:'d4'+n});}
-  const n=ri(12,49),d=pk([1,-1]),m=n+d;return Q('mm-dbl',5,{v:n+m,html:`<div class="lnx">${L(`${n} + ${m} = ?`)}</div>`,text:'כִּמְעַט כָּפוּל שֶׁל מִסְפָּר גָּדוֹל.',ds:[2*n,2*m,n+m+10],ex:ex(`${n} + ${n} = ${2*n}`,`${2*n} ${d>0?'+':'−'} 1 = ${n+m}`),key:'d5'+n+m});},
+  if(lv<=2){const n=lv===1?ri(1,5):ri(6,10);return Q('mm-dbl',lv,{v:2*n,html:`<div class="lnx">${L(`${n} + ${n} = ?`)}</div>`,tip:'כָּפוּל: מִסְפָּר וְעוֹד אוֹתוֹ מִסְפָּר.',ds:[2*n-1,2*n+1,2*n+2],ex:ex(`${n} + ${n} = ${2*n}`),key:'d'+n});}
+  if(lv===3){const n=ri(3,9),d=pk([1,-1]),m=n+d;return Q('mm-dbl',3,{v:n+m,html:`<div class="lnx">${L(`${n} + ${m} = ?`)}</div>`,tip:'כִּמְעַט כָּפוּל!',ds:[2*n,2*m,n+m+2],ex:ex(`${n} + ${n} = ${2*n}`,`${2*n} ${d>0?'+':'−'} 1 = ${n+m}`),key:'d3'+n+m});}
+  if(lv===4){const n=pk([ri(11,25),ri(2,5)*10,25,15,35,45]);return Q('mm-dbl',4,{v:2*n,html:`<div class="lnx">${L(`${n} + ${n} = ?`)}</div>`,tip:'כָּפוּל שֶׁל מִסְפָּר גָּדוֹל: עֲשָׂרוֹת כָּפוּל, וַאֲחָדוֹת כָּפוּל.',ds:[2*n-10,2*n+10,2*n+1],ex:ex(`${n-n%10} + ${n-n%10} = ${2*(n-n%10)}`,`${n%10} + ${n%10} = ${2*(n%10)}`,`${2*(n-n%10)} + ${2*(n%10)} = ${2*n}`),key:'d4'+n});}
+  const n=ri(12,49),d=pk([1,-1]),m=n+d;return Q('mm-dbl',5,{v:n+m,html:`<div class="lnx">${L(`${n} + ${m} = ?`)}</div>`,tip:'כִּמְעַט כָּפוּל שֶׁל מִסְפָּר גָּדוֹל.',ds:[2*n,2*m,n+m+10],ex:ex(`${n} + ${n} = ${2*n}`,`${2*n} ${d>0?'+':'−'} 1 = ${n+m}`),key:'d5'+n+m});},
  'mm-comp':lv=>{
   const mk=(a,op,b,steps,key)=>{const v=op==='+'?a+b:a-b;const r=Math.round(b/10)*10,fix=Math.abs(r-b);
-    return Q('mm-comp',lv,{v,html:`<div class="lnx">${L(`${a} ${op==='+'?'+':'−'} ${b} = ?`)}</div>`,text:`מְעַגְּלִים אֶת ${B(b)} לְ-${B(r)}, וּמְתַקְּנִים בְּ-${B(fix)}.`,ds:[v+fix,v-fix,v+10],ex:ex(...steps),key});};
+    return Q('mm-comp',lv,{v,html:`<div class="lnx">${L(`${a} ${op==='+'?'+':'−'} ${b} = ?`)}</div>`,tip:`מְעַגְּלִים אֶת ${B(b)} לְ-${B(r)}, וּמְתַקְּנִים בְּ-${B(fix)}.`,ds:[v+fix,v-fix,v+10],ex:ex(...steps),key});};
   const near=(a,op,b)=>{const r=Math.round(b/10)*10,fix=r-b;const m=op==='+'?a+r:a-r;const v=op==='+'?a+b:a-b;
     return [`${a} ${op==='+'?'+':'−'} ${r} = ${m}`,`${m} ${(op==='+')===(fix>0)?'−':'+'} ${Math.abs(fix)} = ${v}`];};
   if(lv===1){const a=ri(3,9);return mk(a,'+',9,near(a,'+',9),'c1'+a);}
@@ -160,7 +160,7 @@ const MM={
   let start,path;for(let tr=0;tr<200;tr++){start=ri(1,100);path=[start];let c=start,ok=true;for(const m of moves)for(const p of parts(m)){c+=p;if(c<1||c>100)ok=false;path.push(c);}if(ok)break;}
   const v=path[path.length-1];const expr=start+moves.map(m=>(m>0?' + ':' − ')+Math.abs(m)).join('');
   return Q('mm-pv',lv,{v,html:`<div class="lnx">${L(expr+' = ?')}</div>`,chart:{start,path},
-    text:'בְּלוּחַ הַמֵּאָה: עוֹד 10 זֶה שׁוּרָה אַחַת לְמַטָּה, וְעוֹד 1 זֶה מִשְׁבֶּצֶת אַחַת קָדִימָה.',ds:[v+10,v-10,v+1,v-1],moves,ex:`<div>${L(path.join(' → '))}</div>`,key:'p'+expr});}
+    tip:'בְּלוּחַ הַמֵּאָה: עוֹד 10 זֶה שׁוּרָה אַחַת לְמַטָּה, וְעוֹד 1 זֶה מִשְׁבֶּצֶת אַחַת קָדִימָה.',ds:[v+10,v-10,v+1,v-1],moves,ex:`<div>${L(path.join(' → '))}</div>`,key:'p'+expr});}
 };
 const MM_IDS=Object.keys(MM);
 
@@ -467,12 +467,12 @@ const hundred=(chart,show)=>{let s='<div class="lnhc" dir="ltr">';for(let i=1;i<
 /* one question card: multiple choice; a short explanation after a mistake */
 function askQ(wrap,q,i,n,title,onAns){T.hudT(title,T.progressBar(i,n));wrap.innerHTML='';const t0=Date.now();
   const card=h('div','prq tqc lnq',`${q.html||''}${q.chart?hundred(q.chart,false):''}${q.text?`<div class="qq">${q.text}</div>`:''}`);wrap.appendChild(card);if(T.rdQ&&q.text)T.rdQ(q,card);
-  O.sayNow=plain((q.html||'').replace(/<span class="lnbox"><\/span>/g,' מה ')+' '+(q.text||''));
+  O.sayNow=plain((q.text?'':(q.html||'')).replace(/<span class="lnbox"><\/span>/g,' מה ')+' '+(q.text||''));
   const row=h('div','chs ltr');let tries=0,lock=false;
   q.opts.forEach((v,k)=>{const b=h('button','chb num',String(v));b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
   const exb=h('div','hintbox');exb.hidden=true;wrap.appendChild(exb);card.classList.add('flashin');
-  const showEx=()=>{if(q.chart){const c=card.querySelector('.lnhc');if(c)c.outerHTML=hundred(q.chart,true);}exb.hidden=false;exb.innerHTML=`<div class="cap">${q.ex||''}</div>`;
-    const nb=h('button','bigbtn sm',O.ICON.play+'<span>הָלְאָה</span>');nb.onclick=()=>{sfx.pop(1);onAns(null);};exb.appendChild(nb);setTimeout(()=>nb.focus(),50);T.setKey(e=>{if(e.key==='Enter'||e.key===' ')nb.click();});};
+  const showEx=()=>{if(q.chart){const c=card.querySelector('.lnhc');if(c)c.outerHTML=hundred(q.chart,true);}exb.hidden=false;exb.innerHTML=`<div class="cap">${q.tip?`<div>💡 ${q.tip}</div>`:''}${q.ex||''}</div>`;
+    const nb=h('button','bigbtn',O.ICON.play+'<span>הַמְשֵׁךְ</span>');nb.onclick=()=>{sfx.pop(1);onAns(null);};exb.appendChild(nb);setTimeout(()=>nb.focus(),50);T.setKey(e=>{if(e.key==='Enter'||e.key===' ')nb.click();});};
   function pickA(k,b){if(lock||b.disabled)return;const ms=Date.now()-t0;
     if(k===q.ans){lock=true;if(tries===0)onAns({ok:true,first:true,ms},true);b.classList.add('ok');sfx.ok(i);const g=tries?1:2;O.addGems(g,b);O.floatText(b,'+'+g);
       if(tries){showEx();}else{if(q.chart){const c=card.querySelector('.lnhc');if(c)c.outerHTML=hundred(q.chart,true);}setTimeout(()=>onAns(null),D(q.chart?1500:900));}return;}
@@ -499,15 +499,15 @@ function mathRound(back){const st=ST();if(C.needsPlacement('math'))return placem
 
 /* ---------- placement ("where are you?") ---------- */
 function placement(dom,back,then){const lad=C.MATH_LADDER;const ps=C.placeStart(lad);O.setScreen('sTal','mount',back);const s=$('#sTal');s.innerHTML='';
-  const say='בּוֹא נִרְאֶה מֵאֵיפֹה מַתְחִילִים! כַּמָּה שְׁאֵלוֹת קְצָרוֹת: מַתְחִילִים בְּקַלּוֹת וּמְטַפְּסִים לְמַעְלָה.';O.sayNow=plain(say);T.hudT('מֵאֵיפֹה מַתְחִילִים?');
+  const say='כַּמָּה שְׁאֵלוֹת קְצָרוֹת, וְנֵדַע מֵאֵיפֹה לְהַתְחִיל.';O.sayNow=plain(say);T.hudT('מֵאֵיפֹה מַתְחִילִים?');
   s.appendChild(h('div','whead',`<span class="gd bob">🧗</span><h1>מֵאֵיפֹה מַתְחִילִים?</h1>`));s.appendChild(h('div','lsent',say));
-  const row=h('div','btnrow');const goB=h('button','bigbtn',O.ICON.play+'<span>מַתְחִילִים!</span>');goB.onclick=()=>{sfx.pop(2);ask();};row.appendChild(goB);s.appendChild(row);setTimeout(()=>goB.focus(),100);
+  const row=h('div','btnrow');const goB=h('button','bigbtn',O.ICON.play+'<span>הַמְשֵׁךְ</span>');goB.onclick=()=>{sfx.pop(2);ask();};row.appendChild(goB);s.appendChild(row);setTimeout(()=>goB.focus(),100);
   let wrap=null;const MAXQ=7;
   function ask(){if(!wrap){s.innerHTML='';wrap=h('div','tq lnr');s.appendChild(wrap);}const [sk,lv]=lad[ps.i];const q=C.gen(sk,lv);let first=null;
     askQ(wrap,q,ps.n,MAXQ,'מֵאֵיפֹה מַתְחִילִים?',r=>{if(r){first=r;return;}C.placeStep(ps,lad,first&&first.ok);if(C.placeDone(ps,lad,MAXQ))fin();else ask();});}
   function fin(){T.setKey(null);const res=C.placeResult(ps,lad);K.applyPlacement(ST(),dom,res);O.persist();const top=Math.max(1,res.top+2);
     const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card"><div class="qbig">🏔️</div><h2>מְצֻיָּן!</h2><div class="sub">מָצָאנוּ אֶת הַשָּׁלָב שֶׁלְּךָ. מַמְשִׁיכִים מִשָּׁם!</div></div>`;
-    const r=h('div','btnrow');const b=h('button','bigbtn',O.ICON.play+'<span>קָדִימָה!</span>');b.onclick=()=>{ov.hidden=true;then();};r.appendChild(b);ov.firstChild.appendChild(r);sfx.win();O.say('מצוין! מצאנו את השלב שלך.');setTimeout(()=>b.focus(),200);}}
+    const r=h('div','btnrow');const b=h('button','bigbtn',O.ICON.play+'<span>הַמְשֵׁךְ</span>');b.onclick=()=>{ov.hidden=true;then();};r.appendChild(b);ov.firstChild.appendChild(r);sfx.win();O.say('מצוין! מצאנו את השלב שלך.');setTimeout(()=>b.focus(),200);}}
 
 /* ---------- paper & pencil ---------- */
 function paper(back){const st=ST();const last=st.pp&&st.pp.k;const kind=last==='math'?'write':'math';const sk=kind==='math'?'pp-math':'pp-write';

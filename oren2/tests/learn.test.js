@@ -135,7 +135,7 @@ let withMarks = 0, both = new Set();
 for (const t of C.WT) for (let lv = t.lv[0]; lv <= t.lv[1]; lv++) for (let i = 0; i < 80; i++) { const q = C.wordQ(lv, t.id); if (grammar(q.tx, t.id, true)) withMarks++;
   const nm = /<span data-w="([^"]+)"/.exec(q.tx); if (nm) both.add(t.id + NAMES[nm[1]]); }
 for (let lv = 1; lv <= 5; lv++) for (let i = 0; i < 100; i++) { const q = C.chalQ(lv); grammar((q.html || '') + ' ' + (q.text || ''), 'ch-' + q.kind); const p = C.paperQ('math', lv); grammar(p.task, 'pp-' + p.kind); }
-for (const sk of C.MM_IDS) for (let lv = 1; lv <= 5; lv++) { const q = C.gen(sk, lv); grammar(q.text + ' ' + q.html, sk); }
+for (const sk of C.MM_IDS) for (let lv = 1; lv <= 5; lv++) { const q = C.gen(sk, lv); grammar((q.text || '') + ' ' + (q.tip || '') + ' ' + q.html, sk); }
 for (let i = 0; i < 60; i++) { const w = C.paperQ('write', 1); grammar(w.task + ' ' + (w.big || '') + ' ' + w.check.join(' ') + ' ' + (w.eg || ''), 'pp-write'); }
 const gk = Object.keys(gprobs);
 ok(gk.length === 0, 'Hebrew: verbs/pronouns agree with each name (m/f), numbers agree with noun gender (אֶחָד/אַחַת, שְׁנֵי/שְׁתֵּי), 1–2 as words, nikud everywhere', gk.slice(0, 6).map(k => k + ': ' + gprobs[k][0]).join(' | '));
