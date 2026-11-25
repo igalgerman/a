@@ -48,15 +48,15 @@ const path = require('path');
   // full sentence list for the offline download: URLs exactly as the game builds them
   ok('list stored', (await (await f('/api/tts/list', { method: 'POST', body: JSON.stringify(['שָׁלוֹם', 'שָׁלוֹם', ' אַחַת ']) })).json()).n === 2);
   const lu = (await (await f('/api/tts/list')).json()).urls;
-  ok('list gives the game URLs', lu.length === 2 && lu[0] === '/api/tts?t=' + encodeURIComponent('שָׁלוֹם') + '&v=he-IL-Chirp3-HD-Kore&r=0.9');
+  ok('list gives the game URLs with the audio version', lu.length === 2 && lu[0] === '/api/tts?t=' + encodeURIComponent('שָׁלוֹם') + '&v=he-IL-Chirp3-HD-Kore&r=0.9&k=1');
   // English game voice (Despina 0.85): pregen and the download list take {t,v,r} items; the cache key matches the client URL
   const EN = { t: 'A. apple', v: 'en-US-Chirp3-HD-Despina', r: 0.85 };
   const pe = await (await f('/api/tts/pregen', { method: 'POST', body: JSON.stringify({ texts: [EN, { t: 'x', v: 'evil' }] }) })).json();
   ok('pregen makes an English item in its voice', pe.res.join() === 'new,bad voice' && calls.at(-1).voice.name === EN.v && calls.at(-1).voice.languageCode === 'en-US' && calls.at(-1).audioConfig.speakingRate === 0.85, JSON.stringify(pe));
-  const enUrl = '/api/tts?t=' + encodeURIComponent('A. apple') + '&v=en-US-Chirp3-HD-Despina&r=0.85';
+  const enUrl = '/api/tts?t=' + encodeURIComponent('A. apple') + '&v=en-US-Chirp3-HD-Despina&r=0.85'; const enK = enUrl + '&k=1';
   const ce = calls.length; ok('English pregen sentence served from cache with the client URL', (await f(enUrl)).status === 200 && calls.length === ce);
   await f('/api/tts/list', { method: 'POST', body: JSON.stringify(['שָׁלוֹם', EN, EN]) });
-  ok('list keeps English items with their voice', JSON.stringify((await (await f('/api/tts/list')).json()).urls) === JSON.stringify([lu[0], enUrl]));
+  ok('list keeps English items with their voice', JSON.stringify((await (await f('/api/tts/list')).json()).urls) === JSON.stringify([lu[0], enK]));
   // automatic pregen queue: processed in the background of ordinary requests, budget, gap, dedupe, few KV writes
   let now = Date.now(); const realNow = Date.now; Date.now = () => now;
   let puts = 0; const put0 = env.SAVES.put; env.SAVES.put = async (k, v, o) => { puts++; return put0(k, v, o); };

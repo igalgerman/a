@@ -333,7 +333,7 @@ async function qRun(env){if(!env.GOOGLE_TTS_KEY)return;const now=Date.now();if(n
 /* the list of all game sentences (pregen.js POSTs it, texts or {t,v,r}; one KV write), for "download all voices to this device" */
 const ttsUrl=x=>{const i=qItem(x);return '/api/tts?t='+encodeURIComponent(i[0])+'&v='+i[1]+'&r='+i[2];};
 async function list(req,env){
- if(req.method==='GET'){let L=[];try{L=JSON.parse(await env.SAVES.get('ttsall'))||[];}catch(e){}return J({urls:L.map(ttsUrl)});}
+ if(req.method==='GET'){let L=[];try{L=JSON.parse(await env.SAVES.get('ttsall'))||[];}catch(e){}const k=await ttsVer(env);return J({ver:k,urls:L.map(x=>ttsUrl(x)+'&k='+k)});}
  if(req.method!=='POST')return J({error:'method'},405);
  let L;try{L=await req.json();if(!Array.isArray(L)||L.length>QMAX)throw 0;}catch(e){return J({error:'bad request'},400);}
  const seen=new Set();L=L.map(qClean).filter(c=>c!=null&&!seen.has(qId(c))&&seen.add(qId(c)));await env.SAVES.put('ttsall',JSON.stringify(L));return J({ok:true,n:L.length});}
