@@ -320,7 +320,7 @@ function durSVG(k){const filled=k!=='w'&&k!=='h';let s=`<svg class="dur" viewBox
 const PATS=[['q','q','q','q'],['q','e','q','q'],['e','e','q','e','q'].slice(0,4),['q','r','q','q'],['e','q','e','q'],['q','q','e','e'],['e','e','e','e'],['q','e','r','q']];
 function patOnsets(p){const out=[];p.forEach((b,i)=>{if(b==='q')out.push(i);if(b==='e'){out.push(i,i+.5);}});return out;}
 const beatSVG=b=>b==='r'?'<svg class="beat" viewBox="0 0 40 60"><path d="M14 10 L26 22 L16 32 L26 44 C18 40 12 46 20 54" fill="none" stroke="#23303b" stroke-width="3.5"/></svg>':b==='q'?durSVG('q').replace('class="dur"','class="beat"'):`<svg class="beat" viewBox="0 0 70 90"><ellipse cx="18" cy="70" rx="10" ry="7" fill="#23303b"/><ellipse cx="50" cy="70" rx="10" ry="7" fill="#23303b"/><line x1="27" y1="68" x2="27" y2="14" stroke="#23303b" stroke-width="3"/><line x1="59" y1="68" x2="59" y2="14" stroke="#23303b" stroke-width="3"/><rect x="26" y="12" width="35" height="7" fill="#23303b"/></svg>`;
-function rhythm(back){const rounds=shuffle(PATS.slice()).slice(0,4);let r=0,total=0,good=0;O.setScreen('sTal','clock',back);const s=$('#sTal');
+function rhythm(back){const rounds=shuffle(PATS.slice()).slice(0,4);let r=0,total=0,good=0;O.setScreen('sTal','final',back);const s=$('#sTal');
   const run=()=>{const p=rounds[r];T.hudT('קֶצֶב',T.progressBar(r,rounds.length));s.innerHTML='';const bar=h('div','rbar',p.map((b,i)=>`<span class="rb2" data-i="${i}">${beatSVG(b)}</span>`).join(''));
     const msg=h('div','lcap','לְחַץ "הַתְחֵל". אַחֲרֵי 4 נְקִישׁוֹת, הַקֵּשׁ עַל הַתֹּף בַּקֶּצֶב.');const drum=h('button','drum','🥁');const go=h('button','bigbtn',ICON.play+'<span>הַתְחֵל</span>');s.append(bar,msg,drum,go);
     let taps=[],t0=0,running=false;const beat=60/80;const tap=()=>{if(!running)return;taps.push(performance.now());drum.classList.remove('hit');void drum.offsetWidth;drum.classList.add('hit');if(O.audio()&&(O.save.snd|0)>=1)O.noise(O.A.ctx.currentTime,.12,{ft:'lowpass',f:600,vol:.5});};
@@ -342,7 +342,7 @@ const SONGS=[['נַצְנְצִי כּוֹכָב',[60,60,67,67,69,69,67,65,65,64
  ['שִׁיר הַשִּׂמְחָה',[64,64,65,67,67,65,64,62,60,60,62,64,64,62,62,64,64,65,67,67,65,64,62,60,60,62,64,62,60,60]],
  ['יוֹנָתָן הַקָּטָן',[67,64,64,65,62,62,60,62,64,65,67,67,67,67,64,64,65,62,62,60,64,67,67,60]],
  ['אָחִי יַעֲקֹב',[67,69,71,67,67,69,71,67,71,72,74,71,72,74,74,76,74,72,71,67,74,76,74,72,71,67,67,62,67,67,62,67]]];
-function piano(back,songIdx){O.setScreen('sTal','clock',back);const s=$('#sTal');s.innerHTML='';const song=songIdx!=null?SONGS[songIdx]:null;
+function piano(back,songIdx){O.setScreen('sTal','final',back);const s=$('#sTal');s.innerHTML='';const song=songIdx!=null?SONGS[songIdx]:null;
   T.hudT(song?song[0]:'פְּסַנְתֵּר');let pos=0,err=0,rec=null,recT=0,last=[];
   const top=h('div','ptop');const kb=h('div','piano');s.append(top,kb);
   WHITE.forEach((m,i)=>{const k=h('button','pw',`<span>${nameOf(m)}</span><small class="ltr">${'ASDFGHJKL;'[i]}</small>`);k.dataset.m=m;k.onpointerdown=e=>{e.preventDefault();press(m);};kb.appendChild(k);});
@@ -359,12 +359,12 @@ function piano(back,songIdx){O.setScreen('sTal','clock',back);const s=$('#sTal')
     const sr=h('div','acts');SONGS.forEach((sg,i)=>{const c=h('button','actc',`<span class="ai">${X.note}</span><span class="an">${sg[0]}</span>`);c.onclick=()=>piano(back,i);sr.appendChild(c);});s.appendChild(h('div','lcap','אוֹ בְּחַר שִׁיר לְנַגֵּן לְפִי הָאוֹר:'));s.appendChild(sr);}
   else{const b=h('button','bigbtn plain sm',ICON.redo+'<span>לִשְׁמֹעַ אֶת הַשִּׁיר</span>');b.onclick=()=>song[1].forEach((m,i)=>playMidi(m,.45,.8,i*.42));s.appendChild(b);}
   glow();window.__piano={press,get pos(){return pos;},song};}
-building({id:'music',name:'אוּלַם הַמּוּזִיקָה',color:'#b8860b',bg:'clock',icon:()=>X.note,blurb:'תָּוִים, קֶצֶב וּנְגִינָה. אֶפְשָׁר לְנַגֵּן גַּם בַּמִּקְלֶדֶת.',acts:[
-  {id:'mus-notes',name:'שְׁמוֹת הַתָּוִים',icon:()=>X.note,run:back=>quiz({id:'mus-notes',title:'שְׁמוֹת הַתָּוִים',bg:'clock',back,n:8,gen:i=>{const lvl=i<3?[0,2,4]:i<6?[0,1,2,3,4,5,6]:[0,1,2,3,4,5,6,7];const idx=pick(lvl);const right=SOL[idx%7];const opts=shuffle([right,...shuffle(SOL.filter(x=>x!==right)).slice(0,2)]);
+building({id:'music',name:'אוּלַם הַמּוּזִיקָה',color:'#b8860b',bg:'final',icon:()=>X.note,blurb:'תָּוִים, קֶצֶב וּנְגִינָה. אֶפְשָׁר לְנַגֵּן גַּם בַּמִּקְלֶדֶת.',acts:[
+  {id:'mus-notes',name:'שְׁמוֹת הַתָּוִים',icon:()=>X.note,run:back=>quiz({id:'mus-notes',title:'שְׁמוֹת הַתָּוִים',bg:'final',back,n:8,gen:i=>{const lvl=i<3?[0,2,4]:i<6?[0,1,2,3,4,5,6]:[0,1,2,3,4,5,6,7];const idx=pick(lvl);const right=SOL[idx%7];const opts=shuffle([right,...shuffle(SOL.filter(x=>x!==right)).slice(0,2)]);
      return {pr:`${staff(idx)}<div class="qq">אֵיזֶה תָּו זֶה?</div>`,opts,ans:opts.indexOf(right),cls:'tx',play:()=>playMidi(midiOf(idx)),auto:1,key:'n'+idx+'-'+i};}})},
-  {id:'mus-dur',name:'אֹרֶךְ הַתָּוִים',icon:()=>durSVG('h'),run:back=>quiz({id:'mus-dur',title:'אֹרֶךְ הַתָּוִים',bg:'clock',back,n:8,gen:i=>{const d=pick(DUR);if(i%2){const opts=shuffle(DUR.map(x=>String(x[1])));return {pr:`${durSVG(d[2])}<div class="qq">כַּמָּה פְּעָמוֹת נִמְשָׁךְ תָּו ${d[0]}?</div>`,opts,ans:opts.indexOf(String(d[1])),cls:'',ltr:1,key:'b'+d[2]+i};}
+  {id:'mus-dur',name:'אֹרֶךְ הַתָּוִים',icon:()=>durSVG('h'),run:back=>quiz({id:'mus-dur',title:'אֹרֶךְ הַתָּוִים',bg:'final',back,n:8,gen:i=>{const d=pick(DUR);if(i%2){const opts=shuffle(DUR.map(x=>String(x[1])));return {pr:`${durSVG(d[2])}<div class="qq">כַּמָּה פְּעָמוֹת נִמְשָׁךְ תָּו ${d[0]}?</div>`,opts,ans:opts.indexOf(String(d[1])),cls:'',ltr:1,key:'b'+d[2]+i};}
      const opts=shuffle(DUR.map(x=>x[0]));return {pr:`${durSVG(d[2])}<div class="qq">אֵיזֶה תָּו זֶה?</div>`,opts,ans:opts.indexOf(d[0]),cls:'tx',key:'n'+d[2]+i};}})},
-  {id:'mus-ear',name:'אֹזֶן מוּזִיקָלִית',icon:()=>'<span style="font-size:34px">👂</span>',run:back=>quiz({id:'mus-ear',title:'אֹזֶן מוּזִיקָלִית',bg:'clock',back,n:8,gen:i=>{const a=rand(60,72);const same=i%4===3;const b=same?a:a+(Math.random()<.5?-1:1)*rand(3,7);const opts=['גָּבוֹהַּ יוֹתֵר','נָמוּךְ יוֹתֵר','אוֹתוֹ צְלִיל'];const ans=same?2:b>a?0:1;
+  {id:'mus-ear',name:'אֹזֶן מוּזִיקָלִית',icon:()=>'<span style="font-size:34px">👂</span>',run:back=>quiz({id:'mus-ear',title:'אֹזֶן מוּזִיקָלִית',bg:'final',back,n:8,gen:i=>{const a=rand(60,72);const same=i%4===3;const b=same?a:a+(Math.random()<.5?-1:1)*rand(3,7);const opts=['גָּבוֹהַּ יוֹתֵר','נָמוּךְ יוֹתֵר','אוֹתוֹ צְלִיל'];const ans=same?2:b>a?0:1;
      return {pr:`<div class="qq">הַקְשֵׁב לִשְׁנֵי צְלִילִים. הַשֵּׁנִי...</div>`,opts,ans,cls:'tx',play:()=>{playMidi(a,.5);playMidi(b,.5,1,.6);},auto:1,playLbl:'שׁוּב',key:a+'-'+b+'-'+i};}})},
   {id:'mus-rhythm',name:'קֶצֶב',icon:()=>'<span style="font-size:34px">🥁</span>',run:rhythm},
   {id:'mus-piano',name:'פְּסַנְתֵּר',icon:()=>X.keys,run:back=>piano(back)}]});

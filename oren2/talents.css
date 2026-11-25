@@ -469,3 +469,6 @@ button:focus:not(:focus-visible){outline:none}
 .tcell:not(.m){background:#f6f1e4;color:#5a646d}
 @media (max-width:760px){.tgrid{gap:2px;padding:3px}.tcell{font-size:13px}}
 .trw{display:flex;align-items:center;gap:10px;direction:ltr}.tre{font-size:30px}
+/* password fields wide enough for their hint; no focus ring on big buttons focused by the game itself */
+.plog .pgin{width:min(260px,70vw);font-size:22px}
+.bigbtn:focus:not(:focus-visible),.bigbtn:focus{outline:none}
