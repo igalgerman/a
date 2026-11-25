@@ -2461,6 +2461,18 @@ button:focus:not(:focus-visible){outline:none}
 .prz .rate span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.prz .rate svg{display:inline-block}
 .corner{height:42%}
 @media (max-width:760px){.arc.game,.arc.prz{min-height:calc(100dvh - 120px)}}
+
+/* ===== reading: 🔊 + lit-up words ===== */
+.rdb{display:inline-grid;place-items:center;width:34px;height:34px;padding:0;margin-inline-end:8px;font-size:18px;line-height:1;background:#fff;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.12),0 3px 0 rgba(0,0,0,.18);vertical-align:middle;cursor:pointer}
+@media (hover:hover){.rdb:hover{filter:brightness(1.06)}}
+.rdb:active{transform:translateY(2px)}
+.rdb.pulse{animation:pulse 1.6s ease-in-out infinite}
+.rw{border-radius:5px;transition:background .12s,box-shadow .12s}
+.rw.on{background:#ffe27a;box-shadow:0 0 0 3px #ffe27a}
+.rdcue{font-size:15px;font-weight:700;color:var(--ink-soft);margin-top:2px}
+.sl .rdb,.hbub2 .rdb{width:28px;height:28px;font-size:15px}
+@media (max-width:760px){.rdb{width:30px;height:30px;font-size:16px}.sl .rdb,.hbub2 .rdb{width:26px;height:26px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.rdb.pulse{animation:none}}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */
@@ -2547,11 +2559,11 @@ function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400
   const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq');s.appendChild(wrap);
   const render=()=>{const q=qs[i];tries=0;lock=false;hudT(o.title,progressBar(i,qs.length));O.sayNow=q.say||plainHe(q.pr);
     wrap.innerHTML='';const card=h('div','prq tqc',q.pr);if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמַע'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
-    wrap.appendChild(card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+    wrap.appendChild(card);if(window.TAL.rdQ)window.TAL.rdQ(q,card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');if(q.auto&&q.play)setTimeout(()=>{if(qs[i]===q)q.play();},D(350));};
   const resolve=(q)=>{const ex=wrap.querySelector('.hintbox');if(q.explain){ex.hidden=false;ex.innerHTML=`<div class="cap">${q.explain}</div>`;}if(q.reveal)q.reveal(wrap.querySelector('.tqc'));};
   function pickA(k,b){if(lock||b.disabled)return;const q=qs[i];
-    if(k===q.ans){lock=true;b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
+    if(k===q.ans){if(window.TAL.rdA)window.TAL.rdA(q,tries,b);lock=true;b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);resolve(q);setTimeout(next,D(q.explain||q.reveal?2300:1000));return;}
     tries++;err++;b.classList.add('bad');b.disabled=true;sfx.no();
     if(tries>=2||q.opts.length<=2){lock=true;const c=wrap.querySelector('.chs').children[q.ans];c.classList.add('show');resolve(q);setTimeout(next,D(2600));}}
   function next(){if(!wrap.isConnected)return;i++;if(i>=qs.length){KEY=null;finishAct(o.id,err,qs.length,gems,o.back,()=>quiz(o),o.doneTitle);}else render();}
@@ -2713,8 +2725,8 @@ function readStory(k,back){const st=STORIES[k];O.setScreen('sTal','final',back);
   const page=h('div','story');page.innerHTML=`<div class="sth"><span>${ALLSPR(st.spr[0])}</span><h2>${st.t}</h2><span>${ALLSPR(st.spr[1])}</span></div>`+st.s.map((x,i)=>`<p class="sl" data-i="${i}">${x}</p>`).join('');s.appendChild(page);
   const row=h('div','btnrow');const rd=h('button','bigbtn blue sm',ICON.say+'<span>הַקְרֵא לִי</span>');const go=h('button','bigbtn',ICON.play+'<span>לַשְּׁאֵלוֹת</span>');row.append(rd,go);s.appendChild(row);
   const mark=i=>{page.querySelectorAll('.sl').forEach(p=>p.classList.toggle('cur',+p.dataset.i===i));};
-  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);O.say(T.spk(p.textContent));});
-  rd.onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(window.__fullSpell?window.__fullSpell(x):T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
+  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);if(T.readEl)T.readEl(p);else O.say(T.spk(p.textContent));});
+  rd.onclick=()=>{if(T.readSeq){T.readSeq([...page.querySelectorAll('.sl')],mark);return;}if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(window.__fullSpell?window.__fullSpell(x):T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
   go.onclick=()=>{O.hush();let qi=0;quiz({id:'story-'+k,title:st.t,bg:'final',back:()=>openStories(back),n:st.q.length,gen:()=>{const [q,a,ds]=st.q[qi++];const opts=shuffle([a,...ds]);return {pr:`<div class="sent">${q}</div>`,opts,ans:opts.indexOf(a),cls:'tx',key:q};}});};}
 function openStories(back){O.setScreen('sTal','final',back);T.hudT('סִפּוּרֵי עֶרֶב');const s=$('#sTal');s.innerHTML='';s.appendChild(h('div','whead',`<span class="gd">${X.moon}</span><h1>סִפּוּרֵי עֶרֶב</h1>`));
   const g=h('div','acts');STORIES.forEach((st,k)=>{const n=(T.S().tl['story-'+k]||{}).s|0;const c=h('button','actc',`<span class="ai">${ALLSPR(st.spr[0])}</span><span class="an">${st.t}</span><span class="st">${[0,1,2].map(j=>j<n?SPR.star:SPR.starOff).join('')}</span>`);c.onclick=()=>readStory(k,()=>openStories(back));g.appendChild(c);});s.appendChild(g);}
@@ -3399,7 +3411,7 @@ function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(
   s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>{openSec=null;panel(id);};tb.appendChild(b);});s.appendChild(tb);
   const body=h('div','pbody');s.appendChild(body);
   if(curTab==='sum')sumTab(body);
-  else if(curTab==='day'){timeTab(body);planTab(body);}
+  else if(curTab==='day'){timeTab(body);planTab(body);if(T.rdSettings)T.rdSettings(body,sec,()=>panel('day'));}
   else MORE.forEach(([id,n])=>{const d=document.createElement('details');d.className='pdet';const sm=document.createElement('summary');sm.textContent=n;d.appendChild(sm);const inner=h('div','pdin');d.appendChild(inner);let done=false;
     const fill=()=>{if(done)return;done=true;FN[id](inner);};d.addEventListener('toggle',()=>{if(d.open){openSec=id;fill();}});if(openSec===id){d.open=true;fill();}body.appendChild(d);});
   const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;
@@ -3825,6 +3837,85 @@ const RUN={balloon,soccer,basket,swim,mole,frog};
 function start(id){T.setKey(null);RUN[id]();}
 window.TAL_arcade=openArcade;T.arcade=openArcade;
 window.__arc={open:openArcade,start,get cur(){return cur;},finish:sc=>cur&&cur.finish(sc),hit:()=>cur&&cur.hit(),state:()=>A(),prize:()=>{}};
+})();
+
+/* ===== READING: "קוֹדֶם אַתָּה, אַחַר כָּךְ אֲנִי" =====
+   Every text Oren should read gets a small 🔊. Pressing it reads the text and lights up each word as it is said.
+   On quiz questions the game first lets him try; at level 1/2 it reads by itself after a pause.
+   Levels go up by themselves when he answers correctly without hearing the question first ("solo"). */
+(()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$}=O;const D=O.D;
+const HEB=/[א-ת]/;
+const RD=()=>{const s=T.S();s.rd=s.rd||{lvl:1,solo:0};return s.rd;};
+const mode=()=>{const m=(T.S().set||{}).rdMode;return m===1||m===2||m===3?m:'auto';};
+const level=()=>{const m=mode();return m==='auto'?((RD().lvl|0)||1):m;};
+const UP={1:25,2:85};                         /* solo answers needed to move up from level 1 / level 2 */
+const TARGETS='#sTal .tqc .qq,#sTal .tqc .sent,#sTal .sl,#sTal .lsent:not(.blab),#sHome .hbub2';
+
+/* ---- words: wrap each word once, keep the element's own markup ---- */
+function words(el){if(el._rw&&el._rw.length&&el._rw.every(w=>w.isConnected))return el._rw;const out=[];
+  const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest('.rdb,.rdcue,.tleft,svg,button')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[];while(tw.nextNode())nodes.push(tw.currentNode);
+  for(const n of nodes){if(!n.nodeValue.trim())continue;const f=document.createDocumentFragment();
+    for(const p of n.nodeValue.split(/(\s+)/)){if(!p)continue;if(/^\s+$/.test(p)){f.appendChild(document.createTextNode(p));continue;}const sp=document.createElement('span');sp.className='rw';sp.textContent=p;f.appendChild(sp);out.push(sp);}
+    n.parentNode.replaceChild(f,n);}
+  el._rw=out;return out;}
+
+/* ---- speaking with lit-up words ---- */
+let cur=null;
+function stop(){if(!cur)return;const r=cur;cur=null;r.timers.forEach(clearTimeout);r.words.forEach(w=>w.classList.remove('on'));r.el.classList.remove('reading');r.resolve();}
+const light=(r,k)=>r.words.forEach((w,j)=>w.classList.toggle('on',j===k));
+const rate=()=>(((T.S().set||{}).voice||{}).rate)||1;
+function estimate(r,from){r.timers.forEach(clearTimeout);r.timers=[];let t=0;
+  for(let k=from;k<r.words.length;k++){const len=(r.words[k].textContent.match(/[א-תA-Za-z0-9]/g)||[]).length;r.timers.push(setTimeout(()=>{if(cur===r)light(r,k);},t));t+=(170+70*len)/rate();}
+  r.timers.push(setTimeout(()=>{if(cur===r)stop();},t+250));}
+/* watch the browser voice of OUR reading for word boundaries (the voice engine itself is untouched) */
+function attach(u,r){const starts=[];String(u.text||'').replace(/\S+/g,(m,o)=>{starts.push(o);return m;});const n=r.words.length;
+  const idx=ci=>{let k=0;for(let j=0;j<starts.length;j++){if(starts[j]<=ci)k=j;else break;}return starts.length===n?k:Math.min(n-1,Math.round(k*n/Math.max(1,starts.length)));};
+  u.addEventListener('start',()=>{if(cur!==r)return;r.started=true;r.timers.forEach(clearTimeout);r.timers=[];r.timers.push(setTimeout(()=>{if(cur===r&&!r.gotB)estimate(r,0);},600));});
+  u.addEventListener('boundary',e=>{if(cur!==r||(e.name&&e.name!=='word'))return;r.gotB=true;r.timers.forEach(clearTimeout);r.timers=[];light(r,idx(e.charIndex|0));});
+  const end=()=>{if(cur===r)stop();};u.addEventListener('end',end);u.addEventListener('error',end);}
+(()=>{try{const ss=window.speechSynthesis;if(!ss)return;const orig=ss.speak.bind(ss);ss.speak=u=>{if(cur&&!cur.u&&u&&u.lang!=='en-US'){cur.u=u;attach(u,cur);}return orig(u);};}catch(e){}})();
+function readEl(el){stop();const ws=words(el);if(!ws.length)return Promise.resolve();heard(el);
+  const cue=el.parentNode&&el.parentNode.querySelector('.rdcue');if(cue)cue.remove();
+  return new Promise(res=>{const r={el,words:ws,timers:[],resolve:res};cur=r;el.classList.add('reading');
+    O.say(ws.map(w=>w.textContent).join(' '));
+    r.timers.push(setTimeout(()=>{if(cur===r&&!r.started&&!r.gotB)estimate(r,0);},700));});}
+let seqTok=0;
+async function readSeq(els,mark){const tok=++seqTok;for(let i=0;i<els.length;i++){if(tok!==seqTok||!els[i].isConnected)return;if(mark)mark(i);await readEl(els[i]);if(tok!==seqTok)return;}}
+T.readEl=el=>{seqTok++;return readEl(el);};T.readSeq=readSeq;T.readStop=()=>{seqTok++;stop();};
+
+/* ---- the 🔊 button on every readable text ---- */
+function decorate(el){if(el.dataset.rd||!HEB.test(el.textContent))return;el.dataset.rd='1';
+  const b=h('button','rdb','🔊');b.type='button';b.setAttribute('aria-label','הקראה');b.onclick=e=>{e.stopPropagation();O.sfx.pop(1);T.readEl(el);};el.prepend(b);}
+const decorateAll=()=>document.querySelectorAll(TARGETS).forEach(decorate);
+let raf=0;const mo=new MutationObserver(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;decorateAll();});});
+['#sTal','#sHome'].forEach(id=>{const e=$(id);if(e)mo.observe(e,{childList:true,subtree:true});});
+
+/* ---- quiz questions: try first, then the game reads ---- */
+let Q=null;
+function heard(el){if(Q&&Q.card&&Q.card.contains(el))Q.heard=true;}
+function clearQ(){if(Q){Q.timers.forEach(clearTimeout);Q.timers=[];}}
+T.rdQ=(q,card)=>{clearQ();decorateAll();const target=card.querySelector('.qq')||card.querySelector('.sent');
+  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};if(!Q.target)return;
+  const lv=level(),btn=Q.target.querySelector('.rdb');if(lv===3)return;
+  if(lv===2&&btn)btn.classList.add('pulse');
+  Q.target.after(h('div','rdcue','נַסֵּה לִקְרֹא 👀'));
+  const me=Q,wrap=card.parentNode;if(wrap&&!wrap._rdL){wrap._rdL=1;wrap.addEventListener('click',e=>{if(Q&&e.target.closest('.chb'))Q.answered=true;},true);}
+  me.timers.push(setTimeout(()=>{if(Q===me&&!me.answered&&!me.heard&&me.target.isConnected)T.readEl(me.target);},D(lv===1?3000:8000)));};
+T.rdA=(q,tries,b)=>{if(!Q||Q.q!==q||!Q.target)return;clearQ();if(tries||Q.heard)return;
+  const r=RD();r.solo=(r.solo|0)+1;
+  if(mode()==='auto'&&UP[r.lvl]&&r.solo>=UP[r.lvl]){r.lvl++;O.floatText(Q.card,'🎉 עָלִיתָ שָׁלָב בִּקְרִיאָה!');}
+  else if(r.solo%4===1)O.floatText(Q.card,'קָרָאתָ לְבַד! ⭐');
+  O.persist();};
+O.on('screen',()=>{clearQ();Q=null;seqTok++;stop();});
+
+/* ---- parent: one setting ---- */
+T.rdSettings=(body,sec,refresh)=>{const r=RD(),m=mode();
+  const box=sec(body,'📖 קריאה',`<div class="pnote">כשאורן רואה שאלה, הוא מנסה לקרוא לבד. אם לא הצליח, המשחק מקריא לו ומדגיש כל מילה בזמן שהיא נאמרת. ליד כל טקסט יש 🔊 לשמיעה.</div><div class="pnote">שלב נוכחי: <b>${level()}</b> · ענה נכון בלי הקראה: <b>${r.solo|0}</b> פעמים${m==='auto'&&UP[r.lvl]?` · לשלב הבא: ${UP[r.lvl]}`:''}</div>`);
+  const row=h('div','popt','<span>שלב:</span>');
+  [['auto','אוטומטי (מומלץ)'],[1,'1 · מקריאים אחרי 3 שניות'],[2,'2 · מקריאים אחרי 8 שניות'],[3,'3 · קורא לבד']].forEach(([v,n])=>{const c=h('button','pchip'+(m===v?' on':''),n);c.onclick=()=>{T.S().set.rdMode=v;O.persist();refresh();};row.appendChild(c);});
+  box.appendChild(row);};
+window.__rd={level,mode,RD,decorateAll,get cur(){return cur;}};
 })();
 
 </script>
