@@ -19,7 +19,7 @@ async function api(req,env,id){if(!/^[a-f0-9]{32}$/.test(id))return new Response
  return new Response('{"error":"method"}',{status:405,headers:JH});}
 /* Google voice: classic voices only (Standard/WaveNet), every sentence created once and kept forever in KV,
    plus a monthly character cap far below Google's free tier. */
-const TTS_CAP=250000;const VOICES=/^he-IL-(Standard|Wavenet)-[A-D]$/;
+const TTS_CAP=250000;const VOICES=/^he-IL-((Standard|Wavenet)-[A-D]|Chirp3-HD-[A-Za-z]+)$/;
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function tts(req,env,u){if(!env.GOOGLE_TTS_KEY)return new Response('{"ok":false,"why":"no key"}',{status:503,headers:JH});
  if(u.pathname==='/api/tts/status')return new Response('{"ok":true}',{headers:JH});
