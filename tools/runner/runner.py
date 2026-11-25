@@ -51,7 +51,7 @@ def select(issues, max_parallel):
              and "in-progress" not in i["labels"] and "blocked" not in i["labels"]
              and not any(b in open_nums for b in blockers(i.get("body")))]
     chosen = []
-    for i in sorted(ready, key=lambda i: i["createdAt"]):
+    for i in sorted(ready, key=lambda i: ("bug" not in i["labels"], i["createdAt"])):   # bugs first
         if slots <= 0:
             break
         if lane_of(i["labels"]) == "core":
@@ -209,13 +209,16 @@ def launch_self():
     print(out.strip() or f"started terminal {name}")
     return rc
 
-def worker_prompt(n, lane, review_text=None):
+def worker_prompt(n, lane, review_text=None, bug=False):
     base = (f"You are an unattended worker for GitHub issue #{n} in repo {REPO} (lane: {lane}). Read CLAUDE.md and FLOW.md, then the issue "
             f"(`gh issue view {n} --repo {REPO} --comments`). Work only inside this worktree (your cwd). Implement ONLY what the issue asks.\n")
     if lane == "review":
         return base + (f"This is a read-only review issue: change NO files, make no commits, open no PR. Post your report as ONE issue comment "
                        f"(`gh issue comment {n} --repo {REPO} --body-file <file>`; write the file under oren2/tests/.tmp/). "
                        "End your output with a line `RESULT: DONE` or `RESULT: STUCK <why>`.")
+    if bug:
+        base += ("This is a BUG: first reproduce it with a failing test (add it to the relevant suite in oren2/tests/), then fix it so the test passes; "
+                 "say the root cause in the PR body.\n")
     steps = ("Steps: 1) implement; 2) python3 build_talents.py (in oren2/, PATH already has python3) and run the build + the suites for what you changed, muted "
              "(see FLOW.md); 3) for each changed screen take screenshots at phone 390x844 and desktop 1366x768 into "
              f"oren2/tests/.tmp/shots-{n}/ and LOOK at them (simple, one main action, Hebrew with nikud); 4) commit (do NOT commit oren2/index.html "
@@ -298,7 +301,7 @@ def process_locked(issue):
         rc, _ = run([BASH, "tools/lane.sh", str(n), BRANCH], cwd=ROOT, env={"REMOTE": REMOTE}, log=log)
         if rc: raise Blocked("lane.sh failed")
 
-        out, res = agent(f"issue-{n}", worker_prompt(n, lane), wt, WORKER_TOOLS if lane != "review" else REVIEW_LANE_TOOLS,
+        out, res = agent(f"issue-{n}", worker_prompt(n, lane, bug="bug" in issue["labels"]), wt, WORKER_TOOLS if lane != "review" else REVIEW_LANE_TOOLS,
                          d / "worker1.log", "RESULT:", n, "worker")
         (d / "worker1.out").write_text(redact(out), encoding="utf-8")
         if not res.startswith("RESULT: DONE"):
@@ -320,7 +323,7 @@ def process_locked(issue):
                 raise Blocked(verdict or "reviewer gave no VERDICT line")
             if rnd == 2:
                 block(n, "reviewer asked for fixes twice; needs a human", log, human=True); return "BLOCKED: reviewer asked for fixes twice; needs a human"
-            out, res = agent(f"issue-{n}-fix", worker_prompt(n, lane, rv), wt, WORKER_TOOLS, d / "worker2.log", "RESULT:", n, "worker")
+            out, res = agent(f"issue-{n}-fix", worker_prompt(n, lane, rv, bug="bug" in issue["labels"]), wt, WORKER_TOOLS, d / "worker2.log", "RESULT:", n, "worker")
             if not res.startswith("RESULT: DONE"):
                 raise Blocked(res or "fix worker gave no RESULT line")
 

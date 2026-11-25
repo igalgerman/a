@@ -30,3 +30,9 @@ _q = [{"number": 1, "labels": ["core"], "createdAt": "1"},
 assert [i["number"] for i in _sel(_q, 3)] == [4]
 assert [i["number"] for i in _sel(_q[1:], 3)] == [3, 4]
 print("ok blocked-by")
+
+# bugs jump the queue
+_q2 = [{"number": 5, "labels": ["pack", "ready-for-agent"], "createdAt": "1"},
+       {"number": 6, "labels": ["pack", "ready-for-agent", "bug"], "createdAt": "2"}]
+assert [i["number"] for i in _sel(_q2, 1)] == [6]
+print("ok bugs-first")
