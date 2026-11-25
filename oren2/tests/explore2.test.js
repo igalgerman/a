@@ -28,7 +28,7 @@ const noNikud = s => String(s).replace(/<[^>]+>/g, ' ').split(/[\s\-–.,:;!?()"
   /* ---------- data checks ---------- */
   const d = await p.evaluate(() => {
     const E = window.EXPLORE2, D = E.DATA, out = {};
-    out.ids = E.ids(); out.skills = E.SKILLS; out.planets = D.PLANETS.map(x => x.k); out.hol = D.HOL_ORDER;
+    out.ids = E.ids(); out.psz = Object.fromEntries(D.PLANETS.map(x => [x.k, x.r])); out.skills = E.SKILLS; out.planets = D.PLANETS.map(x => x.k); out.hol = D.HOL_ORDER;
     out.inv = D.INV.map(x => [x.k, x.ago]); out.cities = D.CITIES; out.cont = D.CONT; out.fcont = D.FCONT;
     out.banks = Object.entries(D.banks()).map(([id, bank]) => [id, bank.map(q => ({ lv: q.lv, q: q.q, a: q.a, ds: q.ds }))]);
     out.kid = E.kidTexts();
@@ -50,6 +50,7 @@ const noNikud = s => String(s).replace(/<[^>]+>/g, ' ').split(/[\s\-–.,:;!?()"
   ok(d.ids.length >= 24 && new Set(d.ids).size === d.ids.length, `activity ids unique (${d.ids.length})`);
   ok(d.ids.every(id => d.skills[id] && !NIK.test(d.skills[id])), 'every activity has a parent skill name (no nikud)');
   ok(JSON.stringify(d.planets) === JSON.stringify(['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']), 'planet order Mercury→Neptune');
+  ok(['mercury', 'mars', 'venus', 'earth', 'neptune', 'uranus', 'saturn', 'jupiter'].every((k, i, A) => !i || d.psz[A[i - 1]] < d.psz[k]), 'planet pictures: sizes in the true order (Mercury smallest, Jupiter biggest)');
   ok(JSON.stringify(d.hol) === JSON.stringify(['rh', 'yk', 'suk', 'han', 'tu', 'pur', 'pes', 'atz', 'lag', 'shav']), 'holidays in calendar order from Rosh Hashana');
   ok(d.inv.every((x, i) => !i || d.inv[i - 1][1] > x[1]), 'inventions sorted oldest→newest ' + d.inv.map(x => x[0]).join(','));
   const C = d.cities, y = k => C[k].xy[1], x = k => C[k].xy[0];

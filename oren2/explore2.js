@@ -17,6 +17,7 @@ const moon=(ph,cx,cy,r)=>{const lit='#fff1a8',dk='#3b3f5c';
   const base=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${dk}" stroke="#8a8fb0" stroke-width="2"/>`;if(ph==='new')return base;
   const inner=ph==='half'?'':` A ${r*.5} ${r} 0 0 0 ${cx} ${cy-r}`;
   return base+`<path d="M ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx} ${cy+r}${ph==='half'?` L ${cx} ${cy-r}`:inner} Z" fill="${lit}"/>`;};
+const MOONF=SV('0 0 120 120',`<rect width="120" height="120" rx="12" fill="#1d2140"/>`+moon('full',60,60,44));
 const MOONS=SV('0 0 400 110',`<rect width="400" height="110" rx="14" fill="#1d2140"/>${[['new',335],['cres',245],['half',155],['full',65]].map(([p,x])=>moon(p,x,55,34)).join('')}`);
 const pl=(k,cx,cy,r)=>{const id='e2c'+(++uid);const clip=b=>`<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><g clip-path="url(#${id})">${b}</g>`;
   const c=(f,rr=r)=>`<circle cx="${cx}" cy="${cy}" r="${rr}" fill="${f}"/>`;
@@ -30,12 +31,12 @@ const pl=(k,cx,cy,r)=>{const id='e2c'+(++uid);const clip=b=>`<clipPath id="${id}
     case 'uranus':return c('#8fd6e0')+clip(`<rect x="${cx-r}" y="${cy-r*.1}" width="${2*r}" height="${r*.15}" fill="#a9e3ea"/>`);
     case 'neptune':return c('#3f63d6')+`<ellipse cx="${cx-r*.25}" cy="${cy-r*.2}" rx="${r*.25}" ry="${r*.14}" fill="#2b47a8"/>`;}
   return '';};
-const PLANETS=[['mercury','כּוֹכַב חַמָּה',8],['venus','נֹגַהּ',12],['earth','כַּדּוּר הָאָרֶץ',12.5],['mars','מַאְדִּים',10],['jupiter','צֶדֶק',25],['saturn','שַׁבְּתַאי',16],['uranus','אוּרָנוּס',16],['neptune','נֶפְטוּן',15.5]].map(([k,n,r])=>({k,n,r}));
+const PLANETS=[['mercury','כּוֹכַב חַמָּה',6.5],['venus','נֹגַהּ',9.5],['earth','כַּדּוּר הָאָרֶץ',10],['mars','מַאְדִּים',7.5],['jupiter','צֶדֶק',26],['saturn','שַׁבְּתַאי',17],['uranus','אוּרָנוּס',15],['neptune','נֶפְטוּן',14.5]].map(([k,n,r])=>({k,n,r}));
 const PL=k=>PLANETS.find(p=>p.k===k);
 const planetSVG=k=>SV('-30 -30 60 60',pl(k,0,0,PL(k).r));
-const ROWX=[355,328,300,272,222,155,95,45],ROWR=[4,7,7.5,5.5,22,15,11,10.5];
-const planetRow=(names,hi)=>SV('0 0 400 '+(names?120:96),`<rect width="400" height="${names?120:96}" rx="14" fill="#1d2140"/><circle cx="430" cy="48" r="60" fill="#ffcf4d"/>`+
-  PLANETS.map((p,i)=>`<g opacity="${hi&&!hi.includes(p.k)?.35:1}">${pl(p.k,ROWX[i],48,ROWR[i])}${names?`<text x="${ROWX[i]}" y="${i%2?112:100}" class="e2lbl" font-size="10">${p.n}</text>`:''}</g>`).join(''));
+const ROWX=[496,456,414,372,306,222,148,80],ROWR=[5,8,8.5,6.5,25,17,12,11.5];
+const planetRow=(names,hi)=>SV('0 0 560 '+(names?150:110),`<rect width="560" height="${names?150:110}" rx="14" fill="#1d2140"/><circle cx="600" cy="55" r="70" fill="#ffcf4d"/>`+
+  PLANETS.map((p,i)=>`<g opacity="${hi&&!hi.includes(p.k)?.3:1}">${pl(p.k,ROWX[i],55,ROWR[i])}${names?`<text x="${ROWX[i]}" y="${i%2?138:112}" class="e2lbl" font-size="16">${p.n}</text>`:''}</g>`).join(''),'e2wide');
 const EARTH_DN=SV('0 0 400 170',`<rect width="400" height="170" rx="14" fill="#1d2140"/><circle cx="345" cy="85" r="42" fill="#ffcf4d"/><g stroke="#ffcf4d" stroke-width="4" opacity=".55">${[-30,-15,0,15,30].map(d=>`<line x1="290" y1="${85+d}" x2="200" y2="${85+d*1.4}"/>`).join('')}</g>
   ${pl('earth',120,85,62)}<path d="M120 23 A62 62 0 0 0 120 147 Z" fill="rgba(8,12,35,.62)"/><text x="160" y="90" class="e2lbl" font-size="15" fill="#1d2631">☀ יוֹם</text><text x="80" y="90" class="e2lbl" font-size="15" style="fill:#fff;stroke:none">לַיְלָה</text>
   <path d="M75 15 A70 70 0 0 1 170 20" fill="none" stroke="#fff" stroke-width="3" marker-end="url(#e2ar)"/><defs><marker id="e2ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#fff"/></marker></defs>`);
@@ -84,11 +85,11 @@ const GULF=[[29.55,34.95],[29.53,35.0],[29.37,35.0],[29.2,34.95],[29.2,34.76],[2
 const DEAD=[[31.77,35.53],[31.72,35.59],[31.50,35.58],[31.35,35.56],[31.15,35.50],[31.05,35.43],[31.10,35.38],[31.46,35.39],[31.70,35.45]];
 const KIN=[[32.89,35.6],[32.85,35.64],[32.78,35.65],[32.71,35.60],[32.70,35.57],[32.74,35.54],[32.80,35.52],[32.87,35.54]];
 const JORDAN=[[33.2,35.62],[33.0,35.61],[32.89,35.6]],JORDAN2=[[32.70,35.57],[32.5,35.57],[32.2,35.55],[32.0,35.53],[31.77,35.53]];
-const CITIES={jer:['יְרוּשָׁלַיִם',[31.78,35.22],[0,17]],ta:['תֵּל אָבִיב',[32.08,34.80],[30,-4]],hai:['חֵיפָה',[32.79,35.03],[22,4]],bs:['בְּאֵר שֶׁבַע',[31.25,34.79],[0,17]],eil:['אֵילַת',[29.56,34.95],[-24,-2]]};
-const SEAS={med:['הַיָּם הַתִּיכוֹן',[32.3,34.25]],kin:['הַכִּנֶּרֶת',[32.8,35.585],[20,-14]],dead:['יָם הַמֶּלַח',[31.42,35.49],[-2,50]],red:['יָם סוּף',[29.35,34.88],[-34,5]]};
+const CITIES={jer:['יְרוּשָׁלַיִם',[31.78,35.22],[-4,20]],ta:['תֵּל אָבִיב',[32.08,34.80],[34,-6]],hai:['חֵיפָה',[32.79,35.03],[24,5]],bs:['בְּאֵר שֶׁבַע',[31.25,34.79],[6,20]],eil:['אֵילַת',[29.56,34.95],[-28,-2]]};
+const SEAS={med:['הַיָּם הַתִּיכוֹן',[32.45,34.18]],kin:['הַכִּנֶּרֶת',[32.8,35.585],[14,-16]],dead:['יָם הַמֶּלַח',[31.42,35.49],[-4,52]],red:['יָם סוּף',[29.35,34.88],[-36,5]]};
 const REGIONS={galil:['הַגָּלִיל',[[33.1,35.11],[33.2,35.6],[32.72,35.55],[32.6,35.3],[32.75,35.12]],[32.95,35.33]],negev:['הַנֶּגֶב',[[31.35,34.25],[31.3,35.3],[30.6,35.2],[29.6,34.99],[29.55,34.9],[30.4,34.45]],[30.6,34.85]]};
 const cityPos=k=>ilP(CITIES[k][1]);
-function ilMap(o={}){const lab=o.labels||[],hit=o.hit||'';const L=(k,n,[x,y],off=[0,0],fs=11)=>lab.includes(k)?`<text x="${x+off[0]}" y="${y+off[1]}" class="e2lbl" font-size="${fs}">${n}</text>`:'';
+function ilMap(o={}){const lab=o.labels||[],hit=o.hit||'';const L=(k,n,[x,y],off=[0,0],fs=14)=>lab.includes(k)?`<text x="${x+off[0]}" y="${y+off[1]}" class="e2lbl" font-size="${fs}">${n}</text>`:'';
   let s=`<defs><linearGradient id="e2land" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8d08d"/><stop offset=".45" stop-color="#cfe0a0"/><stop offset=".6" stop-color="#ead39a"/><stop offset="1" stop-color="#e6c27f"/></linearGradient></defs>
   <rect x="0" y="0" width="204" height="420" fill="url(#e2land)"/>
   <polygon points="0,0 ${pts(MED)} 0,232" fill="#7cc3ea" data-k="med" class="${hit==='sea'?'e2hit':''}"/>
@@ -99,9 +100,9 @@ function ilMap(o={}){const lab=o.labels||[],hit=o.hit||'';const L=(k,n,[x,y],off
   if(hit==='region')for(const k in REGIONS)s+=`<polygon points="${pts(REGIONS[k][1])}" fill="transparent" stroke="${lab.includes(k)?'#6b4423':'none'}" stroke-dasharray="4 3" data-k="${k}" class="e2hit"/>`;
   for(const k in CITIES){const [x,y]=cityPos(k);s+=`<circle cx="${x}" cy="${y}" r="4.5" fill="#e4572e" stroke="#fff" stroke-width="2"/>${hit==='city'?`<circle cx="${x}" cy="${y}" r="15" fill="transparent" data-k="${k}" class="e2hit"/>`:''}`;}
   s+=`<g class="e2lbls" pointer-events="none">`;
-  for(const k in SEAS){const [x,y]=ilP(SEAS[k][1]);s+=L(k,SEAS[k][0],[x,y],SEAS[k][2],k==='med'?12:10);}
+  for(const k in SEAS){const [x,y]=ilP(SEAS[k][1]);s+=L(k,SEAS[k][0],[x,y],SEAS[k][2],k==='med'?15:13);}
   for(const k in CITIES){const [x,y]=cityPos(k);s+=L(k,CITIES[k][0],[x,y],CITIES[k][2]);}
-  for(const k in REGIONS){const [x,y]=ilP(REGIONS[k][2]);s+=L(k,REGIONS[k][0],[x,y],[0,0],12);}
+  for(const k in REGIONS){const [x,y]=ilP(REGIONS[k][2]);s+=L(k,REGIONS[k][0],[x,y],[0,0],15);}
   s+=`</g>`+compass(186,22,13);
   return SV('0 0 204 420',s,'e2il');}
 const compass=(x,y,r)=>`<g pointer-events="none"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1d2631" stroke-width="1.5"/><path d="M${x} ${y-r+2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#e4572e"/><path d="M${x} ${y+r-2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#9aa1a8"/><text x="${x}" y="${y-r-3}" class="e2lbl" font-size="${r*.7}">צָפוֹן</text></g>`;
@@ -221,14 +222,14 @@ function mapQuiz(o){const items=o.items;let i=0,err=0,gems=0,tries=0,lock=false;
 /* ================= 🚀 SPACE ================= */
 const SKY_SUN=lessonAct({id:'sky-sun',name:'שֶׁמֶשׁ וְיָרֵחַ',icon:()=>SUN,bg:'final',skill:'מדע: שמש, ירח, יום ולילה',
  cards:[{lv:1,art:SUN,t:'הַשֶּׁמֶשׁ הִיא כּוֹכָב: כַּדּוּר עֲנָק וְחַם מְאוֹד, שֶׁנּוֹתֵן לָנוּ אוֹר וְחֹם.'},{lv:1,art:SUN,t:'הַשֶּׁמֶשׁ גְּדוֹלָה הַרְבֵּה יוֹתֵר מִכַּדּוּר הָאָרֶץ. הִיא נִרְאֵית קְטַנָּה כִּי הִיא רְחוֹקָה מְאוֹד.'},
-  {lv:1,art:EARTH_DN,t:'כַּדּוּר הָאָרֶץ מִסְתּוֹבֵב. הַצַּד שֶׁמּוּל הַשֶּׁמֶשׁ – יוֹם. הַצַּד הַשֵּׁנִי – לַיְלָה.'},{lv:1,art:SV('0 0 120 120',moon('full',60,60,44)),t:'הַיָּרֵחַ מִסְתּוֹבֵב סְבִיב כַּדּוּר הָאָרֶץ. הוּא לֹא מֵאִיר בְּעַצְמוֹ – הַשֶּׁמֶשׁ מְאִירָה אוֹתוֹ.'},
-  {lv:2,art:MOONS,t:'בְּכָל לַיְלָה הַיָּרֵחַ נִרְאֶה קְצָת אַחֶרֶת. פַּעַם הוּא דַּק כְּמוֹ בָּנָנָה, וּפַעַם הוּא עִגּוּל מָלֵא.'},{lv:2,art:SV('0 0 120 120',moon('full',60,60,44)),t:'בְּעֵרֶךְ פַּעַם בְּחֹדֶשׁ רוֹאִים יָרֵחַ מָלֵא.'},
+  {lv:1,art:EARTH_DN,t:'כַּדּוּר הָאָרֶץ מִסְתּוֹבֵב. הַצַּד שֶׁמּוּל הַשֶּׁמֶשׁ – יוֹם. הַצַּד הַשֵּׁנִי – לַיְלָה.'},{lv:1,art:MOONF,t:'הַיָּרֵחַ מִסְתּוֹבֵב סְבִיב כַּדּוּר הָאָרֶץ. הוּא לֹא מֵאִיר בְּעַצְמוֹ – הַשֶּׁמֶשׁ מְאִירָה אוֹתוֹ.'},
+  {lv:2,art:MOONS,t:'בְּכָל לַיְלָה הַיָּרֵחַ נִרְאֶה קְצָת אַחֶרֶת. פַּעַם הוּא דַּק כְּמוֹ בָּנָנָה, וּפַעַם הוּא עִגּוּל מָלֵא.'},{lv:2,art:MOONF,t:'בְּעֵרֶךְ פַּעַם בְּחֹדֶשׁ רוֹאִים יָרֵחַ מָלֵא.'},
   {lv:2,art:SUN,t:'הַשֶּׁמֶשׁ הִיא הַכּוֹכָב הֲכִי קָרוֹב אֵלֵינוּ. אֶת הַכּוֹכָבִים הָאֲחֵרִים רוֹאִים בַּלַּיְלָה.'},
   {lv:3,art:planetRow(false,['earth']),t:'כַּדּוּר הָאָרֶץ מַקִּיף אֶת הַשֶּׁמֶשׁ. סִבּוּב אֶחָד שָׁלֵם לוֹקֵחַ שָׁנָה.'},{lv:3,art:SUN,t:'אָסוּר לְהִסְתַּכֵּל יָשָׁר אֶל הַשֶּׁמֶשׁ – זֶה מַזִּיק לָעֵינַיִם!'}],
  bank:[Q(1,'מָה נוֹתֵן לָנוּ אוֹר וְחֹם בַּיּוֹם?','הַשֶּׁמֶשׁ',['הַיָּרֵחַ','הָעֲנָנִים']),Q(1,'הַשֶּׁמֶשׁ הִיא...','כּוֹכָב',['כּוֹכַב לֶכֶת','יָרֵחַ']),Q(1,'מִי הֲכִי גָּדוֹל?','הַשֶּׁמֶשׁ',['כַּדּוּר הָאָרֶץ','הַיָּרֵחַ']),
   Q(1,'לָמָּה יֵשׁ יוֹם וְלַיְלָה?','כַּדּוּר הָאָרֶץ מִסְתּוֹבֵב',['הַשֶּׁמֶשׁ הוֹלֶכֶת לִישֹׁן','הַיָּרֵחַ מַסְתִּיר אֶת הַשֶּׁמֶשׁ'],{art:EARTH_DN}),Q(1,'מִי מִסְתּוֹבֵב סְבִיב כַּדּוּר הָאָרֶץ?','הַיָּרֵחַ',['הַשֶּׁמֶשׁ','כָּל הַכּוֹכָבִים']),
   Q(1,'הַאִם הַיָּרֵחַ מֵאִיר בְּעַצְמוֹ?','לֹא, הַשֶּׁמֶשׁ מְאִירָה אוֹתוֹ',['כֵּן, יֵשׁ בּוֹ מְנוֹרָה','כֵּן, הוּא בּוֹעֵר']),
-  Q(2,'אֵיזֶה יָרֵחַ בַּתְּמוּנָה?','יָרֵחַ מָלֵא',['חֲצִי יָרֵחַ','יָרֵחַ דַּק'],{art:SV('0 0 120 120',moon('full',60,60,44))}),Q(2,'אֵיזֶה יָרֵחַ בַּתְּמוּנָה?','חֲצִי יָרֵחַ',['יָרֵחַ מָלֵא','יָרֵחַ דַּק'],{art:SV('0 0 120 120',`<rect width="120" height="120" rx="12" fill="#1d2140"/>`+moon('half',60,60,44))}),
+  Q(2,'אֵיזֶה יָרֵחַ בַּתְּמוּנָה?','יָרֵחַ מָלֵא',['חֲצִי יָרֵחַ','יָרֵחַ דַּק'],{art:MOONF}),Q(2,'אֵיזֶה יָרֵחַ בַּתְּמוּנָה?','חֲצִי יָרֵחַ',['יָרֵחַ מָלֵא','יָרֵחַ דַּק'],{art:SV('0 0 120 120',`<rect width="120" height="120" rx="12" fill="#1d2140"/>`+moon('half',60,60,44))}),
   Q(2,'אֵיזֶה יָרֵחַ בַּתְּמוּנָה?','יָרֵחַ דַּק',['יָרֵחַ מָלֵא','חֲצִי יָרֵחַ'],{art:SV('0 0 120 120',`<rect width="120" height="120" rx="12" fill="#1d2140"/>`+moon('cres',60,60,44))}),
   Q(2,'כָּל כַּמָּה זְמַן, בְּעֵרֶךְ, רוֹאִים יָרֵחַ מָלֵא?','פַּעַם בְּחֹדֶשׁ',['כָּל יוֹם','פַּעַם בְּשָׁנָה']),Q(2,'מָה הַכּוֹכָב הֲכִי קָרוֹב אֵלֵינוּ?','הַשֶּׁמֶשׁ',['הַיָּרֵחַ','מַאְדִּים']),
   Q(2,'לָמָּה הַשֶּׁמֶשׁ נִרְאֵית קְטַנָּה?','כִּי הִיא רְחוֹקָה מְאוֹד',['כִּי הִיא קְטַנָּה','כִּי הִיא יְשֵׁנָה']),
@@ -253,7 +254,7 @@ const SKY_ORD={id:'sky-order',name:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ'
   if(L===1)lesson({title:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ',bg:'final',back,cards:[{art:planetRow(true),t:'כָּךְ מְסֻדָּרִים כּוֹכְבֵי הַלֶּכֶת: כּוֹכַב חַמָּה, נֹגַהּ, כַּדּוּר הָאָרֶץ, מַאְדִּים, צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.'}],then:go});else go();}};
 const SKY_AST=lessonAct({id:'sky-astro',name:'אַסְטְרוֹנָאוּטִים',icon:()=>ASTRO,bg:'final',skill:'מדע: חלל ואסטרונאוטים',
  cards:[{lv:1,art:ROCKET,t:'אַסְטְרוֹנָאוּטִים הֵם אֲנָשִׁים שֶׁטָּסִים לֶחָלָל בַּחֲלָלִית.'},{lv:1,art:ASTRO,t:'בֶּחָלָל אֵין אֲוִיר לִנְשִׁימָה, לָכֵן לוֹבְשִׁים חֲלִיפַת חָלָל עִם קַסְדָּה.'},{lv:1,art:ASTRO,t:'בְּתוֹךְ הַחֲלָלִית הָאַסְטְרוֹנָאוּטִים מְרַחֲפִים, כְּאִלּוּ אֵין לָהֶם מִשְׁקָל.'},
-  {lv:2,art:SV('0 0 120 120',`<rect width="120" height="120" rx="12" fill="#1d2140"/>`+moon('full',60,60,44)),t:'לִפְנֵי יוֹתֵר מֵחֲמִשִּׁים שָׁנָה אֲנָשִׁים נָחֲתוּ עַל הַיָּרֵחַ וְהָלְכוּ עָלָיו.'},{lv:2,art:ROCKET,t:'בְּתַחֲנַת הֶחָלָל אַסְטְרוֹנָאוּטִים גָּרִים וְעוֹבְדִים כַּמָּה חֳדָשִׁים.'},
+  {lv:2,art:MOONF,t:'לִפְנֵי יוֹתֵר מֵחֲמִשִּׁים שָׁנָה אֲנָשִׁים נָחֲתוּ עַל הַיָּרֵחַ וְהָלְכוּ עָלָיו.'},{lv:2,art:ROCKET,t:'בְּתַחֲנַת הֶחָלָל אַסְטְרוֹנָאוּטִים גָּרִים וְעוֹבְדִים כַּמָּה חֳדָשִׁים.'},
   {lv:3,art:ASTRO,t:'בֶּחָלָל הַשָּׁמַיִם שְׁחֹרִים, גַּם כְּשֶׁהַשֶּׁמֶשׁ זוֹרַחַת.'},{lv:3,art:planetSVG('earth'),t:'מֵהֶחָלָל רוֹאִים שֶׁכַּדּוּר הָאָרֶץ עָגֹל וְכָחֹל: רֻבּוֹ מְכֻסֶּה בְּמַיִם.'}],
  bank:[Q(1,'אֵיךְ טָסִים לֶחָלָל?','בַּחֲלָלִית',['בְּאוֹפַנַּיִם','בְּסִירָה']),Q(1,'לָמָּה צְרִיכִים חֲלִיפַת חָלָל?','כִּי בֶּחָלָל אֵין אֲוִיר לִנְשִׁימָה',['כִּי בֶּחָלָל יוֹרֵד גֶּשֶׁם','כְּדֵי לִהְיוֹת יָפִים']),
   Q(1,'מָה קוֹרֶה לָאַסְטְרוֹנָאוּטִים בְּתוֹךְ הַחֲלָלִית?','הֵם מְרַחֲפִים',['הֵם שׂוֹחִים בְּמַיִם','הֵם נִהְיִים קְטַנִּים']),
@@ -336,10 +337,11 @@ const MAP_WORLD={id:'map-world',name:'יַבָּשׁוֹת וְאוֹקְיָנ�
    :L===2?[{art:worldMap({labels:['asia','antarctica']}),t:'אַסְיָה הִיא הַיַּבֶּשֶׁת הֲכִי גְּדוֹלָה. אַנְטַארְקְטִיקָה הִיא הֲכִי קָרָה – כִּמְעַט כֻּלָּהּ קֶרַח.'},{art:worldMap({labels:['australia']}),t:'אוֹסְטְרַלְיָה הִיא יַבֶּשֶׁת וְגַם מְדִינָה. שָׁם חַי הַקֶּנְגּוּרוּ.'}]
    :[{art:worldMap({labels:Object.keys(OCEANS)}),t:'הָאוֹקְיָנוֹס הַשָּׁקֵט הוּא הֲכִי גָּדוֹל. יֵשׁ גַּם אֶת הָאוֹקְיָנוֹס הָאַטְלַנְטִי וְאֶת הָאוֹקְיָנוֹס הַהֹדִּי.'}];
   lesson({...o,cards,then:()=>mapQuiz({...o,items})});}};
+const inCont=k=>({namerica:'בִּצְפוֹן אֲמֶרִיקָה',samerica:'בִּדְרוֹם אֲמֶרִיקָה'})[k]||'בְּ'+CONT[k][0];
 const MAP_FLAGS={id:'map-flags',name:'דְּגָלִים עַל הַמַּפָּה',icon:()=>flagSVG('jp'),skill:'גאוגרפיה: מדינות, דגלים ויבשות',
  run:function run(back){const L=lvl('map-flags'),F=FLAGS();const ks=Object.keys(FCONT).filter(k=>F[k]&&(FLV[k]||3)<=L);const cur=ks.filter(k=>(FLV[k]||3)===L);
   const pickd=shuffle(cur).concat(shuffle(ks.filter(k=>!cur.includes(k)))).slice(0,6);const o={id:'map-flags',title:'דְּגָלִים עַל הַמַּפָּה',bg:'sea',back,again:()=>run(back)};
-  const items=pickd.map(k=>({top:`<div class="e2fl">${flagSVG(k)}<b>${F[k][0]}</b></div>`,q:`בְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת ${F[k][0]}? לְחַץ עָלֶיהָ.`,k:FCONT[k],map:worldMap({hit:1}),reveal:worldMap({hit:1,labels:[FCONT[k]]}),ex:`${F[k][0]} נִמְצֵאת בְּ${CONT[FCONT[k]][0]}.`}));
+  const items=pickd.map(k=>({top:`<div class="e2fl">${flagSVG(k)}<b>${F[k][0]}</b></div>`,q:`בְּאֵיזוֹ יַבֶּשֶׁת נִמְצֵאת ${F[k][0]}? לְחַץ עָלֶיהָ.`,k:FCONT[k],map:worldMap({hit:1}),reveal:worldMap({hit:1,labels:[FCONT[k]]}),ex:`${F[k][0]} נִמְצֵאת ${inCont(FCONT[k])}.`}));
   lesson({...o,cards:L===1?[{art:`<div class="e2fl">${flagSVG('il')}${flagSVG('jp')}${flagSVG('fr')}</div>`,t:'לְכָל מְדִינָה יֵשׁ דֶּגֶל מִשֶּׁלָּהּ. וְכָל מְדִינָה נִמְצֵאת בְּאַחַת הַיַּבָּשׁוֹת.'}]:[],then:()=>mapQuiz({...o,items})});}};
 const HIS_THEN=lessonAct({id:'his-then',name:'פַּעַם וְהַיּוֹם',icon:()=>em('🕯️'),bg:'clock',skill:'היסטוריה: פעם והיום (בית, תחבורה, כתיבה)',
  cards:[{lv:1,art:em('🕯️ ⬅ 💡'),t:'לִפְנֵי הַרְבֵּה שָׁנִים לֹא הָיָה חַשְׁמַל. בַּלַּיְלָה הֵאִירוּ בְּנֵרוֹת וּבִמְנוֹרוֹת שֶׁמֶן.'},{lv:1,art:em('🐴 🐪 ⬅ 🚗 🚆 ✈️'),t:'פַּעַם הָלְכוּ בָּרֶגֶל אוֹ רָכְבוּ עַל חֲמוֹרִים, סוּסִים וּגְמַלִּים. הַיּוֹם נוֹסְעִים בִּמְכוֹנִית, בְּרַכֶּבֶת וּבְמָטוֹס.'},

@@ -6,12 +6,13 @@
 .e2card{width:min(640px,100%)}
 .e2card .e2art{display:flex;justify-content:center;align-items:center;min-height:110px}
 .e2card .e2art .e2svg{width:min(400px,84vw);max-height:42vh}
-.e2card .e2art .e2svg.e2il{width:auto;height:min(46vh,380px)}
+.e2card .e2art .e2svg.e2il{width:auto;height:min(54vh,440px);max-height:none}
+.e2card .e2art .e2svg.e2wide{width:min(600px,88vw);max-height:none}
 .e2card .e2art .e2svg.e2world{width:min(600px,86vw)}
-.e2card .e2art .flagsvg,.e2fl .flagsvg{width:96px;height:64px}
+.e2card .e2art .flagsvg,.e2fl .flagsvg{width:120px;height:80px}
 .e2art.sm{display:flex;justify-content:center}
 .e2art.sm .e2svg{width:min(240px,60vw);max-height:26vh}
-.e2art.sm .e2svg.e2hood{width:min(220px,56vw)}
+.e2art.sm .e2svg.e2hood{width:min(270px,62vw);max-height:none}
 .e2art.sm .e2em{font-size:56px}
 .e2card .sent{max-width:600px}
 .e2next{margin-top:4px}
@@ -33,7 +34,7 @@
 .e2slot i{font-style:normal;font-weight:900;color:#9aa1a8;font-size:24px}
 .e2slot.on{border:3px solid var(--ok,#4fae4f);background:#eaf7e3;animation:pulse .4s}
 .e2slot b,.e2it b{font-family:var(--read);font-size:16px;line-height:1.15;text-align:center}
-.e2pi{display:inline-flex}.e2pi .e2svg{width:54px;height:54px}.e2pi .e2em{font-size:40px;letter-spacing:0}
+.e2pi{display:inline-flex}.e2pi .e2svg{width:58px;height:58px}.e2pi .e2em{font-size:40px;letter-spacing:0}
 .e2pi.big .e2svg{width:140px;height:140px}.e2pi.big .e2em{font-size:96px}
 .e2slot .e2pi .e2svg{width:44px;height:44px}.e2slot .e2pi .e2em{font-size:32px}
 .e2ends{display:flex;justify-content:space-between;width:100%;font-family:var(--read);font-weight:700;color:#5c6b73;font-size:18px}
@@ -45,7 +46,7 @@
 /* map quiz */
 .e2mapq{width:min(760px,100%)}
 .e2mapw{display:flex;justify-content:center;width:100%}
-.e2mapw .e2svg.e2il{width:auto;height:min(52vh,430px);touch-action:manipulation}
+.e2mapw .e2svg.e2il{width:auto;height:min(58vh,470px);touch-action:manipulation}
 .e2mapw .e2svg.e2world{width:min(720px,94vw)}
 .e2hit{cursor:pointer}
 g.e2hit:hover polygon,polygon.e2hit:hover{filter:brightness(1.08)}
@@ -80,7 +81,8 @@ circle.e2hit.e2show,rect.e2hit.e2show{fill:rgba(255,209,102,.6)!important;stroke
 .e2free .e2cell{cursor:pointer}
 @media (max-width:760px){
   .e2em{font-size:48px}.e2em.sm{font-size:36px}
-  .e2slot,.e2start{width:66px;min-height:80px}.e2slot b,.e2it b{font-size:14px}
+  .e2slot{width:54px;min-height:78px}.e2start{width:36px;min-height:78px}.e2slots{gap:4px}
+  .e2mapq,.e2ord{padding:10px 8px}.e2fl .flagsvg{width:96px;height:64px}.e2slot b,.e2it b{font-size:14px}
   .e2pi .e2svg{width:44px;height:44px}.e2slot .e2pi .e2svg{width:36px;height:36px}
   .chb.e2it{min-height:84px;min-width:80px}
   .e2bgrid{--bc:40px}.e2bp .e2grid{height:84px}
@@ -88,3 +90,4 @@ circle.e2hit.e2show,rect.e2hit.e2show{fill:rgba(255,209,102,.6)!important;stroke
   .e2pc{width:48px;height:48px}
   .e2fl{font-size:24px}
 }
+.e2start .e2svg{width:44px;height:44px}
