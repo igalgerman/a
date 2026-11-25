@@ -499,6 +499,7 @@ svg.px{shape-rendering:crispEdges;display:block}
       <button class="bigbtn" id="btnStart"><span id="icoStart"></span>יוֹצְאִים לַדֶּרֶךְ</button>
       <div class="note" id="voiceNote" hidden>לא נמצא קול בעברית בדפדפן הזה. במחשב: פתחו ב-Edge</div>
     </section>
+    <section class="screen" id="sHome" hidden></section>
     <section class="screen" id="sMap" hidden></section>
     <section class="screen" id="sWorld" hidden></section>
     <section class="screen" id="sLearn" hidden></section>
@@ -1014,7 +1015,7 @@ async function cloudInit(){
     const id=await user.id();if(!id)return;const base='data/users/'+id+'/';const ref=db.doc(base+'progress4');
     const snap=await ref.get();if(snap.exists)mergeIn(snap.data());else{const old=await db.doc(base+'progress').get();if(old.exists)migrateOld(old.data());}
     cloud.ref=ref;try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}cloud.dirty=true;cloudFlush();
-    updateGems();if($('#dlg').hidden){if(!$('#sMap').hidden)showMap();else if(!$('#sWorld').hidden&&curWorld)showWorld(curWorld);}
+    updateGems();if($('#dlg').hidden){if(!$('#sMap').hidden)showJourney();else if(!$('#sWorld').hidden&&curWorld)showWorld(curWorld);}
   }catch(e){}finally{updateSaveNote();}
 }
 function updateSaveNote(){const el=$('#saveNote');if(!el)return;el.innerHTML=cloud.ref?`${ICON.cloud}<span>נִשְׁמָר בַּחֶשְׁבּוֹן</span>`:`${ICON.disk}<span>נִשְׁמָר בַּמַּחְשֵׁב הַזֶּה</span>`;}
@@ -1113,11 +1114,28 @@ async function renderAudio(kind,name,secs){const off=new OfflineAudioContext(2,M
     return {peak:+peak.toFixed(3),rms:+Math.sqrt(sum/(buf.length*2)).toFixed(4)};}finally{A=saved;Object.assign(mus,sv);}}
 
 /* ---------- speech (only on demand + a few moments) ---------- */
-let heVoice=null,sayNow='';
-function pickVoice(){if(!('speechSynthesis' in window))return;const vs=speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang));heVoice=vs.find(v=>/Hila/i.test(v.name))||vs.find(v=>/Avri/i.test(v.name))||vs.find(v=>/Natural|Online/i.test(v.name))||vs[0]||null;$('#voiceNote').hidden=!!heVoice;}
+let heVoice=null,enVoice=null,sayNow='';
+/* voice: prefers Claude's built-in voice (free, part of the page) when it can speak Hebrew, else the best Hebrew voice the browser has */
+const VP=()=>((save.set||{}).voice)||{eng:'auto',name:'',rate:1};
+function setVoicePref(v){save.set=save.set||{};save.set.voice=Object.assign({},VP(),v);persist();pickVoice();}
+function pickVoice(){if(!('speechSynthesis' in window))return;const all=speechSynthesis.getVoices();const vs=all.filter(v=>/^(he|iw)/i.test(v.lang));const want=VP().name;
+  heVoice=(want&&vs.find(v=>v.name===want))||vs.find(v=>/Hila/i.test(v.name)&&/Online|Natural/i.test(v.name))||vs.find(v=>/Avri/i.test(v.name)&&/Online|Natural/i.test(v.name))||vs.find(v=>/Natural|Online/i.test(v.name))||vs.find(v=>/Google/i.test(v.name))||vs.find(v=>/Hila|Avri|Asaf/i.test(v.name))||vs[0]||null;
+  enVoice=all.find(v=>/^en/i.test(v.lang)&&/Natural|Online/i.test(v.name))||all.find(v=>/^en-US/i.test(v.lang))||null;$('#voiceNote').hidden=!!heVoice||!!TTS.ok;}
+const TTS={ns:null,he:false,en:false,ok:false,blocked:false};
+(async()=>{for(let i=0;i<30&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
+  try{TTS.ns=window.claude&&window.claude.use?await window.claude.use('tts'):null;}catch(e){TTS.ns=null;}
+  if(!TTS.ns)return;let L;try{L=TTS.ns.languages?await TTS.ns.languages().catch(()=>undefined):undefined;}catch(e){}
+  TTS.langs=L;TTS.he=!!(L&&L.some(x=>/^(he|iw)/i.test(x)));TTS.en=true;TTS.ok=true;try{TTS.ns.onState(({state,reason})=>{duck(state!=='idle');if(reason==='not_granted'||reason==='unavailable')TTS.blocked=true;});}catch(e){}pickVoice();})();
+const useClaude=lang=>{if(!TTS.ns||TTS.blocked)return false;const e=VP().eng;if(e==='browser')return false;if(e==='claude')return true;return lang==='en'?TTS.en:TTS.he;};
+const withNikud=s=>String(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+function browserSay(t,lang){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(t));u.lang=lang==='en'?'en-US':'he-IL';const v=lang==='en'?enVoice:heVoice;if(v)u.voice=v;u.rate=(lang==='en'?.85:.92)*(VP().rate||1);u.pitch=1.05;u.onstart=()=>duck(true);u.onend=u.onerror=()=>duck(false);speechSynthesis.speak(u);}
+function say(t,lang){if(!t||window.__fast)return;lang=lang||'he';
+  if(useClaude(lang)){try{speechSynthesis.cancel();}catch(e){}const txt=(lang==='he'?withNikud(t):plain(t)).slice(0,1900);
+    TTS.ns.speak(txt,{language:lang,rate:Math.max(.7,Math.min(1.3,(VP().rate||1)*(lang==='en'?.9:.95)))}).catch(e=>{const c=e&&(e.code||e.reason);if(c==='not_granted'||c==='unavailable'){TTS.blocked=true;return;}if(c==='stopped')return;browserSay(t,lang);});return;}
+  browserSay(t,lang);}
+window.__tts=TTS;
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,1500);}else $('#voiceNote').hidden=false;
-function say(t){if(!('speechSynthesis' in window)||!t||window.__fast)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(t));u.lang='he-IL';if(heVoice)u.voice=heVoice;u.rate=.92;u.pitch=1.05;u.onstart=()=>duck(true);u.onend=u.onerror=()=>duck(false);speechSynthesis.speak(u);}
-const hush=()=>{try{speechSynthesis.cancel();}catch(e){}};
+const hush=()=>{try{speechSynthesis.cancel();}catch(e){}if(TTS.ns&&!TTS.blocked)TTS.ns.stop().catch(()=>{});};
 
 /* ---------- animated pixel background: cached static layer + live elements ---------- */
 const bg=$('#bg');let bx=bg.getContext('2d');let BW=192,BH=108,bgW='meadow',bgTimer=0,bgCache={key:'',cv:null};
@@ -1192,9 +1210,9 @@ function addGems(n,fromEl){save.gems=(save.gems|0)+n;
 const app=$('#app');let backTo=null,curWorld=null;
 const wipeEl=$('#wipe');wipeEl.innerHTML='<i></i>'.repeat(70);
 function wipe(){if(window.__fast||RM())return;sfx.whoosh();wipeEl.hidden=false;[...wipeEl.children].forEach((c,i)=>{const r=i/10|0,col=i%10;c.style.animation='none';void c.offsetWidth;c.style.animation='';c.style.animationDelay=((r+col)*22)+'ms';});clearTimeout(wipe.t);wipe.t=setTimeout(()=>wipeEl.hidden=true,720);}
-function setScreen(id,w,back){['sStart','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
+function setScreen(id,w,back){['sStart','sHome','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
   if(app.dataset.w!==(w||'meadow')){app.dataset.w=w||'meadow';bgW=app.dataset.w;paintBG(performance.now());}setTheme(THEME_OF[app.dataset.w]||'map');
-  backTo=back||null;$('#btnBack').style.visibility=back?'visible':'hidden';$('#btnBack').innerHTML=back===showMap?ICON.home:ICON.back;$('#screens').scrollTop=0;play=null;stopSpeed();updateGems();wipe();}
+  backTo=back||null;$('#btnBack').style.visibility=back?'visible':'hidden';$('#btnBack').innerHTML=back===showMap?ICON.home:ICON.back;$('#screens').scrollTop=0;play=null;stopSpeed();updateGems();wipe();emit('screen',id,back);}
 $('#btnSay').innerHTML=ICON.say;$('#btnMusic').innerHTML=ICON.music;$('#icoStart').innerHTML=ICON.play;
 if(save.snd==null)save.snd=save.music===false?1:2;
 const syncMusic=()=>{const b=$('#btnMusic');b.innerHTML=save.snd===2?ICON.music:save.snd===1?ICON.say.replace('currentColor','#23303b'):ICON.mute;b.classList.toggle('off',save.snd===0);b.title=['שֶׁקֶט','רַק צְלִילִים','מוּזִיקָה וּצְלִילִים'][save.snd];b.setAttribute('aria-label',b.title);};syncMusic();
@@ -1242,8 +1260,9 @@ function studio(first){setScreen('sStudio','meadow',first?null:showMap);
   render();}
 
 /* ---------- MAP ---------- */
-function showMap(greet){
-  setScreen('sMap','meadow',null);curWorld=null;
+function showMap(greet){if(window.TAL_home&&!window.TAL_noHome)return window.TAL_home(greet);return showJourney(greet);}
+function showJourney(greet){
+  setScreen('sMap','meadow',window.TAL_home?showMap:null);curWorld=null;
   $('#hudMid').innerHTML=`<div class="starcount">${SPR.star}<span>${totalStars()}</span></div>`;
   const m=$('#sMap');m.innerHTML='';
   const nextW=WORLDS.find(w=>worldOpen(w)&&!freed(w));
@@ -1277,8 +1296,8 @@ function showMap(greet){
 /* ---------- WORLD PATH ---------- */
 let walkFrom=null;
 function showWorld(Wd){
-  if(!save.story[Wd.id+'-in']){curWorld=Wd;setScreen('sWorld',Wd.bg,showMap);$('#sWorld').innerHTML='';story(Wd.intro.map(t=>[Wd.gd,t]),()=>{save.story[Wd.id+'-in']=1;persist();showWorld(Wd);});return;}
-  curWorld=Wd;setScreen('sWorld',Wd.bg,showMap);
+  if(!save.story[Wd.id+'-in']){curWorld=Wd;setScreen('sWorld',Wd.bg,showJourney);$('#sWorld').innerHTML='';story(Wd.intro.map(t=>[Wd.gd,t]),()=>{save.story[Wd.id+'-in']=1;persist();showWorld(Wd);});return;}
+  curWorld=Wd;setScreen('sWorld',Wd.bg,showJourney);
   const got=Wd.levels.reduce((s,l)=>s+stars(l.id),0);
   $('#hudMid').innerHTML=`<div class="starcount">${SPR.star}<span>${got} / ${Wd.levels.length*3}</span></div>`;
   sayNow=Wd.say;
@@ -1628,7 +1647,7 @@ function colType(d){const p=play,q=p.qs[p.i],st=p.col;if(st.c>=st.R.length)retur
 function finishLevel(){const p=play;if(!p||p.finished)return;p.finished=true;p.lock=true;const lv=p.lv,u=p.u;
   if(lv.type==='train'){save.trains++;addGems(10);persist();setTimeout(()=>{if(play!==p)return;const ov=$('#ov');ov.hidden=false;
       ov.innerHTML=`<div class="card"><h2>סִיַּמְתָּ אֶת הָאִמּוּן!</h2><div class="gain">+${p.gemsEarned+10} ${SPR.gem}</div><div class="sub">טָעֻיּוֹת שֶׁעוֹד מְחַכּוֹת: <span class="ltr">${save.rq.length}</span></div></div>`;
-      const row=h('div','btnrow');const a=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד אִמּוּן</span>');a.onclick=startTraining;const m=h('button','bigbtn',ICON.homeW+'<span>לַמַּפָּה</span>');m.onclick=()=>showMap();row.append(a,m);ov.firstChild.appendChild(row);sfx.win();rain();},D(300));return;}
+      const row=h('div','btnrow');const a=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד אִמּוּן</span>');a.onclick=startTraining;const m=h('button','bigbtn',ICON.homeW+'<span>לַמַּפָּה</span>');m.onclick=()=>showJourney();row.append(a,m);ov.firstChild.appendChild(row);sfx.win();rain();},D(300));return;}
   const miss=p.errors+p.hints;const lim=p.N<=6?[0,2]:[1,4];const st=miss<=lim[0]?3:miss<=lim[1]?2:1;
   const before=pts();const first=!stars(lv.id);if(st>stars(lv.id)){save.s[lv.id]=st;}const after=pts();
   const bonus=5+st*3+(lv.type==='boss'?20:0);addGems(bonus);persist();emit('levelDone',lv,st);
@@ -1765,7 +1784,7 @@ function showFinal(){setScreen('sFinal','final',showMap);$('#hudMid').innerHTML=
 
 updateGems();cloudInit();
 const BUS={};function emit(e,...a){(BUS[e]||[]).forEach(f=>{try{f(...a);}catch(x){console.error(x);}});}
-window.OREN={get save(){return save;},persist,sfx,RAW,tone,noise,NT,audio,get A(){return A;},musicStart,musicStop,setTheme,duck,say,hush,sprite,SPR,AV,PET,GUARD,h,$,rand,pick,shuffle,setScreen,showMap,burst,rain,center,addGems,updateGems,floatText,ICON,D,RM,graphemes,story,today,dayStreak,masteredCount,WORLDS,ALLLV,ALLU,stars,totalStars,mergeIn,castle,revealedFor,pts,startLevel,kingdom,
+window.OREN={get save(){return save;},persist,sfx,RAW,tone,noise,NT,audio,get A(){return A;},musicStart,musicStop,setTheme,duck,say,hush,sprite,SPR,AV,PET,GUARD,h,$,rand,pick,shuffle,setScreen,showMap,burst,rain,center,addGems,updateGems,floatText,ICON,D,RM,graphemes,story,today,dayStreak,masteredCount,WORLDS,ALLLV,ALLU,stars,totalStars,mergeIn,castle,revealedFor,pts,startLevel,kingdom,showJourney,showWorld,unlocked,studio,sayLang:(t,l)=>say(t,l),get heVoice(){return heVoice;},setVoicePref,
   set sayNow(v){sayNow=v;},get sayNow(){return sayNow;},hud:html=>{$('#hudMid').innerHTML=html;},resetAll:keep=>{const snd=save.snd;save=blank();save.snd=snd;Object.assign(save,keep||{});persist();renderStart();},on:(e,f)=>{(BUS[e]=BUS[e]||[]).push(f);},emit,blank};
 window.__oren4={renderAudio,THEMES,RAW,setTheme,get mus(){return mus;},WORLDS,ALLLV,ALLU,hintHTML,hintData,uniq,colInit,colNeedBorrow,digs,qkey,bubbleOpts,storyFor,teachCheck,HEROES,get play(){return play;},get save(){return save;},startLevel,playLevel,showMap,showWorld,kingdom,studio,teacher,playSpeed,setFast:v=>{window.__fast=v;},mergeIn,migrateOld,lp};
 })();
@@ -2049,6 +2068,39 @@ window.__oren4={renderAudio,THEMES,RAW,setTheme,get mus(){return mus;},WORLDS,AL
 .pta.big{font-family:var(--font);font-size:17px;direction:rtl;min-height:70px}
 @media (max-width:760px){.profg{grid-template-columns:repeat(2,1fr)}.hbub{font-size:18px}.hbub b{font-size:21px}.hpet svg{width:54px;height:54px}.toast{font-size:16px;white-space:normal;width:86vw;text-align:center}.ucard{padding:12px 16px}}
 @media (max-width:760px){.ptabs{display:grid;grid-template-columns:1fr 1fr}.ptab{font-size:14px;padding:7px 6px}}
+/* ===== home ===== */
+#sHome{justify-content:flex-start;padding-top:12px;padding-bottom:24px;gap:14px}
+.hmhead{display:flex;align-items:center;gap:10px;max-width:760px}.hav svg{width:76px;height:auto}.hpet2 svg{width:52px;height:52px}
+.today{width:min(820px,100%);box-sizing:border-box;background:rgba(255,255,255,.92);padding:12px 16px 16px;box-shadow:0 6px 0 rgba(0,0,0,.18);display:flex;flex-direction:column;align-items:center;gap:12px}
+.tdh{font-weight:900;font-size:22px}
+.tpath{display:flex;align-items:center;justify-content:center;width:100%}
+.tlink{flex:1;max-width:70px;height:8px;background:repeating-linear-gradient(90deg,#c9b48a 0 10px,transparent 10px 16px)}.tlink.on{background:var(--ok)}
+.tstep2{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:130px;padding:10px 4px 8px;background:var(--birch);box-shadow:inset 0 -6px 0 var(--sc,#999),0 5px 0 rgba(0,0,0,.22);font-weight:800}
+.tstep2 .tn{position:absolute;top:-12px;inset-inline-start:-10px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-size:16px;font-weight:900}
+.tstep2 .ti2 svg{width:44px;height:44px}.tstep2 .ti2>span{font-size:34px}.tstep2 .tl{font-size:15px;text-align:center;line-height:1.2}
+.tstep2.done{background:#d9f2d0;opacity:.85}.tstep2.done .tn{background:var(--ok)}
+.tstep2.cur{transform:translateY(-4px) scale(1.06);box-shadow:inset 0 -6px 0 var(--sc,#999),0 0 0 4px var(--gold),0 8px 0 4px rgba(0,0,0,.2);animation:pulse 2s infinite}
+.tstep2 .dsw{position:absolute;bottom:-12px;inset-inline-end:-8px}
+.bigbtn.huge{font-size:28px;padding:14px 34px}
+.tfree{font-weight:900;font-size:24px;color:var(--ok-d)}
+.doors{display:grid;grid-template-columns:repeat(3,minmax(160px,250px));gap:16px;justify-content:center;width:100%}
+.door{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px 14px;background:var(--birch);border-top:10px solid var(--dc);box-shadow:inset -6px -6px 0 rgba(0,0,0,.14),inset 6px 6px 0 rgba(255,255,255,.55),0 7px 0 rgba(0,0,0,.25)}
+.door .dico svg{width:70px;height:70px}.door>b{font-size:24px;font-weight:900}.door small{font-size:14px;font-family:var(--read);color:var(--ink-soft);text-align:center}
+.door .bar{width:80%;height:10px;background:rgba(0,0,0,.12);display:block}.door .bar i{display:block;height:100%;background:var(--dc)}
+.door .dg{display:flex;align-items:center;gap:4px;direction:ltr}.door .dg svg{width:20px;height:20px}.door .dg b{font-size:18px}
+@media (hover:hover){.door:hover,.tstep2:hover{filter:brightness(1.07)}}
+.door:active,.tstep2:active{transform:translateY(3px)}
+.merow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.merow .ti{font-size:28px;line-height:1}.merow .ti svg{width:34px;height:34px}
+.hubgroups{display:flex;flex-direction:column;gap:12px;width:100%;align-items:center}
+.hgrp{display:flex;flex-direction:column;gap:6px;width:min(820px,100%)}.hgt{font-weight:900;font-size:19px;color:#fff;text-shadow:2px 2px 0 var(--ink),-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink)}
+.hgrp .hub{grid-template-columns:repeat(4,minmax(140px,1fr))}.hgrp .bld{min-height:130px}
+.plrow{border-bottom:1px solid #eee;padding-bottom:6px}.plrow .pchip{font-size:12px;padding:3px 8px}
+#btnHome{margin-inline-start:8px}
+@media (max-width:760px){
+  .doors{grid-template-columns:1fr 1fr}.door.king{grid-column:1/-1}.door .dico svg{width:52px;height:52px}.door>b{font-size:20px}
+  .tstep2{width:92px}.tstep2 .tl{font-size:12px}.tstep2 .ti2 svg{width:34px;height:34px}.tlink{max-width:24px}.bigbtn.huge{font-size:20px;padding:12px 18px}
+  .hgrp .hub{grid-template-columns:repeat(2,1fr)}.hav svg{width:56px}
+}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */
@@ -2151,15 +2203,17 @@ function building(b){BUILD.push(b);b.acts.forEach(a=>{ACT[a.id]=a;a.b=b;});}
 const bState=b=>window.TAL_bState?window.TAL_bState(b):(S().set.hide[b.id]?'off':'on');
 const actOff=id=>!!(S().set.offA||{})[id];
 function actStars(id){return (S().tl[id]||{}).s|0;}
+const GROUPS=[['📖 קוֹרְאִים וְכוֹתְבִים',['read','write','stories','eng']],['🔬 חוֹקְרִים וְחוֹשְׁבִים',['lab','world','think','code']],['🎨 יוֹצְרִים',['art','music','type']],['🍃 נִרְגָּעִים',['mind']]];
 function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);hudT('עִיר הַכִּשְׁרוֹנוֹת',`<div class="starcount">${SPR.star}<span>${Object.values(S().tl).reduce((a,c)=>a+(c.s|0),0)}</span></div>`);
   O.sayNow='עיר הכשרונות. בחר בניין.';const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd bob">${X.portal}</span><h1>עִיר הַכִּשְׁרוֹנוֹת</h1>`));
-  const grid=h('div','hub');
-  BUILD.filter(b=>bState(b)!=='off').forEach(b=>{const bs=bState(b);const got=b.acts.reduce((a,x)=>a+actStars(x.id),0),max=b.acts.length*3;
+  const grids={};const gwrap=h('div','hubgroups');GROUPS.forEach(([n,ids])=>{const g=h('div','hgrp',`<div class="hgt">${n}</div>`);const gr=h('div','hub');g.appendChild(gr);ids.forEach(id=>grids[id]=gr);gwrap.appendChild(g);});
+  const other=GROUPS[GROUPS.length-1];
+  BUILD.filter(b=>bState(b)!=='off').forEach(b=>{const grid=grids[b.id]||gwrap.lastChild.querySelector('.hub');const bs=bState(b);const got=b.acts.reduce((a,x)=>a+actStars(x.id),0),max=b.acts.length*3;
     const c=h('button','wcard2 bld',`<span class="ico">${b.icon()}</span><span class="nm">${b.name}</span><span class="bar"><i style="width:${got/max*100}%"></i></span><span class="cnt">${SPR.star}${got}/${max}</span>`);c.style.setProperty('--lc',b.color);
     if(bs!=='on'){c.classList.add('lockb');c.querySelector('.cnt').innerHTML='🔒 '+bs.lock;c.onclick=()=>{sfx.no();window.TAL_locked&&window.TAL_locked(b);};}else c.onclick=()=>openBuilding(b);
     grid.appendChild(c);});
-  s.appendChild(grid);O.emit('hub',s);}
+  gwrap.querySelectorAll('.hgrp').forEach(g=>{if(!g.querySelector('.bld'))g.remove();});s.appendChild(gwrap);O.emit('hub',s);}
 function openBuilding(b){KEY=null;O.setScreen('sTal',b.bg,openHub);hudT(b.name);O.sayNow=plainHe(b.name);const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd">${b.icon()}</span><h1>${b.name}</h1>`));if(b.blurb)s.appendChild(h('div','lsent',b.blurb));
   const grid=h('div','acts');
@@ -2169,16 +2223,18 @@ function openBuilding(b){KEY=null;O.setScreen('sTal',b.bg,openHub);hudT(b.name);
 
 /* ---------- daily missions ---------- */
 const dailyPool=()=>Object.keys(ACT).filter(id=>bState(ACT[id].b)==='on'&&!actOff(id)&&!ACT[id].noDaily&&(!ACT[id].avail||ACT[id].avail()));
-function dailyEnsure(){const s=S();if(s.daily&&s.daily.d===today()){const d=s.daily,pool=dailyPool();for(let i=1;i<d.t.length;i++)if(!d.done[i]&&!pool.includes(d.t[i])){const alt=pool.filter(x=>!d.t.includes(x));if(alt.length)d.t[i]=pick(alt);}return d;}const ids=dailyPool();const pickIds=shuffle(ids).slice(0,2);
-  s.daily={d:today(),t:['math',...pickIds],done:[0,0,0],claimed:0};O.persist();return s.daily;}
+function dailyEnsure(){const s=S();if(s.daily&&s.daily.d===today()){const d=s.daily,pool=dailyPool();for(let i=0;i<d.t.length;i++)if(d.t[i]!=='math'&&!d.done[i]&&!pool.includes(d.t[i])){const alt=pool.filter(x=>!d.t.includes(x));if(alt.length)d.t[i]=pick(alt);}return d;}const ids=dailyPool();const pickIds=shuffle(ids).slice(0,2);if(!ids.length)pickIds.length=0;
+  const plan=S().set.plan;let t=['math',...pickIds];
+  if(plan&&plan.length){const used=new Set();t=plan.map(sp=>{if(sp==='math')return 'math';const pool=dailyPool().filter(id=>!used.has(id)&&(sp==='any'||ACT[id].b.id===sp));const id=pool.length?pick(pool):pick(dailyPool().filter(x=>!used.has(x))||['math']);used.add(id);return id||'math';});}
+  s.daily={d:today(),t,done:t.map(()=>0),claimed:0};O.persist();return s.daily;}
 function dailyMark(id){const d=dailyEnsure();const i=d.t.indexOf(id);if(i>=0&&!d.done[i]){d.done[i]=1;}}
-O.on('levelDone',(lv)=>{if(!lv||lv.type==='train')return;const d=dailyEnsure();if(!d.done[0]){d.done[0]=1;O.persist();}});
+O.on('levelDone',(lv)=>{if(!lv||lv.type==='train')return;const d=dailyEnsure();const i=d.t.findIndex((x,k)=>x==='math'&&!d.done[k]);if(i>=0){d.done[i]=1;O.persist();}});
 function dailyCard(){const d=dailyEnsure();const card=h('div','daily');
   const names=d.t.map(id=>id==='math'?'שָׁלָב בְּחֶשְׁבּוֹן':ACT[id]?ACT[id].name:'');
   card.innerHTML=`<div class="dh">מְשִׂימוֹת הַיּוֹם</div>`;
   d.t.forEach((id,i)=>{const b=h('button','dt'+(d.done[i]?' ok':''),`<span class="dc">${d.done[i]?'✓':''}</span><span class="di">${id==='math'?SPR.tree:(ACT[id]?ACT[id].icon():'')}</span><span>${names[i]}</span>`);
-    b.onclick=()=>{if(id==='math'){O.showMap();return;}const a=ACT[id];if(a)a.run(()=>O.showMap());};
-    if(i>0&&!d.done[i]&&!d.sw){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף מְשִׂימָה';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');
+    b.onclick=()=>{if(window.TAL_step){window.TAL_step(i);return;}if(id==='math'){O.showJourney();return;}const a=ACT[id];if(a)a.run(()=>O.showMap());};
+    if(id!=='math'&&!d.done[i]&&!d.sw){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף מְשִׂימָה';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');
       sw.onclick=e=>{e.stopPropagation();const pool=dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;d.t[i]=pick(pool);d.sw=1;O.persist();sfx.whoosh&&sfx.whoosh();card.replaceWith(dailyCard());};b.appendChild(sw);}
     card.appendChild(b);});
   const all=d.done.every(Boolean);
@@ -2187,9 +2243,7 @@ function dailyCard(){const d=dailyEnsure();const card=h('div','daily');
   return card;}
 
 /* ---------- map integration ---------- */
-O.on('map',m=>{const tb=m.querySelector('.topbar');if(tb){const b=h('button','tool hubtool',`<span class="ti">${X.portal}</span><span>עִיר הַכִּשְׁרוֹנוֹת</span>`);b.onclick=openHub;tb.insertBefore(b,tb.firstChild);}
-  const grid=m.querySelector('.worlds');if(grid&&!S().set.noDaily)grid.parentNode.insertBefore(dailyCard(),grid);
-  const rs=m.querySelector('.reset');if(rs)rs.remove();const pb=h('button','parbtn','🔒 כניסת הורים');pb.onclick=parentGate;m.appendChild(pb);});
+O.on('map',m=>{const rs=m.querySelector('.reset');if(rs)rs.remove();if(window.TAL_noHome)return;m.querySelectorAll('.topbar .tool').forEach(t=>{if(/הַמַּמְלָכָה|הַגִּבּוֹר שֶׁלִּי/.test(t.textContent))t.remove();});});
 O.on('kingdomScene',sc=>{const s=S();if(s.kpic!=null&&s.art[s.kpic]){const f=h('div','kpic',artSVG(s.art[s.kpic]));sc.querySelector('.ktop').appendChild(f);}});
 
 /* ---------- time tracking & break reminder ---------- */
@@ -2220,7 +2274,7 @@ T.WORDS=WORDS;
 const pic=w=>`<span class="pic">${ALLSPR(w.spr)}</span>`;
 const first=w=>w.w.replace(/[֑-ׇ]/g,'')[0];
 const others=(w,n,f)=>shuffle(WORDS.filter(x=>x!==w&&(!f||f(x)))).slice(0,n);
-const sayEn=t=>{if(!('speechSynthesis' in window)||window.__fast)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';const v=speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang));if(v)u.voice=v;u.rate=.85;speechSynthesis.speak(u);};
+const sayEn=t=>O.sayLang(t,'en');
 /* sentences */
 const SENT=[['הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא.','מִי יָשֵׁן?','cat',['dog','bird']],['הַכֶּלֶב רָץ אַחֲרֵי הַכַּדּוּר.','אַחֲרֵי מָה הַכֶּלֶב רָץ?','ball',['apple','car']],
  ['הַצִּפּוֹר עָפָה אֶל הָעֵץ.','לְאָן עָפָה הַצִּפּוֹר?','tree',['hut','boat']],['אוֹרֶן אוֹכֵל תַּפּוּחַ אָדֹם.','מָה אוֹרֶן אוֹכֵל?','apple',['cake','egg']],
@@ -2900,7 +2954,7 @@ function profile(back){const pr=Object.assign({},prof()||{});let step=0;O.setScr
     s.appendChild(h('div','pcard',`<div class="pcav">${O.AV()}<span class="pcpet bob">${ALLSPR(pr.an)}</span></div><h2>נָעִים לְהַכִּיר, אוֹרֶן!</h2><div class="lsent">${an[2]} יְלַוֶּה אוֹתְךָ בָּעִיר 😊</div>`));
     s.querySelector('.pcard').style.setProperty('--fc',pr.col);const row=h('div','btnrow');const b=h('button','bigbtn',ICON.play+'<span>יוֹצְאִים!</span>');b.onclick=back;row.appendChild(b);s.appendChild(row);O.say('נעים להכיר, אורן!');};
   run();}
-T.profile=profile;
+T.profile=profile;T.suggestion=()=>suggestion();T.hello=()=>hello();T.P_AN=P_AN;
 /* ---------- personal greeting in the hub ---------- */
 const hour=()=>new Date().getHours();
 const hello=()=>{const H=hour();return H<12?'בֹּקֶר טוֹב':H<17?'צָהֳרַיִם טוֹבִים':'עֶרֶב טוֹב';};
@@ -2916,8 +2970,7 @@ O.on('hub',s=>{const pr=prof();if(!pr){setTimeout(()=>profile(T.openHub),0);retu
   const sg=suggestion();const head=h('div','hhead');head.style.setProperty('--fc',pr.col||'#4fae4f');
   head.innerHTML=`<span class="hpet bob">${ALLSPR(pr.an)}</span><div class="hbub"><b>${hello()}, אוֹרֶן!</b><span>${sg.t}</span></div>`;
   const hb=head.querySelector('.hbub');if(sg.a||sg.b){const go=h('button','bigbtn sm',ICON.play+'<span>בּוֹא!</span>');go.onclick=()=>sg.a?sg.a.run(T.openHub):T.openBuilding(sg.b);hb.appendChild(go);}
-  const tools=h('div','htools');const bt=h('button','tool',`<span class="ti">🏅</span><span>הַתַּגִּים שֶׁלִּי</span>`);bt.onclick=()=>badges(T.openHub);const pc=h('button','tool',`<span class="ti">${O.AV()}</span><span>הַכַּרְטִיס שֶׁלִּי</span>`);pc.onclick=()=>profile(T.openHub);tools.append(bt,pc);
-  const wh=s.querySelector('.whead');wh.after(head);head.after(tools);O.sayNow=plain(hello()+' אורן. '+sg.t);});
+  const wh=s.querySelector('.whead');wh.after(head);O.sayNow=plain(hello()+' אורן. '+sg.t);});
 /* remember the last activity */
 Object.values(ACT).forEach(a=>{const r=a.run;a.run=back=>{const s=T.S();s.last={id:a.id,d:O.today()};return r(back);};});
 /* ---------- badges ---------- */
@@ -2954,7 +3007,8 @@ T.badges=badges;
 O.on('map',m=>{const st=SET();
   /* hide math worlds the parent switched off */
   const cards=m.querySelectorAll('.worlds > .wcard2');O.WORLDS.forEach((w,i)=>{if(st.offW[w.id]&&cards[i])cards[i].hidden=true;});
-  const msg=st.msg;if(msg&&msg.text&&!msg.seen)setTimeout(()=>{if(!$('#ov').hidden||$('#sMap').hidden)return;showMsg(msg);},D(700));});
+});
+T.checkMsg=()=>{const msg=SET().msg;if(msg&&msg.text&&!msg.seen)setTimeout(()=>{if(!$('#ov').hidden||$('#sHome').hidden)return;showMsg(msg);},D(700));};
 function showMsg(msg){const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card"><div class="callp">💌</div><h2>הוֹדָעָה מֵהַהוֹרִים</h2><div class="pmsg">${esc(msg.text)}</div>${msg.gems?`<div class="gain">+${msg.gems} ${SPR.gem}</div>`:''}<div class="sub">שְׁלַח תְּשׁוּבָה:</div></div>`;
   const row=h('div','btnrow');['❤️','😊','👍','🤗','😂'].forEach(em=>{const b=h('button','bigbtn plain sm emo',em);b.onclick=()=>{msg.seen=Date.now();msg.reply=em;if(msg.gems)O.addGems(msg.gems);O.persist();ov.hidden=true;sfx.win();O.rain();};row.appendChild(b);});
   ov.firstChild.appendChild(row);O.say('הודעה מההורים. '+msg.text);sfx.star(0);}
@@ -2968,12 +3022,12 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const BAR=(v,max,col)=>`<span class="pbar"><i style="width:${max?Math.min(100,v/max*100):0}%;background:${col||'#4fae4f'}"></i></span>`;
 const fmtMin=sec=>{const m=Math.round(sec/60);return m<60?m+' דק׳':(m/60).toFixed(1)+' שע׳';};
 function lastDays(n){const out=[];const d=new Date();for(let i=n-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);const k=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([k,x]);}return out;}
-const TABS=[['sum','📊 סיכום'],['perm','🎤 הרשאות'],['parts','🧩 חלקי המערכת'],['prog','⏭️ התקדמות ואיפוס'],['msg','💌 הודעה לאורן'],['set','⚙️ הגדרות']];
+const TABS=[['sum','📊 סיכום'],['plan','📅 היום של אורן'],['voice','🔊 קול'],['perm','🎤 הרשאות'],['parts','🧩 חלקי המערכת'],['prog','⏭️ התקדמות ואיפוס'],['msg','💌 הודעה לאורן'],['set','⚙️ הגדרות']];
 let curTab='sum';
-const exitParent=()=>{parentOn=false;O.showMap();};
+const exitParent=()=>{parentOn=false;O.showMap();};T.exitParent=exitParent;
 function panel(tab){if(!parentOn)return login(()=>panel(tab));curTab=tab||curTab;O.setScreen('sPar','valley',exitParent);O.hud('<div class="chip">לוח הורים</div>');const s=$('#sPar');s.innerHTML='';
   s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>panel(id);tb.appendChild(b);});s.appendChild(tb);
-  const body=h('div','pbody');s.appendChild(body);({sum:sumTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab}[curTab])(body);
+  const body=h('div','pbody');s.appendChild(body);({sum:sumTab,plan:planTab,voice:voiceTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab}[curTab])(body);
   const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;}
 T.parentPanel=t=>{parentOn=true;panel(t);};
 const sec=(box,t,html)=>{const d=h('section','psec',`<h3>${t}</h3>`);if(html)d.insertAdjacentHTML('beforeend',html);box.appendChild(d);return d;};
@@ -2999,6 +3053,24 @@ function sumTab(box){const s0=T.S(),sv=O.save;
   const pr=prof();const md=s0.mood.slice(-14);const jarN=s0.jar.reduce((a,j)=>a+(j.i?j.i.length:0),0);
   sec(box,'אורן — רגשות והעדפות',`${pr?`<div class="pnote">החיה האהובה: ${plain((P_AN.find(a=>a[0]===pr.an)||[])[1]||'')} · צבע: ${plain((P_COL.find(a=>a[0]===pr.col)||[])[1]||'')} · הכי כיף לו: ${plain((P_LOVE.find(a=>a[0]===pr.love)||[])[1]||'')}</div>`:''}
     ${md.length?`<div class="pmood">${md.map(m=>FACES[m.f]?`<span title="${m.d}">${FACES[m.f].s}<small>${m.d.slice(5).replace('-','/')}</small></span>`:'').join('')}</div>`:'<div class="pnote">עוד לא נרשמו רגשות.</div>'}<div class="pnote">בצנצנת התודה: ${jarN} דברים טובים.</div>`);}
+/* --- today's plan --- */
+function planTab(box){const st=SET();let plan=(st.plan&&st.plan.slice())||['math','any','any'];
+  const ps=sec(box,'מה יהיה בכל יום',`<div class="pnote">אורן רואה במסך הבית שביל של צעדים ("הַיּוֹם שֶׁלִּי") עם כפתור אחד גדול: "מַמְשִׁיכִים". כאן אתם קובעים מה יהיה בשביל. "לבחירת המשחק" = פעילות מתחלפת. בסוף השביל אורן מקבל 15 יהלומים ואז זמן חופשי.</div>`);
+  const nr=h('div','popt','<span>מספר צעדים ביום:</span>');[2,3,4].forEach(n=>{const b=h('button','pchip'+(plan.length===n?' on':''),String(n));b.onclick=()=>{while(plan.length<n)plan.push('any');plan=plan.slice(0,n);draw();};nr.appendChild(b);});ps.appendChild(nr);
+  const rows=h('div','');ps.appendChild(rows);const opts=[['math','🧮 חשבון'],['any','🎲 לבחירת המשחק'],...BUILD.filter(b=>!st.hide[b.id]).map(b=>[b.id,plain(b.name)])];
+  const draw=()=>{nr.querySelectorAll('.pchip').forEach(b=>b.classList.toggle('on',+b.textContent===plan.length));rows.innerHTML='';plan.forEach((v,i)=>{const r=h('div','popt plrow',`<span>צעד ${i+1}:</span>`);opts.forEach(([k,n])=>{const b=h('button','pchip'+(v===k?' on':''),n);b.onclick=()=>{plan[i]=k;draw();};r.appendChild(b);});rows.appendChild(r);});};draw();
+  const row=h('div','btnrow');const sv=h('button','bigbtn sm','<span>שמירה</span>');sv.onclick=()=>{st.plan=plan.slice();const d=T.S().daily;let now=false;if(!d||!d.done.some(Boolean)){delete T.S().daily;now=true;}O.persist();sfx.ok(1);O.floatText(sv,now?'נשמר — כבר מהיום':'נשמר — יתחיל ממחר');};
+  const df=h('button','bigbtn plain sm','<span>חזרה לברירת מחדל</span>');df.onclick=()=>{delete st.plan;O.persist();panel('plan');};row.append(df,sv);ps.appendChild(row);}
+/* --- voice --- */
+function voiceTab(box){const tts=window.__tts||{};const vp=Object.assign({eng:'auto',name:'',rate:1},(T.S().set.voice)||{});
+  const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];
+  const vsx=sec(box,'הקול של המשחק',`<div class="pnote">כל הקולות כאן חינמיים, בלי הקלטות. <b>אוטומטי</b> בוחר את הכי טוב שיש: הקול של Claude אם הוא מדבר עברית בדפדפן הזה, ואחרת הקול העברי הכי טבעי שיש בדפדפן.</div>
+    <div class="pnote">מצב נוכחי: קול Claude — ${tts.ns?(tts.he?'זמין, כולל עברית ✓':'זמין, אבל לא אישר עברית (יוקרא באנגלית בלבד)'):'לא זמין בתצוגה הזו'} · קולות עבריים בדפדפן: ${vs.length?vs.map(v=>v.name.replace(/Microsoft |Online \(Natural\) - /g,'')).join(', '):'אין'}</div>`);
+  const er=h('div','popt','<span>מנוע:</span>');[['auto','אוטומטי (מומלץ)'],['claude','קול Claude'],['browser','קול הדפדפן']].forEach(([k,n])=>{const b=h('button','pchip'+(vp.eng===k?' on':''),n);if(k==='claude'&&!tts.ns)b.disabled=true;b.onclick=()=>{O.setVoicePref({eng:k});panel('voice');};er.appendChild(b);});vsx.appendChild(er);
+  if(vs.length&&vp.eng!=='claude'){const br=h('div','popt','<span>קול דפדפן:</span>');[['','הכי טוב שיש'],...vs.map(v=>[v.name,v.name.replace(/Microsoft |Google /g,'').replace(/ Online \(Natural\).*/,' (טבעי)')])].forEach(([k,n])=>{const b=h('button','pchip'+(vp.name===k?' on':''),n);b.onclick=()=>{O.setVoicePref({name:k});panel('voice');};br.appendChild(b);});vsx.appendChild(br);}
+  const rr=h('div','popt','<span>מהירות:</span>');[[.8,'לאט'],[.9,'קצת לאט'],[1,'רגיל'],[1.1,'קצת מהר']].forEach(([v,n])=>{const b=h('button','pchip'+(Math.abs((vp.rate||1)-v)<.01?' on':''),n);b.onclick=()=>{O.setVoicePref({rate:v});panel('voice');};rr.appendChild(b);});vsx.appendChild(rr);
+  const row=h('div','btnrow');const tr=h('button','bigbtn sm','🔊 <span>נסו את הקול</span>');tr.onclick=()=>O.say('שָׁלוֹם אוֹרֶן! בּוֹא נִקְרָא יַחַד: הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא.');const te=h('button','bigbtn plain sm','🔊 <span>באנגלית</span>');te.onclick=()=>O.sayLang('Hello Oren! The cat is sleeping.','en');row.append(tr,te);vsx.appendChild(row);
+  sec(box,'איך מקבלים קול עברי טוב יותר — בחינם',`<div class="pnote">• <b>במחשב Windows עם Edge:</b> יש קולות עבריים טבעיים מובנים (Hila / Avri). פשוט פותחים את המשחק ב-Edge.<br>• <b>Windows בלי חיבור:</b> הגדרות ← זמן ושפה ← דיבור ← הוספת קולות ← עברית.<br>• <b>טלפון Android:</b> הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← להתקין עברית.<br>• <b>אייפון/אייפד:</b> הגדרות ← נגישות ← תוכן מוקרא ← קולות ← עברית ← להוריד את Carmit (משופר).</div>`);}
 /* --- permissions --- */
 async function permTab(box){const d=sec(box,'הרשאות','<div class="pnote">בודק…</div>');const P=await getPerm();
   if(!P){d.innerHTML='<h3>הרשאות</h3><div class="pnote">בתצוגה הזו אי אפשר לבקש הרשאות מראש. אם תידרש הרשאה (למשל מיקרופון), אורן יתבקש לקרוא לכם, ואז תאשרו בחלון שייפתח.</div>';return;}
@@ -3063,6 +3135,56 @@ function setTab(box){const st=SET();
   const ex=h('button','bigbtn plain sm','<span>הצג גיבוי</span>');ex.onclick=()=>{ta.value=JSON.stringify(O.save);ta.select();try{navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(()=>O.floatText(ex,'הועתק!'),()=>{});}catch(e){}};
   const im=h('button','bigbtn sm','<span>שחזור מגיבוי</span>');im.onclick=()=>{try{const o=JSON.parse(ta.value);if(!o||typeof o!=='object'||!o.v)throw 0;o.t=Date.now()+1;O.mergeIn(o);O.persist();O.floatText(im,'שוחזר!');sfx.win();setTimeout(()=>panel('set'),600);}catch(e){O.floatText(im,'גיבוי לא תקין');sfx.no();}};
   r.append(ex,im);bk.append(ta,r);}
+})();
+
+/* ===== HOME: one clear place to start · today's path · home button ===== */
+(()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,ICON,SPR}=O;const {X,ACT,ALLSPR}=T;const sfx=O.sfx,D=O.D;
+function nextLevel(){const off=(T.S().set.offW)||{};for(const w of O.WORLDS){if(off[w.id])continue;for(const lv of w.levels){if(!O.stars(lv.id)&&O.unlocked(lv))return lv;}}return null;}
+function runStep(i){const d=T.dailyEnsure();const id=d.t[i];if(id==='math'){const lv=nextLevel();if(!lv){O.showJourney();return;}
+    if(!O.save.story[lv.w.id+'-in'])O.showWorld(lv.w);else O.startLevel(lv);return;}
+  const a=ACT[id];if(a)a.run(O.showMap);}
+window.TAL_step=runStep;
+const stepInfo=id=>id==='math'?{n:'שָׁלָב בְּחֶשְׁבּוֹן',ic:SPR.tree,c:'#d99a2b'}:ACT[id]?{n:ACT[id].name,ic:ACT[id].icon(),c:ACT[id].b.color}:{n:'',ic:'',c:'#999'};
+function home(){const S0=T.S();
+  if(O.save.story.intro&&!S0.prof){T.profile(O.showMap);return;}
+  O.setScreen('sHome','meadow',null);O.hud(`<div class="starcount">${SPR.star}<span>${O.totalStars()}</span></div>`);const s=$('#sHome');s.innerHTML='';
+  const pr=S0.prof||{};const st=S0.set;
+  /* greeting */
+  const d=st.noDaily?null:T.dailyEnsure();const left=d?d.done.filter(x=>!x).length:0;
+  const sub=!d?'מָה נַעֲשֶׂה הַיּוֹם?':left===0?(d.claimed?'סִיַּמְתָּ אֶת הַיּוֹם שֶׁלְּךָ! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ הַכֹּל! קַח אֶת הַפְּרָס 🎁'):left===1?'עוֹד צַעַד אֶחָד לַפְּרָס 🌟':`עוֹד ${left} צְעָדִים לַפְּרָס 🌟`;
+  const hd=h('div','hmhead',`<span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}<div class="hbub" style="--fc:${pr.col||'#4fae4f'}"><b>${T.hello()}, אוֹרֶן!</b><span>${sub}</span></div>`);s.appendChild(hd);
+  O.sayNow=T.plainHe(T.hello()+' אורן. '+sub);
+  /* today's path */
+  if(d){const card=h('div','today');card.appendChild(h('div','tdh','📅 הַיּוֹם שֶׁלִּי'));const path=h('div','tpath');
+    const nx=d.done.findIndex(x=>!x);
+    d.t.forEach((id,i)=>{const inf=stepInfo(id);if(i)path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
+      const b=h('button','tstep2'+(d.done[i]?' done':i===nx?' cur':''),`<span class="tn">${d.done[i]?'✓':i+1}</span><span class="ti2">${inf.ic}</span><span class="tl">${inf.n}</span>`);b.style.setProperty('--sc',inf.c);
+      b.onclick=()=>{sfx.pop(2);runStep(i);};
+      if(id!=='math'&&!d.done[i]&&!d.sw){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');sw.onclick=e=>{e.stopPropagation();const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;d.t[i]=O.pick(pool);d.sw=1;O.persist();sfx.whoosh&&sfx.whoosh();home();};b.appendChild(sw);}
+      path.appendChild(b);});
+    card.appendChild(path);const row=h('div','btnrow');
+    if(nx>=0){const go=h('button','bigbtn huge',ICON.play+`<span>מַמְשִׁיכִים: ${stepInfo(d.t[nx]).n}</span>`);go.onclick=()=>{sfx.pop(3);runStep(nx);};row.appendChild(go);}
+    else if(!d.claimed){const c=h('button','bigbtn gold huge',SPR.gem+'<span>קַבֵּל 15 יַהֲלוֹמִים!</span>');c.onclick=()=>{d.claimed=1;O.addGems(15,c);sfx.win();O.rain();O.persist();setTimeout(home,D(900));};row.appendChild(c);}
+    else row.appendChild(h('div','tfree','🎈 בְּחַר מָה שֶׁבָּא לְךָ!'));
+    card.appendChild(row);s.appendChild(card);}
+  /* three doors */
+  const doors=h('div','doors');
+  const pct=(a,b)=>b?Math.round(a/b*100):0;const lvDone=O.ALLLV.filter(l=>O.stars(l.id)).length;
+  const talGot=T.BUILD.reduce((a,b)=>a+b.acts.reduce((x,y)=>x+((S0.tl[y.id]||{}).s|0),0),0),talMax=T.BUILD.reduce((a,b)=>a+b.acts.length*3,0);
+  [['journey','הַמַּסָּע','חֶשְׁבּוֹן וְהַרְפַּתְקָאוֹת','#d99a2b',SPR.mount||SPR.tree,()=>O.showJourney(),pct(lvDone,O.ALLLV.length)],
+   ['city','עִיר הַכִּשְׁרוֹנוֹת','קְרִיאָה, מַדָּע, אָמָּנוּת וְעוֹד','#6c4fc1',X.portal,()=>T.openHub(),pct(talGot,talMax)],
+   ['king','הַמַּמְלָכָה שֶׁלִּי','בּוֹנִים עִם הַיַּהֲלוֹמִים','#3a8fc4',SPR.tower,()=>O.kingdom(),null]].forEach(([k,n,sb,c,ic,fn,p])=>{
+    const b=h('button','door '+k,`<span class="dico">${ic}</span><b>${n}</b><small>${sb}</small>${p!=null?`<span class="bar"><i style="width:${p}%"></i></span>`:`<span class="dg">${SPR.gem}<b>${O.save.gems|0}</b></span>`}`);b.style.setProperty('--dc',c);b.onclick=()=>{sfx.pop(2);fn();};doors.appendChild(b);});
+  s.appendChild(doors);
+  /* small corner of "me" */
+  const me=h('div','merow');[[O.AV(),'הַגִּבּוֹר שֶׁלִּי',()=>O.studio(false)],['🏅','הַתַּגִּים שֶׁלִּי',()=>T.badges(O.showMap)],[pr.an?ALLSPR(pr.an):'🪪','הַכַּרְטִיס שֶׁלִּי',()=>T.profile(O.showMap)]].forEach(([ic,n,fn])=>{const b=h('button','tool',`<span class="ti">${ic}</span><span>${n}</span>`);b.onclick=fn;me.appendChild(b);});
+  s.appendChild(me);
+  const pb=h('button','parbtn','🔒 כניסת הורים');pb.onclick=()=>window.TAL_parentGate();s.appendChild(pb);
+  T.checkMsg&&T.checkMsg();}
+window.TAL_home=home;T.home=home;
+/* a home button that is always in the same place */
+(()=>{const bb=$('#btnBack');if(!bb)return;const hb=h('button','ibtn','');hb.id='btnHome';hb.innerHTML=ICON.home;hb.setAttribute('aria-label','בית');hb.title='הַבַּיִת';hb.hidden=true;hb.onclick=()=>{O.hush&&O.hush();sfx.pop(1);O.showMap();};bb.after(hb);
+  O.on('screen',(id,back)=>{hb.hidden=id==='sStart'||id==='sHome'||back===O.showMap;});})();
 })();
 
 </script>
