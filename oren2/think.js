@@ -436,18 +436,30 @@ const DESC={'read-first':'זיהוי הצליל הראשון במילה','read-p
 const packs=()=>Object.keys(window).map(k=>{try{return window[k];}catch(e){return null;}}).filter(x=>x&&typeof x==='object'&&x.SKILLS&&typeof x.register==='function');
 const descOf=a=>{if(a.desc)return a.desc;for(const p of packs())if(p.SKILLS[a.id])return p.SKILLS[a.id];if(/^story-/.test(a.id))return 'סיפור קצר עם שאלות הבנה';return DESC[a.id]||'';};
 const lvOf=a=>{for(const p of packs())if(typeof p.levelOf==='function'){const v=p.levelOf(a.id);if(v)return v;}return '';};
-T.contentMap=(box,sec,BAR)=>{const s=S(),off=(s.set||{}).offA||{},offW=(s.set||{}).offW||{};const ST={on:'✓ פתוח',lock:'🔒 נפתח בהדרגה',off:'⏸ כבוי'};
-  const line=(name,st,lv,got,max,desc)=>`<div class="cmrow"><span class="cmn">${name}${desc?`<small>${desc}</small>`:''}</span><span class="cmst ${st}">${ST[st]}</span><span class="cmlv">${lv||''}</span>${max?BAR(got,max):'<span></span>'}</div>`;
-  const area=(title,st,got,max,inner)=>`<details class="pdet cmarea"><summary><span>${title}</span><span class="cmst ${st}">${ST[st]}</span>${BAR(got,max)}</summary><div class="pdin">${inner}</div></details>`;
-  let html='';
-  /* math worlds */
-  html+=area('🧮 מסע החשבון','on',O.WORLDS.reduce((a,w)=>a+w.levels.filter(l=>O.stars(l.id)).length,0),O.WORLDS.reduce((a,w)=>a+w.levels.length,0),O.WORLDS.map(w=>{const got=w.levels.filter(l=>O.stars(l.id)).length;
-    const st=offW[w.id]?'off':(O.unlocked&&!O.unlocked(w.levels[0]))?'lock':'on';return line(plain(w.name),st,`${got}/${w.levels.length} שלבים`,got,w.levels.length,w.units.filter(u=>!u.boss).slice(0,4).map(u=>plain(u.name)).join(', '));}).join(''));
-  /* buildings → activities */
-  T.BUILD.forEach(b=>{const bs=T.bState(b);const bst=bs==='off'?'off':bs==='on'?'on':'lock';const got=b.acts.reduce((a,x)=>a+((s.tl[x.id]||{}).s|0),0);
-    html+=area(plain(b.name),bst,got,b.acts.length*3,`${b.blurb?`<div class="pnote">${plain(b.blurb)}</div>`:''}${b.acts.map(a=>{const st=bst==='off'||off[a.id]?'off':(bst==='lock'||(a.avail&&!a.avail()))?'lock':'on';const r=s.tl[a.id]||{};
-      return line(plain(a.name),st,lvOf(a)||(r.n?`${r.n} פעמים`:''),r.s|0,3,descOf(a));}).join('')}`);});
-  sec(box,'🗺️ מפת התוכן',`<div class="pnote">כל מה שיש במשחק. ✓ פתוח · 🔒 נפתח בהדרגה (או רק אחרי התקדמות) · ⏸ כבוי (אפשר להפעיל ב"להפעיל / לכבות חלקים"). הפס = כוכבים/שלבים.</div>${html}`);};
+/* review: the parent tries each item in the sandbox and ticks "checked" (saved in the synced settings: set.reviewed{id:day}) */
+const REV=()=>{const st=O.realSave.set=O.realSave.set||{};st.reviewed=st.reviewed||{};return st.reviewed;};
+let cmOnlyNew=false,cmLast=null;
+/* open one item in the parent sandbox; done/back returns to the map */
+T.cmTry=id=>{cmLast=id;T.cmFrom=true;const back=()=>{O.parentPlay(false);T.cmFrom=false;T.parentPanel('map');};O.parentPlay(true);
+  if(id.startsWith('w:')){const w=O.WORLDS.find(x=>'w:'+x.id===id);if(w)O.showWorld(w);else back();return;}const a=T.ACT[id];if(a)a.run(back);else back();};
+/* everything in the order Oren meets it: the math journey, open buildings, then the ones that open later, then switched off */
+function cmItems(){const s=S(),set=s.set||{},off=set.offA||{},offW=set.offW||{};const out=[];
+  O.WORLDS.forEach(w=>{const got=w.levels.filter(l=>O.stars(l.id)).length;out.push({area:'🧮 מסע החשבון',id:'w:'+w.id,name:plain(w.name),st:offW[w.id]?'off':(O.unlocked&&!O.unlocked(w.levels[0]))?'lock':'on',lv:`${got}/${w.levels.length} שלבים`,got,max:w.levels.length,desc:w.units.filter(u=>!u.boss).slice(0,4).map(u=>plain(u.name)).join(', ')});});
+  const gord=((set.grad||{}).order)||[];const rank=b=>{const bs=T.bState(b);return (bs==='on'?0:bs==='off'?2000:1000)+(gord.includes(b.id)?gord.indexOf(b.id):100+T.BUILD.indexOf(b));};
+  T.BUILD.slice().sort((a,b)=>rank(a)-rank(b)).forEach(b=>{const bs=T.bState(b);const bst=bs==='off'?'off':bs==='on'?'on':'lock';
+    b.acts.forEach(a=>{const st=bst==='off'||off[a.id]?'off':(bst==='lock'||(a.avail&&!a.avail()))?'lock':'on';const r=s.tl[a.id]||{};
+      out.push({area:plain(b.name),id:a.id,name:plain(a.name),st,lv:lvOf(a)||(r.n?`${r.n} פעמים`:''),got:r.s|0,max:3,desc:descOf(a)});});});
+  const o={on:0,lock:1,off:2};return out.map((x,k)=>Object.assign(x,{k})).sort((a,b)=>(o[a.st]-o[b.st])||(a.k-b.k));}
+T.contentMap=(box,sec,BAR)=>{const ST={on:'✓ פתוח',lock:'🔒 נפתח בהדרגה',off:'⏸ כבוי'};const rev=REV();const items=cmItems();const done=items.filter(x=>rev[x.id]).length;
+  const S0=sec(box,'🗺️ מפת התוכן',`<div class="pnote">כל מה שיש במשחק, לפי הסדר שאורן יפגוש. ▶ נסה פותח את הפעילות במצב הורה (לא משפיע על אורן). ✓ פתוח · 🔒 נפתח בהדרגה · ⏸ כבוי.</div>`);
+  const top=h('div','cmtop',`<b>בדקת ${done} מתוך ${items.length}</b>`);const f=h('button','pchip'+(cmOnlyNew?' on':''),'לא נבדקו');f.onclick=()=>{cmOnlyNew=!cmOnlyNew;S0.remove();T.contentMap(box,sec,BAR);};top.appendChild(f);S0.appendChild(top);
+  let area=null;items.forEach(x=>{if(cmOnlyNew&&rev[x.id])return;if(x.area!==area){area=x.area;S0.appendChild(h('div','cmarea',area));}
+    const r=h('div','cmrow'+(rev[x.id]?' ok':''),`<span class="cmn">${x.name}${x.desc?`<small>${x.desc}</small>`:''}</span><span class="cmst ${x.st}">${ST[x.st]}${x.lv?`<small>${x.lv}</small>`:''}</span>${x.max?BAR(x.got,x.max):'<span></span>'}`);r.dataset.id=x.id;
+    const tr=h('button','pchip','▶ נסה');tr.onclick=()=>T.cmTry(x.id);
+    const cb=h('label','cmchk',`<input type="checkbox"${rev[x.id]?' checked':''}> בדקתי`);cb.firstChild.onchange=e=>{const R=REV();if(e.target.checked)R[x.id]=O.today();else delete R[x.id];O.persist();S0.remove();T.contentMap(box,sec,BAR);};
+    r.append(tr,cb);S0.appendChild(r);});
+  if(cmLast){const el=S0.querySelector(`.cmrow[data-id="${cmLast}"]`);if(el)setTimeout(()=>el.scrollIntoView({block:'center'}),0);cmLast=null;}
+  return S0;};
 
 window.__th={track,readRC,challenge,openTracks,TH,skillList};
 })();
