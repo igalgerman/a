@@ -151,7 +151,7 @@ function basket(){const F=frame('basket');const best=lvl('basket');const N=8;let
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)made=sc;done();},hit:()=>{if(phase==='q'){const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();}else if(phase==='aim')throwIt(true);},get phase(){return phase;},get score(){return made;}};
   ask();}
 /* ---------- d. swim race: each right answer is a stroke ---------- */
-function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=0,rival=0,ok=0,q=null,alive=true,last=0,won=null;const rivalT=Math.max(28000,48000-best*1500);
+function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=0,rival=0,ok=0,q=null,alive=true,last=0;const rivalT=Math.max(28000,48000-best*1500);
   F.field.classList.add('pool');
   const lanes=h('div','lanes',`<div class="lane"><span class="who">אַתָּה</span><span class="swr me">🏊</span><span class="fin">🏁</span></div><div class="lane"><span class="who">דּוֹלְפִין</span><span class="swr rv">🐬</span><span class="fin">🏁</span></div>`);
   const me=lanes.querySelector('.me'),rv=lanes.querySelector('.rv');const area=h('div','barea');F.field.append(lanes,area);
@@ -160,7 +160,7 @@ function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=
     area.appendChild(answers(q,(good,b)=>{if(!alive)return;if(good){you++;ok++;F.score(ok);b.classList.add('ok');me.classList.remove('stroke');void me.offsetWidth;me.classList.add('stroke');sfx.pop(4);put();if(you>=N)return end(true);setTimeout(()=>{if(alive)ask();},D(250));}
       else{b.classList.add('bad');b.disabled=true;sfx.no();}}));};
   const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מוֹבִיל':'🏊 מוֹבִיל!');if(rival>=1)return end(false);requestAnimationFrame(loop);};
-  function end(win){if(!alive)return;alive=false;won=win;const st=win?(rival<.75?3:2):1;finish('swim',ok,ok+(win?5:0),st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
+  function end(win){if(!alive)return;alive=false;const st=win?(rival<.75?3:2):1;finish('swim',ok,ok+(win?5:0),st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)ok=sc;end(ok>=N);},hit:()=>{const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();},get score(){return ok;}};
   put();ask();countdown(F,()=>{last=performance.now();requestAnimationFrame(loop);});}
 /* ---------- wiring ---------- */
