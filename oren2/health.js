@@ -34,8 +34,10 @@ const enabled=dm=>dm==='math'?true:dm==='arcade'?!!window.TAL_arcade:T.dailyPool
 /* ---------- settings & the day's record ---------- */
 const MEALS=[['b','אֲרוּחַת בֹּקֶר','בוקר','07:30'],['l','אֲרוּחַת צָהֳרַיִם','צהריים','13:00'],['d','אֲרוּחַת עֶרֶב','ערב','18:30']];
 H.MEAL_WIN=60;H.MEAL_MIN=10;H.ACTS=4;
-function cfg(){const st=T.S().set;const c=st.hl=st.hl||{};c.off=c.off||{};c.meals=c.meals||{};MEALS.forEach(([k,,,t])=>{if(!/^\d\d:\d\d$/.test(c.meals[k]||''))c.meals[k]=t;});
-  if(![15,20,30].includes(c.brk))c.brk=20;if(![10,15,20].includes(c.thr))c.thr=15;return c;}
+/* read with defaults; nothing is written until a parent changes something (so Oren's device never makes the family settings look newer) */
+function cfg(){const c=T.S().set.hl||{};const m={};MEALS.forEach(([k,,,t])=>{m[k]=/^\d\d:\d\d$/.test((c.meals||{})[k]||'')?c.meals[k]:t;});
+  return {off:Object.assign({},c.off||{}),meals:m,brk:[15,20,30].includes(c.brk)?c.brk:20,thr:[10,15,20].includes(c.thr)?c.thr:15};}
+H.setCfg=(k,v)=>{const st=T.S().set;const c=st.hl=st.hl||{};if(k==='off'||k==='meals')c[k]=Object.assign({},cfg()[k],v);else c[k]=v;if(k==='off')for(const x of Object.keys(c.off))if(!c.off[x])delete c.off[x];O.persist();};
 H.cfg=cfg;
 function day(t){const s=T.S();s.health=s.health||{};const d=dayOf(t==null?now():t);let r=s.health[d];
   if(!r){r=s.health[d]={};const ks=Object.keys(s.health).sort();ks.slice(0,Math.max(0,ks.length-60)).forEach(k=>delete s.health[k]);}
@@ -163,13 +165,13 @@ H.decorate=decorate;
 document.addEventListener('click',e=>{if(bypass||off())return;const el=e.target.closest&&e.target.closest('[data-hrest]');if(!el||el.closest('.hlock')||!H.resting(el.dataset.hrest))return;e.stopPropagation();e.preventDefault();sfx.pop&&sfx.pop(1);showRest(el.dataset.hrest,el);},true);
 
 /* ---------- parent panel (no nikud) ---------- */
-H.panel=(box,sec,re)=>{const c=cfg(),r=day();const save=()=>{O.persist();re&&re();};
+H.panel=(box,sec,re)=>{const c=cfg(),r=day();
   const s1=sec(box,'הפסקות, ארוחות והחלפת נושא','<div class="pnote">בסוף פעילות (אף פעם לא באמצע שאלה): כל כמה דקות פעילות — הפסקה של כחצי דקה עם החבר, בסבב: מים, שירותים, תנועה, מנוחת עיניים. בזמן ארוחה המשחק עוצר עד "אכלתי" (לפחות 10 דקות, או סיסמת הורה). אחרי הרבה זמן באותו תחום — החבר מציע תחום אחר, והתחום נח עד מחר.</div>');
-  const tg=h('div','popt','<span>תזכורות:</span>');[['water','💧 מים'],['toilet','🚽 שירותים'],['move','🤸 תנועה'],['eyes','👀 עיניים'],['meal','🍽️ ארוחות']].forEach(([k,n])=>{const b=h('button','pchip'+(c.off[k]?'':' on'),n);b.onclick=()=>{if(c.off[k])delete c.off[k];else c.off[k]=1;save();};tg.appendChild(b);});s1.appendChild(tg);
-  const iv=h('div','popt','<span>הפסקה כל:</span>');[15,20,30].forEach(v=>{const b=h('button','pchip'+(c.brk===v?' on':''),v+' דק׳');b.onclick=()=>{c.brk=v;save();};iv.appendChild(b);});s1.appendChild(iv);
+  const tg=h('div','popt','<span>תזכורות:</span>');[['water','💧 מים'],['toilet','🚽 שירותים'],['move','🤸 תנועה'],['eyes','👀 עיניים'],['meal','🍽️ ארוחות']].forEach(([k,n])=>{const b=h('button','pchip'+(c.off[k]?'':' on'),n);b.onclick=()=>{H.setCfg('off',{[k]:c.off[k]?0:1});re&&re();};tg.appendChild(b);});s1.appendChild(tg);
+  const iv=h('div','popt','<span>הפסקה כל:</span>');[15,20,30].forEach(v=>{const b=h('button','pchip'+(c.brk===v?' on':''),v+' דק׳');b.onclick=()=>{H.setCfg('brk',v);re&&re();};iv.appendChild(b);});s1.appendChild(iv);
   const ml=h('div','popt','<span>ארוחות:</span>');MEALS.forEach(([k,,n])=>{const l=h('label','hml',n+' ');const i=document.createElement('input');i.type='time';i.className='pgin sm';i.value=c.meals[k];i.setAttribute('aria-label','ארוחת '+n);
-    i.onkeydown=e=>e.stopPropagation();i.onchange=()=>{if(/^\d\d:\d\d$/.test(i.value)){c.meals[k]=i.value;O.persist();}};l.appendChild(i);ml.appendChild(l);});s1.appendChild(ml);
-  const th=h('div','popt','<span>החלפת נושא אחרי:</span>');[10,15,20].forEach(v=>{const b=h('button','pchip'+(c.thr===v?' on':''),v+' דק׳');b.onclick=()=>{c.thr=v;save();};th.appendChild(b);});th.appendChild(h('small','hnote','(או '+H.ACTS+' פעילויות באותו תחום ביום)'));s1.appendChild(th);
+    i.onkeydown=e=>e.stopPropagation();i.onchange=()=>{if(/^\d\d:\d\d$/.test(i.value))H.setCfg('meals',{[k]:i.value});};l.appendChild(i);ml.appendChild(l);});s1.appendChild(ml);
+  const th=h('div','popt','<span>החלפת נושא אחרי:</span>');[10,15,20].forEach(v=>{const b=h('button','pchip'+(c.thr===v?' on':''),v+' דק׳');b.onclick=()=>{H.setCfg('thr',v);re&&re();};th.appendChild(b);});th.appendChild(h('small','hnote','(או '+H.ACTS+' פעילויות באותו תחום ביום)'));s1.appendChild(th);
   /* today's log */
   const BI={water:'💧',toilet:'🚽',move:'🤸',eyes:'👀'};
   const br=r.breaks.length?r.breaks.map(x=>`<span class="hlg${x.ok?'':' no'}">${BI[x.k]||''} ${x.t}</span>`).join(' '):'עוד לא היו הפסקות היום';

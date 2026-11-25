@@ -21,7 +21,7 @@ const FIX='a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0',OLD='0123456789abcdef0123456789abcd
  // parent on B: set password + time limit
  await L.noCoach(B);await B.evaluate(()=>window.OREN.showMap());await sleep(300);await B.click('#sHome .parbtn');await B.fill('#pw1','abcd');await B.fill('#pw2','abcd');await B.keyboard.press('Enter');await sleep(300);
  await B.evaluate(()=>window.TAL.parentPanel('set'));await sleep(200);{const t=await B.textContent('#sPar');ok('no family code or link in settings',!t.includes('#f=')&&!t.includes('מכשירים נוספים'));}
- await B.evaluate(()=>{window.TAL.parentPanel('time');});await sleep(200);await B.locator('#sPar .pchip',{hasText:'45'}).first().click();await sleep(2500);
+ await B.evaluate(()=>{window.TAL.parentPanel('time');});await sleep(200);await B.locator('#sPar .psec',{hasText:'הגבלה קבועה'}).locator('.pchip',{hasText:/^45$/}).click();await sleep(2500);
  // meanwhile A keeps playing (newer saves)
  await A.evaluate(()=>{const O=window.OREN;O.save.gems=40;O.persist();});await sleep(2500);
  await A.evaluate(()=>window.OREN.famPull());await sleep(800);

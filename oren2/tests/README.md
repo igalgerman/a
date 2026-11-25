@@ -31,6 +31,8 @@ Needs Node and the `playwright` package with Chromium (no npm install inside the
 | day-path (desktop/phone) | "what do you feel like today?" choice from enabled parts, something else, together time (parent "I have time now" and Oren-led), real-world missions, no tickets / prize / badge toasts, first-time tour, family merge of the new keys |
 | arcade (desktop/phone) | all arcade cabinets, records, real clicks (no tickets or prize shop) |
 | family-sync | website mode: fresh devices share one fixed family save (no codes or links), old per-device id merged once, settings/progress sync through a fake `/api/save` |
+| health | body breaks (water, toilet, movement, eyes) at the end of an activity, meal pauses by the clock, topic switching and resting doors, parent settings and log, family merge |
+| timelimit | what is left in the top bar, spoken reminders, finish-the-current-activity grace, count-based limits, the parent's "⏱️ היום" block, a grant from the parent's phone unlocking Oren's device |
 | worker | the Cloudflare `_worker.js` bundle: page, icons, manifest, save API (GET/PUT/400/404/405/413), Google voice cache and `/api/tts/pregen` (fake Google) |
 | playthrough (FULL=1) | plays every world level by level on a viewport, extras, layout overflow |
 

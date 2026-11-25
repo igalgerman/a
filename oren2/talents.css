@@ -520,3 +520,10 @@ body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
 /* long paths (together / real-world steps added) still fit a phone */
 @media (max-width:760px){#sHome .tpath .tstep2 .ti2,#sHome .tgoal{width:min(56px,calc((100vw - 24px) / var(--n,5) - 10px));height:min(56px,calc((100vw - 24px) / var(--n,5) - 10px))}
   #sHome .tpath .tstep2 .ti2 svg{width:70%;height:auto}#sHome .tpath .ti2>span,#sHome .tgoal>span{font-size:min(30px,calc((100vw - 24px) / var(--n,5) / 2))}#sHome .tpath .tlink{min-width:4px}}
+/* what is left today (screen-time limit): a small pill in the top bar on every screen (on a phone it takes the gems' place) */
+.tpill{font-size:16px;font-weight:900;background:#eef6fb;color:var(--ink);padding:4px 10px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15),0 0 0 3px var(--ink);white-space:nowrap;line-height:1.3;flex:0 0 auto}
+.tpill.low{background:#ffb15c;color:#5a2a00}
+.tgrace{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;background:#fff4d6;font-family:var(--read);font-size:20px;font-weight:800;padding:8px 18px;box-shadow:0 0 0 4px var(--ink),0 6px 0 4px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px);overflow:hidden;text-overflow:ellipsis}
+.tyay{z-index:95;cursor:pointer}
+.tlock .callp svg{width:96px;height:96px}
+@media (max-width:760px){.tpill{font-size:13px;padding:3px 6px}body.haspill #gemc{display:none}.tgrace{font-size:16px;padding:6px 12px}}

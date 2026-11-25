@@ -22,14 +22,14 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  ok('template saved with specific activity',await p.evaluate(()=>JSON.stringify(window.TAL.S().set.plan).includes('act:art-mix')));
  const nd=await p.evaluate(()=>{delete window.TAL.S().daily;return window.TAL.dailyEnsure().t;});ok('new day uses template',nd[1]==='art-mix',JSON.stringify(nd));
  // time tab
- await p.evaluate(()=>window.TAL.parentPanel('time'));await sleep(200);await p.locator('#sPar .pchip',{hasText:'30'}).first().click();await sleep(100);
+ await p.evaluate(()=>window.TAL.parentPanel('time'));await sleep(200);await p.locator('#sPar .psec',{hasText:'הגבלה קבועה'}).locator('.pchip',{hasText:/^30$/}).click();await sleep(100);
  ok('daily limit set',await p.evaluate(()=>window.TAL.S().set.lim.daily===30));
  await p.locator('#sPar .pchip',{hasText:'+10'}).click();await sleep(100);ok('today +10',await p.evaluate(()=>window.TAL.S().set.lim.today.min===40));
- await p.locator('#sPar .pchip',{hasText:'ביטול השינוי'}).click();await sleep(100);
+ await p.locator('#sPar .pchip',{hasText:'כמו כל יום'}).click();await sleep(100);
  await p.locator('#sPar .bigbtn',{hasText:'יציאה'}).click();await sleep(300);
- ok('home shows time left',(await p.textContent('#sHome .hbub2')).includes('30 דַּקּוֹת'));
- // warning at 5 minutes left
- await p.evaluate(()=>{window.__toasts=[];new MutationObserver(m=>m.forEach(r=>r.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('toast'))window.__toasts.push(n.textContent);}))).observe(document.body,{childList:true});const T=window.TAL,O=window.OREN;T.S().time[O.today()]=26*60;});await sleep(5600);ok('5-minute warning toast',await p.evaluate(()=>window.__toasts.some(t=>t.includes('דַּקּוֹת'))));
+ ok('the top bar shows the time left',(await p.textContent('#hud .tpill')).includes('30 דַּקּוֹת'));
+ // the last 5 minutes
+ await p.evaluate(()=>{window.__toasts=[];new MutationObserver(m=>m.forEach(r=>r.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('toast'))window.__toasts.push(n.textContent);}))).observe(document.body,{childList:true});const T=window.TAL,O=window.OREN;T.S().time[O.today()]=26*60;});await sleep(2600);ok('last 5 minutes: the pill turns orange',await p.evaluate(()=>document.querySelector('#hud .tpill').classList.contains('low')));
  // time up
  await p.evaluate(()=>{const T=window.TAL,O=window.OREN;T.S().time[O.today()]=31*60;});await sleep(5600);ok('time-up lock shown',await p.locator('.tlock').count()===1);
  await L.shot(p,{path:L.SHOTDIR+'/timeup.png'});

@@ -7,7 +7,8 @@ const { chromium } = require('playwright'); const sleep = ms => new Promise(r =>
 const res = []; const ok = (n, c, i = '') => { res.push((c ? 'PASS ' : 'FAIL ') + n + (i ? ' — ' + i : '')); if (process.env.DBG) console.log(res[res.length - 1]); };
 // the built game; if health.js is not injected yet, inject it here
 let html = fs.readFileSync(path.join(L.ROOT, 'index.html'), 'utf8');
-if (!html.includes('window.HEALTH=H')) {
+const BUILT = html.includes('window.HEALTH=H');   // integrated into the game (phase 2): also test the parent panel and sync
+if (!BUILT) {
   const css = fs.readFileSync(path.join(L.ROOT, 'health.css'), 'utf8'), js = fs.readFileSync(path.join(L.ROOT, 'health.js'), 'utf8');
   html = html.replace('<!--/TALENTS-->', '<style>' + css + '</style>\n<script>\n' + js + '\n</script>\n<!--/TALENTS-->');
 }
@@ -15,7 +16,7 @@ const PAGE = path.join(L.TMP, 'health-' + L.variant + '.html'); fs.mkdirSync(L.T
 const SH = process.env.HSHOTS; if (SH) fs.mkdirSync(SH, { recursive: true });
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext(L.VIEWPORT);
-  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('hk')) { localStorage.clear(); sessionStorage.setItem('hk', 1); } } catch (e) { } window.__fast = true; window.__noFamily = true; window.__health = true; });
+  await ctx.addInitScript(() => { window.__fast = true; window.__noFamily = true; window.__health = true; });
   const p = await ctx.newPage(); p.setDefaultTimeout(5000); const errs = []; p.on('pageerror', e => errs.push(e.message));
   const shot = async n => { if (SH) await p.screenshot({ path: path.join(SH, n + '-' + L.variant + '.png') }); };
   const T0 = '2026-11-25T10:00:00';
@@ -70,7 +71,7 @@ const SH = process.env.HSHOTS; if (SH) fs.mkdirSync(SH, { recursive: true });
   await p.locator('.hlock .hcards .dcard').first().click(); await sleep(500);
   ok('a card takes him to the other domain', !(await lock()) && await p.evaluate(() => window.HEALTH.current() !== 'read'), await p.evaluate(() => window.HEALTH.current()));
   // resting doors
-  await p.evaluate(() => { const T = window.TAL; T.openGroup(T.GROUPS.find(g => g.id === 'readg')); }); await sleep(300);
+  await p.evaluate(() => { const T = window.TAL; document.getElementById('dlg').hidden = true; T.openGroup(T.GROUPS.find(g => g.id === 'readg')); }); await sleep(300);
   const moons = await p.evaluate(() => [...document.querySelectorAll('#sTal .bld')].map(b => [b.querySelector('.nm').textContent, !!b.querySelector('.hmoon')]));
   ok('resting buildings show a small moon, others not', moons.some(x => x[1]) && moons.some(x => !x[1] && x[0] === 'אַנְגְּלִית'), JSON.stringify(moons));
   await shot('rest-doors');
@@ -101,9 +102,10 @@ const SH = process.env.HSHOTS; if (SH) fs.mkdirSync(SH, { recursive: true });
   await shot('meal');
   await clock(9 * 60000); await sleep(350); ok('still waiting after 9 minutes', (await lock()).dis === true);
   // a reload does not skip the meal
-  await p.reload(); await boot('2026-11-25T13:14:30'); await home(); await sleep(400); l = await lock();
+  await p.reload();
+  await boot('2026-11-25T13:14:30'); await home(); await sleep(400); l = await lock();
   ok('after a reload the meal pause is still there', l && /hmeal/.test(l.cls));
-  await clock(60000); await sleep(400); l = await lock(); ok('after 10 minutes "I ate" turns on', l && l.dis === false);
+  await clock(60000); await sleep(400); l = await lock(); ok('after 10 minutes "I ate" turns on', l && l.dis === false, JSON.stringify([l, await st().then(r => r.meals), await p.evaluate(() => new Date(window.HEALTH.clock()).toString())]));
   await pressBack(); await sleep(400); r = await st(); ok('meal logged', r.meals.l && r.meals.l.e > r.meals.l.s);
   await p.evaluate(() => window.HEALTH.check()); await sleep(200); ok('only once per meal per day', !(await lock()));
   // parent unlock with the password (existing login)
@@ -115,12 +117,12 @@ const SH = process.env.HSHOTS; if (SH) fs.mkdirSync(SH, { recursive: true });
     r = await st(); ok('the parent password ends the pause early', !(await lock()) && r.meals.d && r.meals.d.p === 1, JSON.stringify(r.meals));
   }
   // ---------- settings ----------
-  await p.evaluate(() => { const c = window.HEALTH.cfg(); c.off = { water: 1, toilet: 1, move: 1, eyes: 1, meal: 1 }; }); await ticks(40); await home(); await sleep(400);
+  await p.evaluate(() => { window.HEALTH.setCfg('off', { water: 1, toilet: 1, move: 1, eyes: 1, meal: 1 }); }); await ticks(40); await home(); await sleep(400);
   ok('all reminders off: no breaks', !(await lock()));
-  await p.evaluate(() => { const c = window.HEALTH.cfg(); c.off = { water: 1, toilet: 1, eyes: 1 }; c.brk = 15; }); await home(); await sleep(400); l = await lock();
+  await p.evaluate(() => { window.HEALTH.setCfg('off', { move: 0 }); window.HEALTH.setCfg('brk', 15); }); await home(); await sleep(400); l = await lock();
   ok('only movement on, every 15 minutes', l && /hjump|hstretch/.test(l.cls)); await clock(31000); await sleep(350); await pressBack(); await sleep(300);
   // parent panel
-  if (await p.evaluate(() => !!window.TAL.parentPanel)) {
+  if (BUILT) {
     await p.evaluate(() => window.TAL.parentPanel('time')); await sleep(400);
     const pn = await p.evaluate(() => { const s = [...document.querySelectorAll('#sPar .psec')].find(x => /הפסקות, ארוחות/.test(x.textContent)); const lg = [...document.querySelectorAll('#sPar .psec')].find(x => /הפסקות וזמן לפי תחום/.test(x.textContent));
       return { sec: !!s, chips: s ? s.querySelectorAll('.pchip').length : 0, times: s ? s.querySelectorAll('input[type=time]').length : 0, log: lg ? lg.textContent : '', old: /תזכורת הפסקה אחרי/.test(document.getElementById('sPar').textContent) }; });
@@ -128,7 +130,7 @@ const SH = process.env.HSHOTS; if (SH) fs.mkdirSync(SH, { recursive: true });
     ok('parent panel: today\'s log (breaks, minutes per domain)', /קריאה וכתיבה/.test(pn.log) && /💧/.test(pn.log), pn.log.slice(0, 200));
     ok('the old break reminder row is gone', !pn.old);
     await p.evaluate(() => { const s = [...document.querySelectorAll('#sPar .psec')].find(x => /הפסקות, ארוחות/.test(x.textContent)); s.scrollIntoView(); }); await sleep(200); await shot('parent');
-    await p.locator('#sPar .psec .pchip', { hasText: '30 דק׳' }).first().click(); await sleep(300);
+    await p.locator('#sPar .psec', { hasText: 'הפסקות, ארוחות' }).locator('.pchip', { hasText: '30 דק׳' }).first().click(); await sleep(300);
     ok('interval chip saves', await p.evaluate(() => window.HEALTH.cfg().brk === 30));
     await p.evaluate(() => window.OREN.showMap()); await sleep(200);
   }

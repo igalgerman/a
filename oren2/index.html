@@ -1010,7 +1010,8 @@ function mergeIn(o){if(!o||typeof o!=='object')return;
   if(o.set&&(+o.setT||0)>(+save.setT||0)){save.set=o.set;save.setT=o.setT;lastSetJ=JSON.stringify(save.set);}
   for(const x of (o.iss||[])){if(!x||!x.d||!x.k)continue;save.iss=save.iss||[];const e=save.iss.find(y=>y.d===x.d&&y.k===x.k);if(e)e.n=Math.max(e.n|0,x.n|0);else save.iss.push(x);}if(save.iss)save.iss=save.iss.sort((a,b)=>a.d<b.d?-1:1).slice(-30);
   for(const k of ['prof','bdg','last'])if(o[k]&&!save[k])save[k]=o[k];
-  for(const m of ['dom','rw','coach'])for(const [k,v] of Object.entries(o[m]||{})){save[m]=save[m]||{};save[m][k]=Math.max(+save[m][k]||0,+v||0);}
+  for(const m of ['dom','rw','coach','cnt'])for(const [k,v] of Object.entries(o[m]||{})){save[m]=save[m]||{};save[m][k]=Math.max(+save[m][k]||0,+v||0);}
+  if(o.health&&window.HEALTH)save.health=window.HEALTH.merge(save.health||{},o.health);else if(o.health&&!save.health)save.health=o.health;
   if((+o.t||0)>(+save.t||0)){for(const k of ['gems','av','k','tc','made','art','daily','typ','kpic','jar','mood','prof','bdg','arc','togL'])if(o[k]!=null)save[k]=o[k];if(o.set&&!(+o.setT||0)&&!(+save.setT||0))save.set=o.set;save.t=o.t;}}
 var lastSetJ='';
 /* problem log for the parent panel: one entry per kind per day with a count (synced with the family) */
@@ -2389,6 +2390,13 @@ body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
 /* long paths (together / real-world steps added) still fit a phone */
 @media (max-width:760px){#sHome .tpath .tstep2 .ti2,#sHome .tgoal{width:min(56px,calc((100vw - 24px) / var(--n,5) - 10px));height:min(56px,calc((100vw - 24px) / var(--n,5) - 10px))}
   #sHome .tpath .tstep2 .ti2 svg{width:70%;height:auto}#sHome .tpath .ti2>span,#sHome .tgoal>span{font-size:min(30px,calc((100vw - 24px) / var(--n,5) / 2))}#sHome .tpath .tlink{min-width:4px}}
+/* what is left today (screen-time limit): a small pill in the top bar on every screen (on a phone it takes the gems' place) */
+.tpill{font-size:16px;font-weight:900;background:#eef6fb;color:var(--ink);padding:4px 10px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15),0 0 0 3px var(--ink);white-space:nowrap;line-height:1.3;flex:0 0 auto}
+.tpill.low{background:#ffb15c;color:#5a2a00}
+.tgrace{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;background:#fff4d6;font-family:var(--read);font-size:20px;font-weight:800;padding:8px 18px;box-shadow:0 0 0 4px var(--ink),0 6px 0 4px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px);overflow:hidden;text-overflow:ellipsis}
+.tyay{z-index:95;cursor:pointer}
+.tlock .callp svg{width:96px;height:96px}
+@media (max-width:760px){.tpill{font-size:13px;padding:3px 6px}body.haspill #gemc{display:none}.tgrace{font-size:16px;padding:6px 12px}}
 
 /* ===== 🕹️ arcade ===== */
 .arc{width:min(980px,100%);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 16px 22px;color:#fff;
@@ -2549,6 +2557,34 @@ body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
 /* 🔊 buttons stay small but get a finger-size touch area */
 .rdb{position:relative}.rdb::after{content:"";position:absolute;inset:-7px;border-radius:50%}
 .sl .rdb::after{inset:-5px}
+
+/* ===== healthy screen time (health.js) ===== */
+.hlock{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(20,40,60,.74);backdrop-filter:blur(3px);padding:16px;overflow:auto}
+.hlock .card{display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--paper);padding:22px 28px;max-width:560px;width:100%;box-sizing:border-box;text-align:center;box-shadow:0 0 0 6px var(--ink),0 14px 0 6px rgba(0,0,0,.3);animation:pop .35s ease-out both}
+.hlock h2{margin:0;font-size:32px;line-height:1.35}.hlock .sub{font-family:var(--read);font-size:22px;line-height:1.6}
+body.hlocked #ov{position:fixed;z-index:100}
+.hfr{display:flex;align-items:flex-end;justify-content:center;gap:12px}.hfr .hav svg{width:104px;height:104px}.hfr .hk{font-size:66px;line-height:1}
+.hcd{font-size:34px;font-weight:900;direction:ltr;min-height:40px;color:var(--ink-soft)}
+.hcnt{font-size:56px;font-weight:900;line-height:1;color:#3a8fc4}
+.hlock .hback[disabled]{filter:grayscale(1);opacity:.5;cursor:default}
+.hlock .hback.ready{animation:pop .35s ease-out both}
+.hjump .hav svg{animation:hjump 1s ease-in-out infinite}
+@keyframes hjump{0%,100%{transform:translateY(0)}40%{transform:translateY(-34px) scaleY(1.05)}60%{transform:translateY(-34px)}85%{transform:translateY(0) scaleY(.92)}}
+.hstretch .hav svg{animation:hstretch 2.4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes hstretch{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.22) scaleX(.92)}}
+.hcards{display:flex;gap:16px;justify-content:center;width:100%}
+.hcards .dcard{width:200px;min-height:160px}
+.hone{background:none;font-size:18px;font-weight:800;text-decoration:underline;color:var(--ink-soft);padding:6px 10px}
+.hpar{background:none;font-size:13px;color:var(--ink-soft);opacity:.75;padding:4px 8px}
+.hrest{position:relative}.hrest>*:not(.hmoon){filter:saturate(.3);opacity:.75}
+.hmoon{position:absolute;top:6px;left:6px;background:#2d3a5a;color:#fff1a8;font-size:13px;font-weight:800;padding:2px 8px;border-radius:12px;white-space:nowrap;pointer-events:none}
+.hml{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:14px}.hml input{width:auto}
+.hnote{font-size:12px;color:var(--ink-soft)}
+.hlg{display:inline-block;background:#eef6ff;padding:1px 7px;margin:2px;font-weight:700;direction:ltr}.hlg.no{opacity:.55}
+.hrs{font-size:13px;font-weight:800;color:#2d3a5a}
+@media (max-width:760px){.hlock .card{padding:16px 14px}.hlock h2{font-size:24px}.hlock .sub{font-size:18px}.hfr .hav svg{width:80px;height:80px}.hfr .hk{font-size:50px}
+  .hcards{gap:10px}.hcards .dcard{width:calc((100vw - 90px)/2);min-height:128px}}
+@media (prefers-reduced-motion:reduce){.hjump .hav svg,.hstretch .hav svg{animation:none}}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */
@@ -2556,7 +2592,7 @@ body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
 const O=window.OREN;if(!O)return;
 const {h,$,pick,shuffle,ICON,SPR,sprite}=O;
 const sfx=O.sfx;const D=O.D;
-const S=()=>{const s=O.save;s.tl=s.tl||{};s.mood=s.mood||[];s.jar=s.jar||[];s.art=s.art||[];s.set=s.set||{brk:25,hide:{}};s.set.hide=s.set.hide||{};s.time=s.time||{};s.typ=s.typ||{best:{},wpm:0};return s;};
+const S=()=>{const s=O.save;s.tl=s.tl||{};s.mood=s.mood||[];s.jar=s.jar||[];s.art=s.art||[];s.set=s.set||{hide:{}};s.set.hide=s.set.hide||{};s.time=s.time||{};s.typ=s.typ||{best:{},wpm:0};return s;};
 const today=O.today;
 const L_=t=>`<span class="ltr">${t}</span>`;
 const nb=n=>`<b>${n}</b>`;
@@ -2695,15 +2731,12 @@ O.on('levelDone',(lv)=>{if(!lv||lv.type==='train')return;S().last={id:'math',d:t
 O.on('map',m=>{const rs=m.querySelector('.reset');if(rs)rs.remove();if(window.TAL_noHome)return;m.querySelectorAll('.hello,.statline').forEach(e=>e.remove());m.querySelectorAll('.topbar .tool').forEach(t=>{if(/הַמַּמְלָכָה|הַגִּבּוֹר שֶׁלִּי/.test(t.textContent))t.remove();});});
 O.on('kingdomScene',sc=>{if(!window.TAL_noHome&&!sc.querySelector('.kmine')){const r=h('div','kmine');const a=h('button','tool',`<span class="ti">${O.AV()}</span><span>הַגִּבּוֹר שֶׁלִּי</span>`);a.onclick=()=>O.studio(false);const b=h('button','tool',`<span class="ti">🏅</span><span>הַתַּגִּים שֶׁלִּי</span>`);b.onclick=()=>window.TAL.badges(O.kingdom);r.append(a,b);sc.prepend(r);}const s=S();if(s.kpic!=null&&s.art[s.kpic]){const f=h('div','kpic',artSVG(s.art[s.kpic]));sc.querySelector('.ktop').appendChild(f);}});
 
-/* ---------- time tracking & break reminder ---------- */
-let lastAct=Date.now(),session=0,snooze=0;
+/* ---------- time tracking (body breaks, meals and topic switching live in health.js) ---------- */
+let lastAct=Date.now(),session=0;
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{lastAct=Date.now();},true));
 setInterval(()=>{if(document.hidden||Date.now()-lastAct>60000||$('#hud').hidden)return;const s=S();const d=today();s.time[d]=(s.time[d]|0)+15;session+=15;
-  if(session%60===0)O.persist();
-  const lim=(s.set.brk|0)*60;if(lim&&session>=lim+snooze&&$('#ov').hidden&&$('#dlg').hidden&&$('#sPlay').hidden){breakTime();}},15000);
-function breakTime(){const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card"><div class="bk">${(S().prof&&S().prof.an?ALLSPR(S().prof.an):FACES.happy.s)}</div><h2>זְמַן לְהַפְסָקָה קְטַנָּה</h2><div class="sub">שִׂחַקְתָּ הַרְבֵּה! אֶפְשָׁר לְהִתְמַתֵּחַ, לִשְׁתּוֹת מַיִם, אוֹ לִנְשֹׁם יַחַד.</div></div>`;
-  const row=h('div','btnrow');const a=h('button','bigbtn',ICON.play+'<span>נְשִׁימָה יַחַד</span>');a.onclick=()=>{ov.hidden=true;session=0;snooze=0;ACT['mind-breath'].run(openHub);};
-  const b=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד קְצָת</span>');b.onclick=()=>{ov.hidden=true;snooze+=600;};row.append(a,b);ov.firstChild.appendChild(row);sfx.star(0);}
+  if(session%60===0)O.persist();},15000);
+const breakTime=()=>window.HEALTH&&window.HEALTH.breakNow();
 
 /* exports for other chunks */
 window.TAL={spk,openGroup,GROUPS,bState,dailyPool,S,X,ALLSPR,FACES,quiz,result,record,finishAct,building,ACT,BUILD,openHub,openBuilding,hudT,progressBar,starsHTML,plainHe,L_,nb,dailyEnsure,setKey:f=>{KEY=f;},get key(){return KEY;},breakTime,artSVG:(...a)=>artSVG(...a)};
@@ -3359,6 +3392,8 @@ function forgot(then){const ov=$('#ov');ov.innerHTML=`<div class="card plog"><h2
   const q=$('#fq');setTimeout(()=>q.focus(),60);const go=()=>{if(q.value.trim()==='888'){delete RSET().pw;O.persist();login(then);}else{$('#pgErr').textContent='לא נכון';sfx.no();}};ok.onclick=go;q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};}
 
 window.TAL_parentGate=()=>login(()=>parentChoice());
+/* the password check alone (e.g. to end a meal pause early); the panel stays closed */
+T.login=then=>login(()=>{parentOn=false;then&&then();});
 O.on('screen',id=>{if(id!=='sPar'&&!O.isParentPlay&&$('#ov').hidden)parentOn=false;});
 /* ---------- permissions ---------- */
 let permP=null;
@@ -3497,7 +3532,7 @@ function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(
   s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>{openSec=null;panel(id);};tb.appendChild(b);});s.appendChild(tb);
   const body=h('div','pbody');s.appendChild(body);
   if(curTab==='sum')sumTab(body);
-  else if(curTab==='day'){timeTab(body);planTab(body);if(T.rdSettings)T.rdSettings(body,sec,()=>panel('day'));}
+  else if(curTab==='day'){timeTab(body);if(window.HEALTH)window.HEALTH.panel(body,sec,()=>panel('day'));planTab(body);if(T.rdSettings)T.rdSettings(body,sec,()=>panel('day'));}
   else MORE.forEach(([id,n])=>{const d=document.createElement('details');d.className='pdet';const sm=document.createElement('summary');sm.textContent=n;d.appendChild(sm);const inner=h('div','pdin');d.appendChild(inner);let done=false;
     const fill=()=>{if(done)return;done=true;FN[id](inner);};d.addEventListener('toggle',()=>{if(d.open){openSec=id;fill();}});if(openSec===id){d.open=true;fill();}body.appendChild(d);});
   const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;
@@ -3570,35 +3605,81 @@ function tryTab(box){const ts=sec(box,'משתמש הורה — לשחק ולנס
   const sk=h('button','pchip','⏭ דלג / סיים');sk.onclick=()=>{$('#ov').hidden=true;if(O.skipLevel())return toast('דילגת על השלב ✓');if(!$('#sTal').hidden){const l=T.S().last;if(l&&ACT[l.id]){T.record(l.id,3);toast('סומן כהושלם ✓');}$('#btnBack').click();}else $('#btnBack').click();};
   const hm=h('button','pchip','🏠 בית');hm.onclick=()=>O.showMap();const ex=h('button','pchip on','🚪 חזרה ללוח ההורים');ex.onclick=()=>{O.parentPlay(false);parentOn=true;panel('try');};
   bar.append(sk,hm,ex);document.body.appendChild(bar);O.on('mode',on=>{bar.hidden=!on;});})();
-/* --- screen time --- */
+/* --- screen time ---
+   lim = {daily (min, every day), bed, nofin (1 = do not let him finish the current activity), bedOff, today:{d, min | n | none}}  — today's preset/grant, back to daily tomorrow.
+   A count limit (n) = activities completed today. Settings are newer-wins in the family save (setT), so a grant from the parent's phone reaches Oren's device on the next pull. */
 setTimeout(()=>{SET();if(O.settleSet)O.settleSet();},0);
 const LIM=()=>{const st=SET();st.lim=st.lim||{daily:0,bed:0,today:null};return st.lim;};
 const usedMin=()=>Math.floor(((T.S().time||{})[O.today()]|0)/60);
-function limitToday(){const l=LIM();if(l.today&&l.today.d===O.today())return l.today.min;return l.daily|0;}
-T.timeLeft=()=>{const lim=limitToday();return lim?Math.max(0,lim-usedMin()):null;};
-function timeTab(box){const l=LIM(),st=SET();const lim=limitToday(),used=usedMin();
-  const ts=sec(box,'זמן משחק היום',`<div class="ptiles"><div><b>${used} דק׳</b><span>שוחקו היום</span></div><div><b>${lim?lim+' דק׳':'ללא הגבלה'}</b><span>מוגדר להיום${l.today&&l.today.d===O.today()?' (שונה במיוחד להיום)':''}</span></div><div><b>${lim?Math.max(0,lim-used)+' דק׳':'—'}</b><span>נשאר</span></div><div><b>${l.bed?l.bed+':00':'—'}</b><span>שעת סיום</span></div></div>`);
-  const tr=h('div','popt','<span>רק להיום:</span>');[[-10,'−10 דק׳'],[10,'+10 דק׳'],[20,'+20 דק׳']].forEach(([v,n])=>{const b=h('button','pchip',n);b.onclick=()=>{const base=limitToday()||Math.max(used,30);l.today={d:O.today(),min:Math.max(used+1,base+v)};if(v<0)l.today.min=Math.max(5,base+v);O.persist();panel('time');};tr.appendChild(b);});
-  const end=h('button','pchip bad','⏹ לסיים להיום עכשיו');end.onclick=()=>{l.today={d:O.today(),min:Math.max(1,used)};O.persist();panel('time');};tr.appendChild(end);
-  if(l.today&&l.today.d===O.today()){const rs=h('button','pchip','↺ ביטול השינוי של היום');rs.onclick=()=>{l.today=null;O.persist();panel('time');};tr.appendChild(rs);}ts.appendChild(tr);
-  const ds=sec(box,'הגבלה קבועה לכל יום','<div class="pnote">נספר רק זמן פעיל. 5 דקות לפני הסוף אורן מקבל תזכורת עדינה, ובסוף הזמן מופיע מסך "נתראה מחר" (אם הוא באמצע שלב — הוא יכול לסיים אותו). רק הורה עם סיסמה יכול להוסיף זמן.</div>');
-  const dr=h('div','popt','<span>דקות ביום:</span>');[[0,'ללא'],[20,'20'],[30,'30'],[45,'45'],[60,'60'],[90,'90']].forEach(([v,n])=>{const b=h('button','pchip'+((l.daily|0)===v?' on':''),n);b.onclick=()=>{l.daily=v;O.persist();panel('time');};dr.appendChild(b);});
-  const ci=h('input','pgin sm');ci.type='number';ci.min=5;ci.max=240;ci.placeholder='אחר';ci.setAttribute('aria-label','דקות');ci.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){const v=Math.max(5,Math.min(240,+ci.value|0));l.daily=v;O.persist();panel('time');}};dr.appendChild(ci);ds.appendChild(dr);
+const doneN=()=>(T.S().cnt||{})[O.today()]|0;
+O.on('tlDone',()=>{tEnd=Date.now();cntUp();});O.on('levelDone',()=>{tEnd=Date.now();cntUp();});
+function cntUp(){if(O.isParentPlay)return;const s=T.S();s.cnt=s.cnt||{};const d=O.today();s.cnt[d]=(s.cnt[d]|0)+1;const ks=Object.keys(s.cnt).sort();ks.slice(0,Math.max(0,ks.length-30)).forEach(k=>delete s.cnt[k]);}
+const todayL=()=>{const l=LIM();return l.today&&l.today.d===O.today()?l.today:null;};
+/* today's limit: {min} or {n} or null */
+function limNow(){const t=todayL(),l=LIM();if(t){if(t.none)return null;if(t.n)return {n:t.n};if(t.min)return {min:t.min};}return l.daily?{min:l.daily|0}:null;}
+function limitToday(){const x=limNow();return x&&x.min?x.min:0;}
+/* what is left: {min:m} or {n:k}, or null without a limit */
+T.limLeft=()=>{const x=limNow();if(!x)return null;return x.n?{n:Math.max(0,x.n-doneN())}:{min:Math.max(0,x.min-usedMin())};};
+T.timeLeft=()=>{const x=T.limLeft();return x&&x.min!=null?x.min:null;};
+/* more for today: minutes or activities, on top of what is left */
+function grant(kind,v){const l=LIM(),x=limNow();if(kind==='min'){const base=x&&x.min&&x.min>usedMin()?x.min:usedMin();l.today={d:O.today(),min:base+v};}
+  else{const base=x&&x.n&&x.n>doneN()?x.n:doneN();l.today={d:O.today(),n:base+v};}O.persist();}
+function timeTab(box){const l=LIM(),x=limNow(),left=T.limLeft(),t=todayL();
+  const lt=!x?'ללא הגבלה':x.n?x.n+' משימות':x.min+' דק׳';const ll=!left?'—':left.n!=null?left.n+' משימות':left.min+' דק׳';
+  const ts=sec(box,'⏱️ היום',`<div class="ptiles"><div><b>${usedMin()} דק׳</b><span>שוחקו היום</span></div><div><b>${doneN()}</b><span>משימות היום</span></div><div><b>${lt}</b><span>הגבלה להיום${t?' (רק היום)':''}</span></div><div><b>${ll}</b><span>נשאר</span></div></div>`);
+  const mk=(row,n,fn,on)=>{const b=h('button','pchip big'+(on?' on':''),n);b.onclick=()=>{fn();sfx.ok&&sfx.ok(1);panel('time');};row.appendChild(b);return b;};
+  const g=h('div','popt','<span>לתת עוד היום:</span>');[10,20,30].forEach(v=>mk(g,'+'+v+' דק׳',()=>grant('min',v)));[[1,'עוד משימה אחת'],[2,'עוד 2'],[3,'עוד 3']].forEach(([v,n])=>mk(g,n,()=>grant('n',v)));ts.appendChild(g);
+  const pr=h('div','popt','<span>רק להיום:</span>');[20,30,45,60].forEach(v=>mk(pr,v+' דק׳',()=>{l.today={d:O.today(),min:v};O.persist();},t&&t.min===v));[3,5,8].forEach(v=>mk(pr,v+' משימות',()=>{l.today={d:O.today(),n:v};O.persist();},t&&t.n===v));
+  mk(pr,'ללא הגבלה',()=>{l.today={d:O.today(),none:1};O.persist();},t&&t.none);if(t)mk(pr,'↺ כמו כל יום',()=>{l.today=null;O.persist();});
+  mk(pr,'⏹ לסיים עכשיו',()=>{l.today={d:O.today(),min:Math.max(1,usedMin())};O.persist();}).classList.add('bad');ts.appendChild(pr);
+  const ds=sec(box,'הגבלה קבועה לכל יום','<div class="pnote">נספר רק זמן פעיל. אורן רואה למעלה כמה נשאר. בסוף הזמן — מסך "נתראה מחר"; אם אורן באמצע פעילות, הוא מסיים אותה (עד 5 דקות). שינוי מהטלפון שלכם מגיע למכשיר של אורן תוך כדקה.</div>');
+  const dr=h('div','popt','<span>דקות ביום:</span>');[[0,'ללא'],[20,'20'],[30,'30'],[45,'45'],[60,'60'],[90,'90']].forEach(([v,n])=>{const b=h('button','pchip'+((l.daily|0)===v?' on':''),n);b.onclick=()=>{l.daily=v;O.persist();panel('time');};dr.appendChild(b);});ds.appendChild(dr);
   const br=h('div','popt','<span>לא לשחק אחרי:</span>');[[0,'ללא'],[18,'18:00'],[19,'19:00'],[20,'20:00'],[21,'21:00']].forEach(([v,n])=>{const b=h('button','pchip'+((l.bed|0)===v?' on':''),n);b.onclick=()=>{l.bed=v;O.persist();panel('time');};br.appendChild(b);});ds.appendChild(br);
-  const bk=h('div','popt','<span>תזכורת הפסקה אחרי:</span>');[[0,'כבוי'],[15,'15 דק׳'],[25,'25 דק׳'],[40,'40 דק׳']].forEach(([v,n])=>{const b=h('button','pchip'+((st.brk|0)===v?' on':''),n);b.onclick=()=>{st.brk=v;O.persist();panel('time');};bk.appendChild(b);});ds.appendChild(bk);}
+  const fr=h('div','popt','<span>בסוף הזמן:</span>');const fb=h('button','pchip'+(l.nofin?'':' on'),'לסיים את מה שהתחיל');fb.onclick=()=>{if(l.nofin)delete l.nofin;else l.nofin=1;O.persist();panel('time');};fr.appendChild(fb);ds.appendChild(fr);}
 /* enforcement on the kid side */
-let warned='',lockEl=null;
-function timeUp(kind){if(lockEl&&lockEl.isConnected)return;O.hush&&O.hush();O.musicStop();const d=T.S().daily;const n=d?d.done.filter(Boolean).length:0;
-  lockEl=h('div','tlock',`<div class="card"><div class="callp">${kind==='bed'?'🌙':'⏰'}</div><h2>${kind==='bed'?'זְמַן לָנוּחַ':'הַזְּמַן שֶׁל הַיּוֹם נִגְמַר'}</h2><div class="sub">כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן!${n?` סִיַּמְתָּ ${n===1?'מְשִׂימָה אַחַת':`${n} מְשִׂימוֹת`}.`:''}<br>הַכֹּל שָׁמוּר. נִתְרָאֶה מָחָר 👋</div></div>`);
-  const row=h('div','btnrow');const pb=h('button','bigbtn plain sm','🔒 <span>הוֹרֶה: עוֹד זְמַן</span>');pb.onclick=()=>login(()=>{const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card"><h2>כמה זמן להוסיף להיום?</h2></div>';const r=h('div','btnrow');
-      [[10,'+10 דק׳'],[20,'+20 דק׳'],[30,'+30 דק׳']].forEach(([v,n2])=>{const b=h('button','bigbtn sm','<span>'+n2+'</span>');b.onclick=()=>{const l=LIM();l.today={d:O.today(),min:usedMin()+v};if(kind==='bed')l.bedOff=O.today();O.persist();ov.hidden=true;parentOn=false;lockEl.remove();lockEl=null;document.body.classList.remove('tlocked');if((O.save.snd|0)>=2)O.musicStart();};r.appendChild(b);});
+let warned={},lockEl=null,lockKind='',tEnd=0,grace=0,graceEl=null,lastPull=0;
+const unlockMsg='אַבָּא אוֹ אִמָּא נָתְנוּ לְךָ עוֹד זְמַן! 🎉';
+function unlock(happy){if(lockEl){lockEl.remove();lockEl=null;}document.body.classList.remove('tlocked');if(happy){const pr=T.S().prof||{};const c=h('div','tlock tyay',`<div class="card"><div class="callp bob">${pr.an?ALLSPR(pr.an):'🎉'}</div><h2>${unlockMsg}</h2></div>`);document.body.appendChild(c);sfx.win();O.rain&&O.rain();O.say(T.spk(unlockMsg));setTimeout(()=>c.remove(),3500);c.onclick=()=>c.remove();}if((O.save.snd|0)>=2)O.musicStart();}
+function timeUp(kind){if(lockEl&&lockEl.isConnected)return;endGrace();O.hush&&O.hush();O.musicStop();const left=T.limLeft();const n=doneN();lockKind=kind;const pr=T.S().prof||{};
+  const head=kind==='bed'?'זְמַן לָנוּחַ':left&&left.n!=null?'סִיַּמְתָּ אֶת הַמְּשִׂימוֹת שֶׁל הַיּוֹם!':'הַזְּמַן שֶׁל הַיּוֹם נִגְמַר';
+  lockEl=h('div','tlock',`<div class="card"><div class="callp bob">${pr.an?ALLSPR(pr.an):kind==='bed'?'🌙':'⏰'}</div><h2>${head}</h2><div class="sub">כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן!${n?` סִיַּמְתָּ ${n===1?'מְשִׂימָה אַחַת':`${n} מְשִׂימוֹת`}.`:''}<br>הַמֹּחַ וְהַגּוּף צְרִיכִים גַּם לָנוּחַ וּלְשַׂחֵק בַּחוּץ.<br>הַכֹּל שָׁמוּר. נִתְרָאֶה מָחָר 👋</div></div>`);
+  const row=h('div','btnrow');const pb=h('button','bigbtn plain sm','🔒 <span>הוֹרֶה: עוֹד זְמַן</span>');pb.onclick=()=>login(()=>{const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card"><h2>כמה להוסיף להיום?</h2></div>';const r=h('div','btnrow');
+      const give=f=>{f();if(kind==='bed')LIM().bedOff=O.today();O.persist();ov.hidden=true;parentOn=false;unlock(false);};
+      [[10,'+10 דק׳'],[20,'+20 דק׳'],[30,'+30 דק׳']].forEach(([v,n2])=>{const b=h('button','bigbtn sm','<span>'+n2+'</span>');b.onclick=()=>give(()=>grant('min',v));r.appendChild(b);});
+      const b1=h('button','bigbtn sm','<span>עוד משימה אחת</span>');b1.onclick=()=>give(()=>grant('n',1));r.appendChild(b1);
       const c=h('button','bigbtn plain sm','<span>ביטול</span>');c.onclick=()=>{ov.hidden=true;parentOn=false;};r.appendChild(c);ov.firstChild.appendChild(r);});
-  row.appendChild(pb);lockEl.firstChild.appendChild(row);document.body.appendChild(lockEl);document.body.classList.add('tlocked');O.say(kind==='bed'?'זמן לנוח. כל הכבוד היום, אורן! נתראה מחר.':'הזמן של היום נגמר. כל הכבוד היום, אורן! נתראה מחר.');}
-setInterval(()=>{if(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidden)return;const l=LIM();const lim=limitToday(),used=usedMin();
-  if(l.bed&&new Date().getHours()>=l.bed&&l.bedOff!==O.today()){if($('#sPlay').hidden)timeUp('bed');return;}
-  if(!lim)return;const left=lim-used;
-  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ ${left===1?'עוֹד דַּקָּה אַחַת':`עוֹד ${left} דַּקּוֹת`} לְסִיּוּם הַיּוֹם`);O.say(left===1?'עוד דקה אחת לסיום היום':`עוד ${left} דקות לסיום היום`);}
-  if(left<=0){if(!$('#sPlay').hidden&&used<lim+3)return;timeUp('time');}},5000);
+  row.appendChild(pb);lockEl.firstChild.appendChild(row);document.body.appendChild(lockEl);document.body.classList.add('tlocked');O.say(T.spk(head+' כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן! נִתְרָאֶה מָחָר.'));}
+/* "finish what you started": a gentle banner, then the lock when the activity ends (at most 5 minutes) */
+const inAct=()=>!$('#sPlay').hidden||(!$('#sTal').hidden&&!!(T.health&&T.health.current()));
+function endGrace(){grace=0;if(graceEl){graceEl.remove();graceEl=null;}}
+O.on('screen',()=>{if(grace&&!lockEl)graceDone=1;});let graceDone=0;
+const bedNow=()=>{const l=LIM();return l.bed&&new Date().getHours()>=l.bed&&l.bedOff!==O.today();};
+const kidSide=()=>!(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidden);
+function limCheck(){const left=T.limLeft(),bed=bedNow();const over=bed||(left&&(left.n!=null?left.n<=0:left.min<=0));pill(left);
+  if(lockEl&&lockEl.isConnected){if(!over){const k=lockKind;lockKind='';unlock(k!=='bed'||!bedNow());}return;}
+  if(!over){endGrace();graceDone=0;if(left)warn(left);return;}
+  if(!kidSide())return;
+  if(bed){if($('#sPlay').hidden)timeUp('bed');return;}
+  const ovOpen=!$('#ov').hidden||!$('#dlg').hidden;
+  if(!grace){if(!LIM().nofin&&(inAct()||ovOpen)&&!(left.n!=null&&!ovOpen)){grace=Date.now();graceDone=0;tEnd0=tEnd;
+      if(left.n==null&&inAct()){graceEl=h('div','tgrace','⏳ זֶה הַתַּרְגִּיל הָאַחֲרוֹן, אַחֲרָיו נִפָּרֵד');document.body.appendChild(graceEl);O.say(T.spk('זֶה הַתַּרְגִּיל הָאַחֲרוֹן, אַחֲרָיו נִפָּרֵד'));}return;}
+    timeUp('time');return;}
+  if(Date.now()-grace>5*60000||((tEnd>tEnd0||graceDone||!inAct())&&!ovOpen))timeUp('time');}
+let tEnd0=0;
+/* spoken reminders: 10 and 2 minutes left, and the last activity */
+function warn(left){const d=O.today();const once=(k,f)=>{if(warned[d+k])return;warned[d+k]=1;f();};
+  if(left.min!=null){[10,2].forEach(m=>{if(left.min<=m&&left.min>m-2)once('m'+m,()=>O.say(T.spk(`נִשְׁאֲרוּ לְךָ עוֹד ${m} דַּקּוֹת`)));});}
+  else if(left.n===1)once('n1'+doneN(),()=>O.say(T.spk('זוֹ הַמְּשִׂימָה הָאַחֲרוֹנָה')));}
+/* what is left, small, in the top bar on every screen */
+let pillEl=null;
+function pillText(left){if(left.min!=null)return left.min<=0?'⏱️ 0':left.min===1?'⏱️ דַּקָּה אַחַת':`⏱️ ${left.min} דַּקּוֹת`;return left.n<=0?'⭐ 0':left.n===1?'⭐ מְשִׂימָה אַחֲרוֹנָה':`⭐ עוֹד ${left.n} מְשִׂימוֹת`;}
+function pillSay(left){if(left.min!=null)return left.min===1?'נִשְׁאֲרָה לְךָ דַּקָּה אַחַת':`נִשְׁאֲרוּ לְךָ ${left.min} דַּקּוֹת`;return left.n===1?'זוֹ הַמְּשִׂימָה הָאַחֲרוֹנָה':`נִשְׁאֲרוּ לְךָ עוֹד ${left.n} מְשִׂימוֹת`;}
+function pill(left){const hud=$('#hud');if(!hud)return;if(!pillEl){pillEl=h('button','tpill','');pillEl.onclick=()=>{const l2=T.limLeft();if(l2){sfx.pop(1);O.say(T.spk(pillSay(l2)));}};const g=$('#gemc');if(g)g.before(pillEl);else hud.appendChild(pillEl);}
+  const show=left&&(left.min!=null?left.min>0:left.n>0)&&!O.isParentPlay&&$('#sPar').hidden;pillEl.hidden=!show;document.body.classList.toggle('haspill',!!show);if(!show)return;const tx=pillText(left);if(pillEl.textContent!==tx)pillEl.textContent=tx;pillEl.classList.toggle('low',left.min!=null?left.min<=5:left.n<=1);}
+O.on('screen',()=>setTimeout(()=>pill(T.limLeft()),0));O.on('synced',()=>limCheck());
+setInterval(()=>{limCheck();const left=T.limLeft();/* near the end or locked: look for the parent's grant more often */
+  if(O.family&&(lockEl||(left&&(left.n!=null?left.n<=1:left.min<=5)))&&Date.now()-lastPull>(window.__pullGap!=null?window.__pullGap:20000)){lastPull=Date.now();O.famPull&&O.famPull();}},2000);
+T.limCheck=limCheck;
 /* --- voice --- *//* --- voice --- */
 const SAMPLE='שָׁלוֹם אוֹרֶן! הַיּוֹם נִלְמַד יַחַד. הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא. כַּמָּה זֶה שָׁלוֹשׁ וְעוֹד אַרְבַּע? נָכוֹן, שֶׁבַע!';
 /* one fixed game voice (Google Kore at 0.9, chosen by the parents); no voice options */
@@ -3677,6 +3758,7 @@ function setTab(box){const st=SET();
 
 /* ===== HOME: one clear place to start · "what do you feel like today?" · today's path · together time · home button ===== */
 (()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,ICON,SPR,pick,shuffle}=O;const {X,ACT,ALLSPR}=T;const sfx=O.sfx,D=O.D;
+T.nextLevel=()=>nextLevel();
 function nextLevel(){const off=(T.S().set.offW)||{};for(const w of O.WORLDS){if(off[w.id])continue;for(const lv of w.levels){if(!O.stars(lv.id)&&O.unlocked(lv))return lv;}}return null;}
 const dayNum=()=>{const [y,m,d]=O.today().split('-').map(Number);return Math.floor(Date.UTC(y,m-1,d)/864e5);};
 /* ---------- together time (🤝): Oren leads most of these ---------- */
@@ -3731,11 +3813,12 @@ O.on('levelDone',checkRW);O.on('tlDone',checkRW);setTimeout(()=>{if(!T.S().rw)ch
 function learned(){const l=T.S().last;if(!l)return '';if(l.id==='math'){const lv=nextLevel();return lv?lv.u.name:'';}return ACT[l.id]?ACT[l.id].name:'';}
 /* ---------- the day's domains ---------- */
 const MATH={id:'math',n:'מַסַּע הַחֶשְׁבּוֹן',e:'🧮',c:'#d99a2b'};
-const poolOf=bids=>T.dailyPool().filter(id=>bids.includes(ACT[id].b.id));
+const rest=id=>!!(window.HEALTH&&window.HEALTH.resting(window.HEALTH.domOf(id)));
+const poolOf=bids=>T.dailyPool().filter(id=>bids.includes(ACT[id].b.id)&&!rest(id));
 const grpOf=bid=>T.GROUPS.find(g=>g.ids.includes(bid))||{};
 const gid=dm=>String(dm).startsWith('b:')?grpOf(dm.slice(2)).id:dm;
 const domOf=id=>id==='math'?'math':ACT[id]?grpOf(ACT[id].b.id).id:null;
-function doms(){const out=[];if(nextLevel())out.push(MATH);T.GROUPS.forEach(g=>{if(poolOf(g.ids).length)out.push(g);});return out;}
+function doms(){const out=[];if(nextLevel()&&!rest('math'))out.push(MATH);T.GROUPS.forEach(g=>{if(poolOf(g.ids).length)out.push(g);});return out;}
 function stepsOf(dm,n,used){if(dm==='math')return Array(n).fill('math');const bid=String(dm).startsWith('b:')?dm.slice(2):null;
   let pool=shuffle(poolOf(bid?[bid]:(T.GROUPS.find(g=>g.id===dm)||{ids:[]}).ids).filter(x=>!used.has(x)));
   if(bid&&pool.length<n)pool=pool.concat(shuffle(poolOf(grpOf(bid).ids||[]).filter(x=>!used.has(x)&&!pool.includes(x))));return pool.slice(0,n);}
@@ -3746,7 +3829,10 @@ function wpick(arr,n){const a=arr.slice(),out=[];while(out.length<n&&a.length){l
 function choose(dm,first){const d=T.dailyEnsure(),S0=T.S();let st=dm==='tog'?[togStep(true)]:first?[first]:[];
   if(dm!=='tog')st=st.concat(stepsOf(dm,3-st.length,new Set([...d.t,...st])));
   wpick(doms().filter(x=>x.id!==gid(dm)),dm==='tog'?2:1).forEach(o=>{st=st.concat(stepsOf(o.id,1,new Set([...d.t,...st])));});
-  if(!st.length)st=['math'];st=st.concat(d.cr||[]);d.cr=[];st.forEach(x=>{d.t.push(x);d.done.push(0);});d.ch=dm;
+  if(!st.length)st=['math'];
+  /* a domain that rested yesterday: the path starts with it, where Oren stopped (once a day) */
+  if(!d.rv&&window.HEALTH){d.rv=1;const rv=window.HEALTH.review().find(x=>!d.t.includes(x)&&!st.includes(x));if(rv)st=[rv].concat(st);}
+  st=st.concat(d.cr||[]);d.cr=[];st.forEach(x=>{d.t.push(x);d.done.push(0);});d.ch=dm;
   if(dm!=='tog'){S0.dom=S0.dom||{};S0.dom[gid(dm)]=dayNum();}O.persist();sfx.ok(2);home();}
 function lastStep(){const l=T.S().last;if(!l)return null;if(l.id==='math')return nextLevel()?'math':null;return T.dailyPool().includes(l.id)?l.id:null;}
 /* "something else": every enabled world and building, and together time */
@@ -3805,7 +3891,7 @@ function home(){const S0=T.S();
   const pr=S0.prof||{};const st=S0.set;const d=st.noDaily?null:T.dailyEnsure();const q=quest();const nx=d?d.done.findIndex(x=>!x):-1;const pickDay=d&&nx<0&&!d.ch;
   /* Oren, his friend, and one sentence */
   const say=!d?`${T.hello()}, אוֹרֶן! בְּמָה נְשַׂחֵק?`:pickDay?'שָׁלוֹם אוֹרֶן! מָה בָּא לְךָ הַיּוֹם?':nx>=0?`${q.e} ${q.a}`:d.claimed?'כָּל הַכָּבוֹד! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ אֶת הַשְּׁבִיל! בּוֹא נִרְאֶה אֵיךְ נִגְמַר הַסִּפּוּר.';
-  const tl=T.timeLeft&&T.timeLeft()?`<small class="tleft">⏱️ ${T.timeLeft()===1?'דַּקָּה אַחַת':T.timeLeft()+' דַּקּוֹת'}</small>`:'';
+  const tl='';
   s.appendChild(h('div','hstage',`<div class="hbub2" style="--fc:${pr.col||'#4fae4f'}">${say}${tl}</div><div class="hpair" role="button" aria-label="מָה אֶפְשָׁר לַעֲשׂוֹת כָּאן?"><span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}</div>`));
   s.querySelector('.hpair').onclick=()=>{sfx.pop(2);tour();};
   O.sayNow=T.spk(say);
@@ -3838,7 +3924,7 @@ function home(){const S0=T.S();
 window.TAL_home=home;T.home=home;T.chooseDay=choose;T.otherDay=other;
 /* the guide: points at the one thing to press, says it, then gets out of the way */
 let coachEl=null;
-function coach(target,text,key,times){if(!target||!target.isConnected||!$('#ov').hidden||!$('#dlg').hidden||document.querySelector('.tlock,.tour'))return;const S0=T.S();S0.coach=S0.coach||{};const n=S0.coach[key]|0;if(n>=(times||1))return;S0.coach[key]=n+1;
+function coach(target,text,key,times){if(!target||!target.isConnected||!$('#ov').hidden||!$('#dlg').hidden||document.querySelector('.tlock,.tour,.hlock'))return;const S0=T.S();S0.coach=S0.coach||{};const n=S0.coach[key]|0;if(n>=(times||1))return;S0.coach[key]=n+1;
   uncoach();const pr=S0.prof||{};const el=h('div','coach',`<div class="cbub"><span class="cpet">${pr.an?ALLSPR(pr.an):O.AV()}</span><span>${text}</span></div><div class="chand">👆</div>`);document.body.appendChild(el);coachEl=el;
   const place=()=>{if(!target.isConnected||!$('#ov').hidden||!$('#dlg').hidden||document.querySelector('.tlock')){uncoach();return;}const r=target.getBoundingClientRect();const hand=el.querySelector('.chand'),bub=el.querySelector('.cbub');
     hand.style.left=(r.left+r.width/2-22)+'px';hand.style.top=(r.bottom-8)+'px';const bw=Math.min(340,innerWidth-24);bub.style.width=bw+'px';
@@ -4124,6 +4210,202 @@ T.rdSettings=(body,sec,refresh)=>{const r=RD(),m=mode();
   [['auto','אוטומטי (מומלץ)'],[1,'1 · מקריאים אחרי 3 שניות'],[2,'2 · מקריאים אחרי 8 שניות'],[3,'3 · קורא לבד']].forEach(([v,n])=>{const c=h('button','pchip'+(m===v?' on':''),n);c.onclick=()=>{T.S().set.rdMode=v;O.persist();refresh();};row.appendChild(c);});
   box.appendChild(row);};
 window.__rd={level,mode,RD,decorateAll,get cur(){return cur;}};
+})();
+
+/* ===== healthy screen time: body breaks, meals, topic switching (injected into index.html by build_talents.py) =====
+   Data: T.S().health[day] = {on, ba, breaks:[{k,t,ok}], dom:{math:sec,...}, act:{math:n}, lt:{math:lastId}, rest:{math:lastId}, one:{math:1}, ov:{math:1}, meals:{b:{s,e}}}
+   on = active seconds today, ba = value of `on` at the last break. History is capped at 60 days.
+   Settings: T.S().set.hl = {off:{water,toilet,move,eyes,meal}, brk:20, thr:15, meals:{b:'07:30',l:'13:00',d:'18:30'}}
+   Hooks: HEALTH.onActivityEnd(dom,id), HEALTH.tick(sec), HEALTH.check(), HEALTH.blocking(), HEALTH.resting(dom), HEALTH.review(), HEALTH.panel(box,sec,rerender)
+   Tests: HEALTH.clock can be replaced (fake time). Off under automation unless window.__health is set (so other suites are not interrupted). */
+(()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$}=O;const sfx=O.sfx;
+const H={};window.HEALTH=H;T.health=H;
+H.clock=()=>Date.now();
+const now=()=>H.clock();
+const pad=n=>String(n).padStart(2,'0');
+const dayOf=t=>{const d=new Date(t);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());};
+const hm=t=>{const d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes());};
+const off=()=>!!(window.__noHealth||(navigator.webdriver&&!window.__health)||O.isParentPlay);
+
+/* ---------- domains ---------- */
+const DOMS=[
+ {id:'math',w:'חֶשְׁבּוֹן',n:'מַסַּע הַחֶשְׁבּוֹן',e:'🧮',c:'#d99a2b',p:'חשבון'},
+ {id:'read',w:'קְרִיאָה',n:'קוֹרְאִים וְכוֹתְבִים',e:'📖',c:'#c0392b',b:['read','write','stories','type'],p:'קריאה וכתיבה'},
+ {id:'eng',w:'אַנְגְּלִית',n:'אַנְגְּלִית',e:'🔤',c:'#3a8fc4',b:['eng'],p:'אנגלית'},
+ {id:'think',w:'חֲשִׁיבָה',n:'חִידוֹת וְקוֹד',e:'🧩',c:'#e8a33d',b:['think','code'],p:'חשיבה וקוד'},
+ {id:'sci',w:'מַדָּע',n:'מַדָּע וְעוֹלָם',e:'🔬',c:'#3cb371',b:['lab','world'],p:'מדע ועולם'},
+ {id:'art',w:'יְצִירָה',n:'יְצִירָה',e:'🎨',c:'#ff7eb6',b:['art'],p:'יצירה'},
+ {id:'music',w:'מוּזִיקָה',n:'מוּזִיקָה',e:'🎵',c:'#b8860b',b:['music'],p:'מוזיקה'},
+ {id:'calm',n:'נִרְגָּעִים',e:'🍃',c:'#7cc3a0',b:['mind'],p:'רגיעה',free:1},
+ {id:'arcade',n:'אַרְקֵייד',e:'🕹️',c:'#ff3fa4',p:'ארקייד'}];
+const DOM=id=>DOMS.find(x=>x.id===id);
+const GFALL={readg:'read',explore:'sci',create:'art',calm:'calm'};
+const bdom=bid=>{const d=DOMS.find(x=>x.b&&x.b.includes(bid));if(d)return d.id;const g=(T.GROUPS.find(x=>x.ids.includes(bid))||{}).id;return GFALL[g]||'art';};
+H.DOMS=DOMS;
+H.domOf=id=>{if(!id)return null;if(id==='math')return 'math';if(/^arc-/.test(id))return 'arcade';const a=T.ACT[id];return a&&a.b?bdom(a.b.id):null;};
+const enabled=dm=>dm==='math'?true:dm==='arcade'?!!window.TAL_arcade:T.dailyPool().some(id=>H.domOf(id)===dm);
+
+/* ---------- settings & the day's record ---------- */
+const MEALS=[['b','אֲרוּחַת בֹּקֶר','בוקר','07:30'],['l','אֲרוּחַת צָהֳרַיִם','צהריים','13:00'],['d','אֲרוּחַת עֶרֶב','ערב','18:30']];
+H.MEAL_WIN=60;H.MEAL_MIN=10;H.ACTS=4;
+/* read with defaults; nothing is written until a parent changes something (so Oren's device never makes the family settings look newer) */
+function cfg(){const c=T.S().set.hl||{};const m={};MEALS.forEach(([k,,,t])=>{m[k]=/^\d\d:\d\d$/.test((c.meals||{})[k]||'')?c.meals[k]:t;});
+  return {off:Object.assign({},c.off||{}),meals:m,brk:[15,20,30].includes(c.brk)?c.brk:20,thr:[10,15,20].includes(c.thr)?c.thr:15};}
+H.setCfg=(k,v)=>{const st=T.S().set;const c=st.hl=st.hl||{};if(k==='off'||k==='meals')c[k]=Object.assign({},cfg()[k],v);else c[k]=v;if(k==='off')for(const x of Object.keys(c.off))if(!c.off[x])delete c.off[x];O.persist();};
+H.cfg=cfg;
+function day(t){const s=T.S();s.health=s.health||{};const d=dayOf(t==null?now():t);let r=s.health[d];
+  if(!r){r=s.health[d]={};const ks=Object.keys(s.health).sort();ks.slice(0,Math.max(0,ks.length-60)).forEach(k=>delete s.health[k]);}
+  r.on=r.on|0;r.ba=r.ba|0;r.breaks=r.breaks||[];['dom','act','lt','rest','one','ov','meals'].forEach(k=>r[k]=r[k]||{});return r;}
+H.day=day;
+H.resting=dm=>{const r=day();return !!(dm&&r.rest[dm]&&!r.ov[dm]);};
+/* the parent lets a resting domain go on today */
+H.allow=dm=>{const r=day();r.ov[dm]=1;O.persist();decorate();};
+/* yesterday's (last play day's) resting domains: the path starts with them ("we continue where we stopped") */
+H.review=()=>{const s=T.S(),hs=s.health||{},td=dayOf(now());const k=Object.keys(hs).filter(x=>x<td&&Object.keys((hs[x]||{}).rest||{}).length).sort().pop();
+  if(!k)return [];const prev=Object.keys(hs).filter(x=>x<td&&(hs[x].on|0)>0).sort().pop();if(prev&&prev!==k)return [];
+  return Object.entries(hs[k].rest).filter(([dm])=>!(hs[k].ov||{})[dm]).map(([dm,id])=>{if(dm==='math')return 'math';return T.ACT[id]&&T.dailyPool().includes(id)?id:null;}).filter(Boolean);};
+/* compact daily log for the parent / skills agent */
+H.log=d=>{const r=(T.S().health||{})[d||dayOf(now())];if(!r)return null;return {min:Math.round((r.on|0)/60),breaks:r.breaks||[],dom:r.dom||{},act:r.act||{},rest:Object.keys(r.rest||{}),meals:r.meals||{}};};
+
+/* ---------- what Oren is doing now ---------- */
+let cur=null,pend=null,lastIn=now(),ticks=0,lastTick=0;
+Object.values(T.ACT).forEach(a=>{const r=a.run;a.run=back=>{const x=r(back);cur=H.domOf(a.id);return x;};});
+if(window.TAL_arcade){const oa=window.TAL_arcade;window.TAL_arcade=T.arcade=b=>{const x=oa(b);cur='arcade';return x;};}
+const MATHS=['sMap','sWorld','sLearn','sPlay','sTable','sFinal','sTeach'],MENU=['sHome','sKing','sStudio','sPar','sStart'];
+const scr=()=>[...MATHS,...MENU,'sTal'].find(id=>{const e=$('#'+id);return e&&!e.hidden;});
+O.on('screen',id=>{if(MATHS.includes(id))cur='math';else if(MENU.includes(id))cur=null;if(pend)pend.ready=1;setTimeout(()=>{decorate();H.check();},0);});
+['hub','group','other'].forEach(e=>O.on(e,()=>{cur=null;setTimeout(decorate,0);}));
+H.current=()=>cur;
+H.onActivityEnd=(dm,id)=>{if(off()||!dm)return;const r=day();r.act[dm]=(r.act[dm]|0)+1;if(id)r.lt[dm]=id;pend={dm,at:performance.now(),ov:0,ready:0};O.persist();};
+O.on('tlDone',id=>H.onActivityEnd(H.domOf(id),id));
+O.on('levelDone',lv=>H.onActivityEnd('math','math'));
+
+/* ---------- active time ---------- */
+H.tick=sec=>{if(off()||H.blocking())return;const p=$('#sPar'),hud=$('#hud');if((p&&!p.hidden)||(hud&&hud.hidden))return;
+  const r=day(),t=now();/* more than 10 minutes since the last active moment: that was a natural break */if(lastTick&&t-lastTick>600000+sec*1000)r.ba=r.on;lastTick=t;r.on+=sec;if(cur)r.dom[cur]=(r.dom[cur]|0)+sec;if(++ticks%4===0)O.persist();H.check();};
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,()=>{lastIn=now();},true));
+setTimeout(()=>{lastTick=+O.save.t||0;},0);
+setInterval(()=>{if(document.hidden||now()-lastIn>60000)return;H.tick(15);},15000);
+setInterval(()=>H.check(),1000);
+setTimeout(()=>{const ov=$('#ov');if(ov&&window.MutationObserver)new MutationObserver(()=>{if(ov.hidden)setTimeout(H.check,0);else endSeen();}).observe(ov,{attributes:true,attributeFilter:['hidden']});},0);
+
+/* ---------- when to show what ---------- */
+const KINDS=['water','toilet','move','eyes'];
+const enKinds=()=>{const c=cfg();return KINDS.filter(k=>!c.off[k]);};
+const mealAt=(k,t)=>{const [hh,mm]=cfg().meals[k].split(':').map(Number);const d=new Date(t);d.setHours(hh,mm,0,0);return +d;};
+function mealDue(){if(cfg().off.meal)return null;const t=now(),r=day();const m=MEALS.find(([k])=>!r.meals[k]&&t>=mealAt(k,t)&&t<mealAt(k,t)+H.MEAL_WIN*60000);return m?m[0]:null;}
+function breakDue(){if(!enKinds().length)return 0;const r=day(),iv=cfg().brk*60,since=r.on-r.ba;return since>=iv?since-iv+1:0;}
+function topicDue(dm){const d=DOM(dm);if(!d||d.free)return false;const r=day();if(r.ov[dm])return false;if(r.rest[dm])return true;return (r.dom[dm]|0)>=cfg().thr*60||(r.act[dm]|0)>=H.ACTS;}
+const vis=id=>{const e=$(id);return e&&!e.hidden;};
+const safeBase=()=>!vis('#ov')&&!vis('#dlg')&&vis('#hud')&&!vis('#sPar')&&!document.querySelector('.tlock,.tour');
+H.blocking=()=>!!document.querySelector('.hlock');
+/* an activity has ended once its result window was closed, the screen changed, or (no result window) after a moment */
+const endSeen=()=>{if(!pend||pend.ready)return;if(vis('#ov')||vis('#dlg'))pend.ov=1;else if(pend.ov||performance.now()-pend.at>2500)pend.ready=1;};
+H.check=()=>{endSeen();if(off()||H.blocking()||!safeBase())return;const r=day(),t=now();
+  const open=MEALS.find(([k])=>r.meals[k]&&!r.meals[k].e);if(open)return showMeal(open[0]);
+  const atEnd=!!pend&&!!pend.ready,menu=['sHome','sMap','sKing'].includes(scr()),notPlay=!vis('#sPlay');
+  const m=mealDue();if(m&&(atEnd||menu||(notPlay&&t-mealAt(m,t)>5*60000)))return showMeal(m);
+  const bd=breakDue();if(bd&&(atEnd||menu||(notPlay&&bd>5*60)))return showBreak();
+  if(atEnd){const p=pend;pend=null;if(topicDue(p.dm))return showTopic(p.dm);}};
+/* the old reminder's entry point */
+H.breakNow=()=>showBreak();
+
+/* ---------- screens ---------- */
+const friend=()=>{const pr=T.S().prof||{};return pr.an?T.ALLSPR(pr.an):T.FACES.happy.s;};
+function lock(cls,html){close();const el=h('div','hlock '+cls,`<div class="card">${html}</div>`);document.body.appendChild(el);document.body.classList.add('hlocked');O.hush&&O.hush();return el;}
+function close(){document.querySelectorAll('.hlock').forEach(e=>{clearInterval(e._iv);e.remove();});document.body.classList.remove('hlocked');}
+const after=()=>setTimeout(()=>{decorate();H.check();},300);
+addEventListener('keydown',e=>{if(!H.blocking()||(e.target.closest&&e.target.closest('#ov,.hlock')))return;e.stopPropagation();},true);
+const say=t=>setTimeout(()=>{if(H.blocking())O.say(T.spk(t));},400);
+const mmss=s=>Math.floor(s/60)+':'+pad(s%60);
+/* a countdown on the button; it turns on when the time is up */
+function wait(el,btn,until,label){const cd=el.querySelector('.hcd');const up=()=>{const left=Math.max(0,Math.ceil((until-now())/1000));btn.disabled=left>0;if(cd)cd.textContent=left?mmss(left):'';btn.classList.toggle('ready',!left);if(!left){if(!btn._r){btn._r=1;sfx.ok&&sfx.ok(1);}}};up();el._iv=setInterval(up,250);}
+
+const BRK={
+ water:{e:'💧',t:'בּוֹא נִשְׁתֶּה מַיִם!',s:'שְׁתֵה כּוֹס מַיִם, וְאַחַר כָּךְ נַמְשִׁיךְ.',sec:30},
+ toilet:{e:'🚽',t:'אוּלַי צָרִיךְ לָלֶכֶת לַשֵּׁרוּתִים?',s:'כְּדַאי לְנַסּוֹת. וְאַחַר כָּךְ לִשְׁטֹף יָדַיִם!',sec:30},
+ jump:{e:'🤸',t:'קוֹפְצִים 10 פְּעָמִים!',s:'קְפֹץ אִתִּי, כְּמוֹ צְפַרְדֵּעַ!',sec:30,cls:'hjump'},
+ stretch:{e:'🤸',t:'מִתְמַתְּחִים!',s:'יָדַיִם לְמַעְלָה, עַד הַתִּקְרָה! וְעַכְשָׁו לְמַטָּה, עַד הָרִצְפָּה.',sec:30,cls:'hstretch'},
+ eyes:{e:'👀',t:'מְנוּחָה לָעֵינַיִם',s:'הִסְתַּכֵּל רָחוֹק, מִבַּעַד לַחַלּוֹן, עַד שֶׁהַשָּׁעוֹן נִגְמָר.',sec:20}};
+H.BRK=BRK;
+function showBreak(kind){const r=day(),en=enKinds();if(!kind){if(!en.length)return;const all=Object.values(T.S().health||{}).reduce((a,x)=>a+((x&&x.breaks)||[]).length,0);kind=en[all%en.length];}
+  const v=kind==='move'?((r.breaks.filter(x=>x.k==='move').length+Math.floor(now()/864e5))%2?'stretch':'jump'):kind;const b=BRK[v];
+  const rec={k:kind,t:hm(now())};r.breaks.push(rec);r.ba=r.on;O.persist();
+  const el=lock('hbrk '+(b.cls||''),`<div class="hfr"><span class="hav bob">${friend()}</span><span class="hk">${b.e}</span></div><h2>${b.t}</h2><div class="sub">${b.s}</div>${v==='jump'?'<div class="hcnt">1</div>':''}<div class="hcd"></div>`);
+  const btn=h('button','bigbtn huge hback','<span>חָזַרְתִּי!</span>');el.firstChild.appendChild(btn);const t0=now();wait(el,btn,t0+b.sec*1000);
+  if(v==='jump'){const c=el.querySelector('.hcnt');const iv=setInterval(()=>{if(!el.isConnected)return clearInterval(iv);c.textContent=Math.min(10,1+Math.floor((now()-t0)/2000));},500);}
+  btn.onclick=()=>{if(btn.disabled)return;rec.ok=1;O.persist();sfx.win&&sfx.win();close();after();};
+  sfx.star&&sfx.star(0);say(b.t+' '+b.s);return el;}
+H.showBreak=showBreak;
+
+function showMeal(k){const r=day(),t=now();const m=r.meals[k]=r.meals[k]||{s:t};O.persist();const nm=(MEALS.find(x=>x[0]===k)||[])[1]||'';
+  const el=lock('hmeal',`<div class="hfr"><span class="hav bob">${friend()}</span><span class="hk">🍽️</span></div><h2>הִגִּיעַ זְמַן לֶאֱכֹל!</h2><div class="sub">${nm}. נַמְשִׁיךְ אַחֲרֵי הָאֹכֶל.</div><div class="hcd"></div>`);
+  const btn=h('button','bigbtn huge hback','<span>אָכַלְתִּי</span>');el.firstChild.appendChild(btn);wait(el,btn,m.s+H.MEAL_MIN*60000);
+  const done=p=>{m.e=now();if(p)m.p=1;O.persist();close();after();};btn.onclick=()=>{if(!btn.disabled){sfx.win&&sfx.win();done();}};
+  if(T.login){const pb=h('button','hpar','🔒 הורה');pb.onclick=()=>T.login(()=>done(1));el.firstChild.appendChild(pb);}
+  if(O.musicStop)O.musicStop();say('הִגִּיעַ זְמַן לֶאֱכֹל! נַמְשִׁיךְ אַחֲרֵי הָאֹכֶל.');return el;}
+H.showMeal=showMeal;
+
+/* two big cards of other domains Oren did least today */
+function cards(ex){const r=day();return DOMS.filter(d=>d.id!==ex&&!H.resting(d.id)&&enabled(d.id)).map(d=>[d,(r.dom[d.id]|0)+Math.random()]).sort((a,b)=>a[1]-b[1]).slice(0,2).map(x=>x[0]);}
+function goDom(dm){close();sfx.pop&&sfx.pop(3);
+  if(dm==='math'){const lv=T.nextLevel&&T.nextLevel();if(lv){if(!O.save.story[lv.w.id+'-in'])O.showWorld(lv.w);else O.startLevel(lv);}else O.showJourney();return;}
+  if(dm==='arcade'){window.TAL_arcade(O.showMap);return;}
+  const tl=T.S().tl,pool=T.dailyPool().filter(id=>H.domOf(id)===dm).sort((a,b)=>((tl[a]||{}).n|0)-((tl[b]||{}).n|0));
+  const id=pool.length?O.pick(pool.slice(0,3)):null;if(id)T.ACT[id].run(O.showMap);else O.showMap();}
+H.goDom=goDom;
+function chooser(cls,dm,head,sub,oneMore){const r=day();const el=lock('htopic '+cls,`<div class="hfr"><span class="hav bob">${friend()}</span><span class="hk">🌙</span></div><h2>${head}</h2><div class="sub">${sub}</div>`);
+  const row=h('div','hcards');cards(dm).forEach(d=>{const b=h('button','dcard',`<span class="dic"><span>${d.e}</span></span><b>${d.n}</b>`);b.style.setProperty('--dc',d.c);b.onclick=()=>goDom(d.id);row.appendChild(b);});el.firstChild.appendChild(row);
+  if(!r.one[dm]){const o=h('button','hone','<span>עוֹד אֶחָד קָטָן</span>');o.onclick=()=>{r.one[dm]=1;O.persist();sfx.pop&&sfx.pop(1);close();oneMore&&oneMore();};el.firstChild.appendChild(o);}
+  sfx.star&&sfx.star(0);say(head+' '+sub);return el;}
+function showTopic(dm){const r=day(),d=DOM(dm);if(!r.rest[dm]){r.rest[dm]=r.lt[dm]||dm;O.persist();}
+  const head=dm==='arcade'?'שִׂחַקְנוּ הַמּוֹן בָּאַרְקֵייד הַיּוֹם!':`עָשִׂינוּ הַמּוֹן ${d.w} הַיּוֹם!`;
+  return chooser('',dm,head,'נַמְשִׁיךְ מָחָר. מָה בָּא לְךָ עַכְשָׁו?',after);}
+H.showTopic=showTopic;
+/* a resting door was tapped: the friend gently suggests something else ("one more" opens it anyway, once a day) */
+function showRest(dm,el){return chooser('hrestc',dm,'זֶה נָח עַד מָחָר 🌙','מָחָר נַמְשִׁיךְ מֵאֵיפֹה שֶׁעָצַרְנוּ. מָה בָּא לְךָ עַכְשָׁו?',()=>{bypass=1;try{el.click();}finally{bypass=0;}});}
+H.showRest=showRest;
+
+/* ---------- resting doors: a small moon, and a gentle suggestion when tapped ---------- */
+let bypass=0;
+function domOfEl(el){if(el.matches('.door.journey'))return 'math';if(el.matches('.door.arcade'))return 'arcade';
+  const txt=((el.querySelector('b,.nm')||{}).textContent||'').trim();if(!txt)return null;
+  const b=T.BUILD.find(x=>x.name===txt);if(b)return bdom(b.id);
+  const g=T.GROUPS.find(x=>x.n===txt);if(g){const ds=[...new Set(g.ids.filter(id=>T.BUILD.some(x=>x.id===id)).map(bdom))];return ds.length&&ds.every(H.resting)?ds[0]:null;}
+  const d=DOMS.find(x=>x.n===txt);return d?d.id:null;}
+function decorate(){if(off())return;document.querySelectorAll('.door,.gdoor,.bld,.dcard').forEach(el=>{if(el.closest('.hlock'))return;const dm=domOfEl(el),rs=dm&&H.resting(dm);
+  el.classList.toggle('hrest',!!rs);const m=el.querySelector('.hmoon');if(rs){el.dataset.hrest=dm;if(!m)el.appendChild(h('span','hmoon','🌙 נָח עַד מָחָר'));}else{delete el.dataset.hrest;if(m)m.remove();}});}
+H.decorate=decorate;
+document.addEventListener('click',e=>{if(bypass||off())return;const el=e.target.closest&&e.target.closest('[data-hrest]');if(!el||el.closest('.hlock')||!H.resting(el.dataset.hrest))return;e.stopPropagation();e.preventDefault();sfx.pop&&sfx.pop(1);showRest(el.dataset.hrest,el);},true);
+
+/* ---------- parent panel (no nikud) ---------- */
+H.panel=(box,sec,re)=>{const c=cfg(),r=day();
+  const s1=sec(box,'הפסקות, ארוחות והחלפת נושא','<div class="pnote">בסוף פעילות (אף פעם לא באמצע שאלה): כל כמה דקות פעילות — הפסקה של כחצי דקה עם החבר, בסבב: מים, שירותים, תנועה, מנוחת עיניים. בזמן ארוחה המשחק עוצר עד "אכלתי" (לפחות 10 דקות, או סיסמת הורה). אחרי הרבה זמן באותו תחום — החבר מציע תחום אחר, והתחום נח עד מחר.</div>');
+  const tg=h('div','popt','<span>תזכורות:</span>');[['water','💧 מים'],['toilet','🚽 שירותים'],['move','🤸 תנועה'],['eyes','👀 עיניים'],['meal','🍽️ ארוחות']].forEach(([k,n])=>{const b=h('button','pchip'+(c.off[k]?'':' on'),n);b.onclick=()=>{H.setCfg('off',{[k]:c.off[k]?0:1});re&&re();};tg.appendChild(b);});s1.appendChild(tg);
+  const iv=h('div','popt','<span>הפסקה כל:</span>');[15,20,30].forEach(v=>{const b=h('button','pchip'+(c.brk===v?' on':''),v+' דק׳');b.onclick=()=>{H.setCfg('brk',v);re&&re();};iv.appendChild(b);});s1.appendChild(iv);
+  const ml=h('div','popt','<span>ארוחות:</span>');MEALS.forEach(([k,,n])=>{const l=h('label','hml',n+' ');const i=document.createElement('input');i.type='time';i.className='pgin sm';i.value=c.meals[k];i.setAttribute('aria-label','ארוחת '+n);
+    i.onkeydown=e=>e.stopPropagation();i.onchange=()=>{if(/^\d\d:\d\d$/.test(i.value))H.setCfg('meals',{[k]:i.value});};l.appendChild(i);ml.appendChild(l);});s1.appendChild(ml);
+  const th=h('div','popt','<span>החלפת נושא אחרי:</span>');[10,15,20].forEach(v=>{const b=h('button','pchip'+(c.thr===v?' on':''),v+' דק׳');b.onclick=()=>{H.setCfg('thr',v);re&&re();};th.appendChild(b);});th.appendChild(h('small','hnote','(או '+H.ACTS+' פעילויות באותו תחום ביום)'));s1.appendChild(th);
+  /* today's log */
+  const BI={water:'💧',toilet:'🚽',move:'🤸',eyes:'👀'};
+  const br=r.breaks.length?r.breaks.map(x=>`<span class="hlg${x.ok?'':' no'}">${BI[x.k]||''} ${x.t}</span>`).join(' '):'עוד לא היו הפסקות היום';
+  const me=MEALS.filter(([k])=>r.meals[k]).map(([k,,n])=>{const m=r.meals[k];return `<span class="hlg">🍽️ ${n} ${hm(m.s)}${m.e?' – '+hm(m.e)+(m.p?' (הורה)':''):''}</span>`;}).join(' ');
+  const s2=sec(box,'היום: הפסקות וזמן לפי תחום',`<div class="pnote">${br}${me?'<br>'+me:''}</div>`);
+  const ds=DOMS.filter(d=>(r.dom[d.id]|0)>=30||r.act[d.id]);if(!ds.length)s2.appendChild(h('div','pnote','עוד לא שיחק היום'));
+  ds.forEach(d=>{const row=h('div','prow',`<span class="pn">${d.e} ${d.p}</span><span class="pc">${Math.round((r.dom[d.id]|0)/60)} דק׳ · ${r.act[d.id]|0} פעילויות</span>`);
+    if(H.resting(d.id)){row.appendChild(h('span','hrs','🌙 נח עד מחר'));const b=h('button','pchip','לאפשר שוב היום');b.onclick=()=>{H.allow(d.id);re&&re();};row.appendChild(b);}s2.appendChild(row);});
+  return s1;};
+
+/* family sync: merge two saves' health maps (per day: max per field, union of lists) */
+H.merge=(dst,src)=>{if(!src||typeof src!=='object')return dst;dst=dst||{};
+  for(const [d,v] of Object.entries(src)){if(!v||typeof v!=='object')continue;const c=dst[d]=dst[d]||{};
+    for(const k of ['on','ba'])c[k]=Math.max(+c[k]||0,+v[k]||0);
+    for(const k of ['dom','act','one','ov']){c[k]=c[k]||{};for(const [x,n] of Object.entries(v[k]||{}))c[k][x]=Math.max(+c[k][x]||0,+n||0);}
+    for(const k of ['lt','rest']){c[k]=c[k]||{};for(const [x,n] of Object.entries(v[k]||{}))if(!c[k][x])c[k][x]=n;}
+    c.meals=c.meals||{};for(const [x,m] of Object.entries(v.meals||{})){if(!m)continue;const e=c.meals[x]||{};const ms=Math.min(+e.s||Infinity,+m.s||Infinity);c.meals[x]={s:isFinite(ms)?ms:0,e:Math.max(+e.e||0,+m.e||0)};if(!c.meals[x].e)delete c.meals[x].e;if(e.p||m.p)c.meals[x].p=1;}
+    const seen=new Map();for(const b of [...(c.breaks||[]),...(v.breaks||[])]){if(!b||!b.k)continue;const key=b.k+b.t;const e=seen.get(key);if(e){if(b.ok)e.ok=1;}else seen.set(key,Object.assign({},b));}
+    c.breaks=[...seen.values()].sort((a,b)=>a.t<b.t?-1:1);}
+  const ks=Object.keys(dst).sort();ks.slice(0,Math.max(0,ks.length-60)).forEach(k=>delete dst[k]);return dst;};
 })();
 
 </script>
