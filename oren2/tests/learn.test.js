@@ -242,7 +242,7 @@ async function ui(variant) {
   await ctx.addInitScript(() => { try { localStorage.clear(); } catch (e) { } window.__fast = true; window.__noFamily = true; });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(L.URL); await p.waitForFunction(() => window.TAL && window.TAL.S); await L.noCoach(p);
-  await p.addStyleTag({ path: path.join(ROOT, 'learn.css') }); await p.addScriptTag({ path: path.join(ROOT, 'learn.js') });
+  if (!(await p.evaluate(() => !!window.LEARN))) { await p.addStyleTag({ path: path.join(ROOT, 'learn.css') }); await p.addScriptTag({ path: path.join(ROOT, 'learn.js') }); }   // until it is built into the page
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const V = variant + ': ';
   ok(await p.evaluate(() => !!(window.TAL.ACT['ln-math'] && window.TAL.ACT['ln-paper'] && window.TAL.ACT['ln-math'].b.id === 'think' && window.TAL.dailyPool().includes('ln-math'))), V + 'registered: math training + paper task in the thinking tower');
