@@ -32,13 +32,24 @@ def lane_of(labels):
             return l
     return "core"
 
+def blockers(body):
+    """Issue numbers in 'Blocked by: #1, #2' lines."""
+    out = []
+    for line in (body or "").splitlines():
+        if line.strip().lower().startswith("blocked by"):
+            out += [int(x) for x in re.findall(r"#(\d+)", line)]
+    return out
+
 def select(issues, max_parallel):
-    """issues: [{number, labels:[names], createdAt}] -> issues to start now (oldest first)."""
+    """issues: [{number, labels:[names], createdAt, body}] -> issues to start now (oldest first).
+    An issue waits while any issue in its 'Blocked by:' line is still open (= in this list)."""
+    open_nums = {i["number"] for i in issues}
     active = [i for i in issues if "in-progress" in i["labels"]]
     core_busy = any(lane_of(i["labels"]) == "core" for i in active)
     slots = max_parallel - len(active)
     ready = [i for i in issues if "ready-for-agent" in i["labels"]
-             and "in-progress" not in i["labels"] and "blocked" not in i["labels"]]
+             and "in-progress" not in i["labels"] and "blocked" not in i["labels"]
+             and not any(b in open_nums for b in blockers(i.get("body")))]
     chosen = []
     for i in sorted(ready, key=lambda i: i["createdAt"]):
         if slots <= 0:
@@ -360,7 +371,7 @@ def main():
         res = process(issue)
         log_line(f"{now()} #{n}: {res}")
         print(f"ISSUE {n}: {res}"); return 0
-    rc, out = gh("issue", "list", "--state", "open", "--limit", "200", "--json", "number,labels,createdAt,updatedAt,title")
+    rc, out = gh("issue", "list", "--state", "open", "--limit", "200", "--json", "number,labels,createdAt,updatedAt,title,body")
     if rc: print("gh failed:", out); return 1
     issues = [{**i, "labels": [l["name"] for l in i["labels"]]} for i in json.loads(out)]
     chosen = [c for c in select(issues, CFG["max_parallel"]) if not FileLock(f"issue-{c['number']}").held_by_other()]

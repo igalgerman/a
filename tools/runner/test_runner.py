@@ -20,3 +20,13 @@ assert r.find_marker("❯ use `RESULT: DONE` or `RESULT: STUCK <why>`\n● hi\n 
 assert r.find_marker("❯ x\n  RESULT: DONE or RESULT: STUCK\n", "RESULT:") == ""
 assert r.find_marker("VERDICT: FIX\nVERDICT: PASS", "VERDICT:") == "VERDICT: PASS"
 print("ok")
+
+# blocked-by: #3 waits while #1 is open; starts when #1 is gone
+from runner import select as _sel, blockers as _bl
+assert _bl("x\nBlocked by: #1, #2\n") == [1, 2]
+_q = [{"number": 1, "labels": ["core"], "createdAt": "1"},
+      {"number": 3, "labels": ["core", "ready-for-agent"], "createdAt": "3", "body": "Blocked by: #1"},
+      {"number": 4, "labels": ["pack", "ready-for-agent"], "createdAt": "4", "body": ""}]
+assert [i["number"] for i in _sel(_q, 3)] == [4]
+assert [i["number"] for i in _sel(_q[1:], 3)] == [3, 4]
+print("ok blocked-by")
