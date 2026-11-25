@@ -23,6 +23,19 @@ const TTS_CAP=250000;const VOICES=/^he-IL-((Standard|Wavenet)-[A-D]|Chirp3-HD-[A
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function tts(req,env,u){if(!env.GOOGLE_TTS_KEY)return new Response('{"ok":false,"why":"no key"}',{status:503,headers:JH});
  if(u.pathname==='/api/tts/status')return new Response('{"ok":true}',{headers:JH});
+ if(u.pathname==='/api/tts/top3'){/* final 3, blind, longer real passages */
+  const F=['Kore','Sulafat','Leda'];
+  const S=[['סיפור','לפני הרבה זמן, בממלכה רחוקה, גר דרקון קטן בשם ניצוץ. ניצוץ אהב מאוד מספרים. בכל בוקר הוא ספר את הכוכבים שנשארו בשמיים: אחד, שתיים, שלוש. יום אחד הוא גילה שכוכב אחד חסר. אתה מוכן לעזור לו למצוא אותו?'],['עידוד','כמעט! זה לא נורא לטעות, ככה לומדים. בוא ננסה עוד פעם ביחד. יופי! הצלחת! אני גאה בך.']];
+  const html=`<!doctype html><html lang="he" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>גמר קולות</title><style>body{font-family:system-ui,Arial;margin:0;padding:16px;background:#f6f2e8;text-align:center}main{max-width:560px;margin:auto}h1{font-size:24px;margin:8px 0}.st{color:#555;font-size:16px;margin-bottom:12px}.c{background:#fff;border-radius:14px;padding:14px;margin:12px 0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}.c h2{width:100%%;margin:0;font-size:22px}.big{font-size:19px;padding:12px 16px;border:0;border-radius:12px;cursor:pointer;color:#fff}.pl{background:#3a8fc4}.pl.on{background:#f5a623}.ch{background:#4fbf63;width:100%%}.w{font-size:34px;font-weight:900;color:#2e7d32}</style><main id="m"></main>
+<script>const F=${JSON.stringify(F)},S=${JSON.stringify(S)};let a;const m=document.getElementById('m');const L=F.slice().sort(()=>Math.random()-.5);
+function url(v,i){return '/api/tts?t='+encodeURIComponent(S[i][1])+'&v=he-IL-Chirp3-HD-'+v+'&r=0.9';}
+function play(v,i,b){if(a)a.pause();document.querySelectorAll('.pl').forEach(x=>x.classList.remove('on'));b.classList.add('on');a=new Audio(url(v,i));a.onended=()=>b.classList.remove('on');a.play();}
+F.forEach(v=>S.forEach((x,i)=>fetch(url(v,i))));
+m.innerHTML='<h1>גמר: 3 קולות</h1><div class="st">השמות מוסתרים. שמע כל קול בסיפור ארוך ובעידוד, כמו במשחק אמיתי, ובחר אחד.</div>'+L.map((v,n)=>'<div class="c"><h2>קול '+'אבג'[n]+'</h2>'+S.map((x,i)=>'<button class="big pl" data-n="'+n+'" data-i="'+i+'">▶ '+x[0]+'</button>').join('')+'<button class="big ch" data-n="'+n+'">זה הקול</button></div>').join('');
+m.querySelectorAll('.pl').forEach(b=>b.onclick=()=>play(L[b.dataset.n],+b.dataset.i,b));
+m.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(a)a.pause();m.innerHTML='<h1>בחרת:</h1><div class="w">'+L[b.dataset.n]+'</div><p>כתוב לי את השם בצ׳אט.</p><p>אם אתה מתלבט בין שניים, השמע את שניהם לאורן ותן לו לבחור.</p><button class="big pl" onclick="location.reload()">להתחיל מחדש</button>';});
+</script></html>`;
+  return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});}
  if(u.pathname==='/api/tts/final'){/* blind "which is nicer, A or B" process: the winner stays, a new voice challenges it */
   const F=['Sulafat','Leda','Achernar','Despina','Aoede','Laomedeia','Kore'];
   const S=['שלום אורן! היום נצא יחד למסע בממלכת המספרים. מוכן?','כמה זה שבע ועוד חמש? נסה לספור על האצבעות.','החתול הקטן ישן על הכיסא, ואז קפץ אל החלון.'];
