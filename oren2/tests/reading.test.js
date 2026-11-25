@@ -49,8 +49,8 @@ const STUB = () => {
   // 3. level 1 reads by itself after the pause
   await p.evaluate(() => { window.__spoken = []; window.TAL.ACT['read-sent'].run(() => {}); });
   /* the instruction may be said at once; the sentence to read is said only after the wait */
-  const sentSaid = () => p.evaluate(() => { const e = document.querySelector('#sTal .tqc .sent'); if (!e) return -1; const w = window.TAL.plainHe(e.textContent).replace(/🔊/g, '').trim().split(/\s+/).slice(0, 2).join(' ');
-    return window.__spoken.filter(t => t.replace(/[\u0591-\u05C7]/g, '').includes(w)).length; });
+  const sentSaid = () => p.evaluate(() => { const e = document.querySelector('#sTal .tqc .sent'); if (!e) return -1; let w = window.TAL.plainHe(e.textContent).replace(/🔊/g, '').trim().split(/\s+/).slice(0, 2).join(' '); if (window.__fullSpell) w = window.__fullSpell(w);
+    return window.__spoken.filter(t => t.replace(/[\u0591-\u05C7]/g, '').startsWith(w)).length; });
   await L.sleep(1500); const early = await sentSaid();
   await L.sleep(2500); const late = await sentSaid();
   ok('level 1: waits, then reads by itself', early === 0 && late >= 1, `${early} → ${late}`);

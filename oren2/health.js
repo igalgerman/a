@@ -55,7 +55,7 @@ H.log=d=>{const r=(T.S().health||{})[d||dayOf(now())];if(!r)return null;return {
 
 /* ---------- what Oren is doing now ---------- */
 let cur=null,pend=null,lastIn=now(),ticks=0,lastTick=0;
-Object.values(T.ACT).forEach(a=>{const r=a.run;a.run=back=>{const x=r(back);cur=H.domOf(a.id);return x;};});
+const wrapRuns=()=>Object.values(T.ACT).forEach(a=>{if(!a.run||a.run._hw)return;const r=a.run;const f=back=>{const x=r(back);cur=H.domOf(a.id);return x;};f._hw=1;a.run=f;});wrapRuns();H.wrapRuns=wrapRuns;   /* packs wired later call H.wrapRuns() again */
 if(window.TAL_arcade){const oa=window.TAL_arcade;window.TAL_arcade=T.arcade=b=>{const x=oa(b);cur='arcade';return x;};}
 const MATHS=['sMap','sWorld','sLearn','sPlay','sTable','sFinal','sTeach'],MENU=['sHome','sKing','sStudio','sPar','sStart'];
 const scr=()=>[...MATHS,...MENU,'sTal'].find(id=>{const e=$('#'+id);return e&&!e.hidden;});

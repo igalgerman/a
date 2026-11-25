@@ -12,7 +12,39 @@ const URL=L.URL;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const tl=id=>p.evaluate(id=>(window.TAL.S().tl[id]||{}).s|0,id);
  async function quizLoop(n=80){for(let k=0;k<n;k++){if(await ovOpen())return true;await p.evaluate(()=>{const q=window.__quiz;if(!q||!q.wrap.isConnected)return;const c=q.wrap.querySelector('.chs');if(c&&c.children[q.ans])c.children[q.ans].click();});await sleep(120);}return ovOpen();}
  const click=sel=>p.evaluate(sel=>{const e=document.querySelector(sel);if(e)e.click();return !!e;},sel);
+ /* batch A packs: each is played to the end in its own suite (gaps, read-bank2, music2, chess, explore2); here we only open it and check the screen is not empty */
+ const OPENED=async()=>{const n=await p.evaluate(()=>document.querySelector('#sTal').children.length+(document.querySelector('#ov').hidden?0:1));return n>0?'skip':'EMPTY SCREEN';};
  const S={
+  'write-mix':OPENED,
+  'write-paper':OPENED,
+  'read-nik':OPENED,
+  'read-flu':OPENED,
+  'write-spell':OPENED,
+  'mus2-rhythm':OPENED,
+  'chess-board':OPENED,
+  'sky-sun':OPENED,
+  'sky-planets':OPENED,
+  'sky-order':OPENED,
+  'sky-astro':OPENED,
+  'nat-home':OPENED,
+  'nat-groups':OPENED,
+  'nat-cycle':OPENED,
+  'nat-il':OPENED,
+  'map-read':OPENED,
+  'map-il':OPENED,
+  'map-world':OPENED,
+  'map-flags':OPENED,
+  'his-then':OPENED,
+  'his-inv':OPENED,
+  'his-old':OPENED,
+  'yr-hol':OPENED,
+  'yr-order':OPENED,
+  'yr-sport':OPENED,
+  'blk-plan':OPENED,
+  'blk-count':OPENED,
+  'blk-mirror':OPENED,
+  'blk-view':OPENED,
+  'blk-free':OPENED,
   'read-build':async()=>{for(let k=0;k<200&&!(await ovOpen());k++){await p.evaluate(()=>{const b=[...document.querySelectorAll('#sTal .chs .chb')].filter(x=>!x.disabled);if(b.length)b[Math.floor(Math.random()*b.length)].click();});await sleep(60);}},
   'type-lessons':async()=>{await click('#sTal .acts .actc');await sleep(200);const inv=await p.evaluate(()=>{const C=window.TAL.TYPE.CODE;const o={};for(const k in C)o[C[k]]=k;return o;});
     for(let k=0;k<400&&!(await ovOpen());k++){const ch=await p.evaluate(()=>{const c=document.querySelector('#sTal .tc.cur');return c?c.textContent:null;});if(ch==null){await sleep(100);continue;}const code=ch.trim()===''?'Space':inv[ch];if(!code){console.log('no code for',JSON.stringify(ch));break;}await p.keyboard.press(code);await sleep(20);}},

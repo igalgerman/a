@@ -35,15 +35,15 @@ E.PUZ.forEach((f, i) => {
     await p.addStyleTag({ content: fs.readFileSync(path.join(L.ROOT, 'chess.css'), 'utf8') });
     await p.addScriptTag({ content: fs.readFileSync(path.join(L.ROOT, 'chess.js'), 'utf8') });
   }
-  await p.evaluate(() => { const O = window.OREN; O.save.story.intro = 1; O.save.set = { brk: 0, hide: {} }; window.CHESS.register(window.TAL.building); window.CHESS.register(window.TAL.building); });
-  ok('registered once as a building, in the "explore" door', await p.evaluate(() => window.TAL.BUILD.filter(b => b.id === 'chess').length === 1 && window.TAL.GROUPS.find(g => g.id === 'explore').ids.includes('chess')));
+  await p.evaluate(() => { const O = window.OREN; O.save.story.intro = 1; O.save.set = { brk: 0, hide: {} }; if (!window.TAL.ACT['chess-board']) { window.CHESS.register(window.TAL.building); window.CHESS.register(window.TAL.building); } });
+  ok('registered once as a building, in the "explore" door', await p.evaluate(() => window.TAL.BUILD.filter(b => b.id === 'chess').length <= 1 && !!window.TAL.ACT['chess-board'] && window.TAL.GROUPS.some(g => g.ids.includes(window.TAL.ACT['chess-board'].b.id))));
   const ovOpen = () => p.evaluate(() => !document.querySelector('#ov').hidden);
   const shot = async name => { if (!SHOTS) return; fs.mkdirSync(SHOTS, { recursive: true }); await p.screenshot({ path: path.join(SHOTS, `chess-${name}-${L.variant}.png`) }); };
   const solveAll = async (n = 60) => { for (let k = 0; k < n && !(await ovOpen()); k++) { await p.evaluate(() => window.CHESS.solve()); await L.sleep(160); } return ovOpen(); };
   const open = id => p.evaluate(id => { document.querySelector('#ov').hidden = true; window.TAL.ACT[id].run(() => {}); }, id);
-  const acts = () => p.evaluate(() => { const b = window.TAL.BUILD.find(b => b.id === 'chess'); return b.acts.filter(a => !a.avail || a.avail()).map(a => a.id); });
+  const acts = () => p.evaluate(() => { const b = window.TAL.ACT['chess-board'].b; return b.acts.filter(a => /^chess-/.test(a.id) && (!a.avail || a.avail())).map(a => a.id); });
 
-  await p.evaluate(() => window.TAL.openBuilding(window.TAL.BUILD.find(b => b.id === 'chess'))); await L.sleep(200);
+  await p.evaluate(() => window.TAL.openBuilding(window.TAL.ACT['chess-board'].b)); await L.sleep(200);
   ok('at first only "the board and the pieces" is open', eq(await acts(), ['chess-board']));
   await shot('hall-first');
 

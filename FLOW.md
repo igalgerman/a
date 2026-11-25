@@ -46,7 +46,7 @@ cd ../wt-<name>/oren2 && export PATH=/c/work/Oren_study/bin:$PATH   # python3 on
 | step | kind | status |
 |---|---|---|
 | batch 0 friend | core | done (cloud, 84e8dcf) |
-| batch A: gaps, read-bank2, music2, chess, explore2 {merge:true}, english2 | core | in progress (local) |
+| batch A: gaps, read-bank2, music2, chess, explore2 {merge:true}, english2 | core | done (local, not deployed) |
 | content check of batch A packs (math, nikud, facts) | read-only | in progress (local, parallel) |
 | batch B: think + daylog | core | next |
 | batch C: learn, help, topic | core | after B |

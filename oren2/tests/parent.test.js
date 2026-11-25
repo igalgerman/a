@@ -48,7 +48,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  const r2=await p.evaluate(async()=>{const T=window.TAL,st=T.S().set;st.hide={};st.offA={};st.grad={on:1,every:2,base:(window.OREN.save.days||[]).length,extra:0,seen:2};T.openHub();await new Promise(r=>setTimeout(r,150));
    const stt=T.BUILD.map(b=>T.bState(b));const locked=stt.filter(x=>x!=='on').length,open=stt.filter(x=>x==='on').length;const lb=T.BUILD.filter(b=>T.bState(b)!=='on');const lbl='🔒 '+T.bState(lb[0]).lock;
    window.TAL_locked(lb[3]);await new Promise(r=>setTimeout(r,100));const ov=!document.querySelector('#ov').hidden;return {locked,open,lbl,ov};});
- ok('gradual: 2 open, rest locked',r2.open===2&&r2.locked===10,JSON.stringify(r2));
+ ok('gradual: 2 open, rest locked',r2.open===2&&r2.locked===11,JSON.stringify(r2));
  await shot('locked');await p.locator('#ov .bigbtn',{hasText:'פּוֹתֵחַ'}).click();await sleep(150);await p.fill('#pw1','new123');await p.keyboard.press('Enter');await sleep(300);
  ok('parent opens a locked building on request',await p.evaluate(()=>window.TAL.BUILD.filter(b=>window.TAL.bState(b)==='on').length)===3);
  ok('new building celebrated',await p.evaluate(()=>(window.TAL.S().set.grad.seen|0)===3));

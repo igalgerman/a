@@ -27,4 +27,7 @@ step('think-merge',()=>{const th=T.BUILD.find(b=>b.id==='think');if(!th)return;
 
 /* english 2 replaces the acts of the 'eng' building (same building id) */
 step('english2',()=>{if(W.ENGLISH2)W.ENGLISH2.register();});
+
+/* health counts the minutes of every activity: wrap the runs of the activities the packs added or replaced */
+step('health',()=>{if(W.HEALTH&&W.HEALTH.wrapRuns)W.HEALTH.wrapRuns();});
 })();

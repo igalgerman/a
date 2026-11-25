@@ -253,6 +253,7 @@ function readStory(k,back){const st=STORIES[k];O.setScreen('sTal','final',back);
   go.onclick=()=>{O.hush();let qi=0;quiz({id:'story-'+k,title:st.t,bg:'final',back:()=>openStories(back),n:st.q.length,gen:()=>{const [q,a,ds]=st.q[qi++];const opts=shuffle([a,...ds]);return {pr:`<div class="sent">${q}</div>`,opts,ans:opts.indexOf(a),cls:'tx',key:q};}});};}
 function openStories(back){O.setScreen('sTal','final',back);T.hudT('סִפּוּרֵי עֶרֶב');const s=$('#sTal');s.innerHTML='';s.appendChild(h('div','whead',`<span class="gd">${X.moon}</span><h1>סִפּוּרֵי עֶרֶב</h1>`));
   const g=h('div','acts');STORIES.forEach((st,k)=>{const n=(T.S().tl['story-'+k]||{}).s|0;const c=h('button','actc',`<span class="ai">${ALLSPR(st.spr[0])}</span><span class="an">${st.t}</span><span class="st">${[0,1,2].map(j=>j<n?SPR.star:SPR.starOff).join('')}</span>`);c.onclick=()=>readStory(k,()=>openStories(back));g.appendChild(c);});s.appendChild(g);}
+T.STORIES=STORIES;T.readStory=readStory;
 building({id:'stories',name:'סִפּוּרֵי עֶרֶב',color:'#6c4fc1',bg:'clock',icon:()=>X.moon,blurb:'סִפּוּרִים קְצָרִים לִקְרִיאָה, עִם שְׁאֵלוֹת בַּסּוֹף.',acts:STORIES.map((st,k)=>({id:'story-'+k,name:st.t,icon:()=>ALLSPR(st.spr[0]),run:back=>readStory(k,back)}))});
 T.openStories=openStories;
 })();
@@ -740,6 +741,7 @@ building({id:'think',name:'מִגְדַּל הַחֲשִׁיבָה',color:'#e8a3
 /* ===== WRITING HOUSE ===== */
 (()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,ICON,SPR}=O;const {X,ALLSPR,building}=T;const sfx=O.sfx,D=O.D;
 const AB=[['א','אָלֶף'],['ב','בֵּית'],['ג','גִּימֶל'],['ד','דָּלֶת'],['ה','הֵא'],['ו','וָו'],['ז','זַיִן'],['ח','חֵית'],['ט','טֵית'],['י','יוֹד'],['כ','כַּף'],['ל','לָמֶד'],['מ','מֵם'],['נ','נוּן'],['ס','סָמֶךְ'],['ע','עַיִן'],['פ','פֵּא'],['צ','צָדִי'],['ק','קוֹף'],['ר','רֵישׁ'],['ש','שִׁין'],['ת','תָּו']];
+T.WRITE={AB};
 const W=()=>{const s=T.S();s.wr=s.wr||{};return s.wr;};
 const wordFor=l=>(T.WORDS||[]).find(w=>w.w.replace(/[֑-ׇ]/g,'')[0]===l);
 const FONT='bold 230px "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif';
