@@ -1,6 +1,7 @@
 // Shared helpers for the Oren game test suites.
 // The page under test is oren2/index.html wrapped in a doctype (tests/.tmp/t.html), built by run.sh.
 const path = require('path'), fs = require('fs');
+require('./mute.js');                               // every test browser is silent
 const ROOT = path.resolve(__dirname, '..');          // oren2/
 const TMP = path.join(__dirname, '.tmp');
 const PAGE = path.join(TMP, 't.html');
