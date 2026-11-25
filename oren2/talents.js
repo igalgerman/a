@@ -111,7 +111,7 @@ function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);hudT('עִי�
   s.appendChild(h('div','whead',`<span class="gd bob">${X.portal}</span><h1>עִיר הַכִּשְׁרוֹנוֹת</h1>`));
   const g4=h('div','gdoors');
   GROUPS.forEach(g=>{const bs=visB(g);if(!bs.length)return;const got=bs.reduce((a,b)=>a+bStars(b)[0],0),max=bs.reduce((a,b)=>a+bStars(b)[1],0);const anyNew=bs.some(b=>bState(b)==='on');
-    const c=h('button','gdoor'+(anyNew?'':' lockb'),`<span class="gem2">${g.e}</span><span class="gicons">${bs.map(b=>`<i>${b.icon()}</i>`).join('')}</span><b>${g.n}</b><span class="bar"><i style="width:${max?got/max*100:0}%"></i></span>`);
+    const c=h('button','gdoor'+(anyNew?'':' lockb'),`<span class="gem2">${g.e}</span><b>${g.n}</b>`);
     c.style.setProperty('--gc',g.c);c.onclick=()=>{sfx.pop(3);const on=bs.filter(b=>bState(b)==='on');if(bs.length===1&&on.length===1)openBuilding(bs[0]);else openGroup(g);};g4.appendChild(c);});
   s.appendChild(g4);O.emit('hub',s);}
 /* level 2: just the buildings of one door */
@@ -871,10 +871,7 @@ function suggestion(){const s=T.S(),pr=prof()||{};const on=BUILD.filter(b=>T.bSt
   return {t:'אַתָּה כְּבָר מַכִּיר אֶת כָּל הָעִיר! אֵיזֶה אַלּוּף!'};}
 O.on('hub',s=>{const pr=prof();if(!pr){setTimeout(()=>profile(T.openHub),0);return;}
   const fg=T.GROUPS.findIndex(g=>g.ids.includes(pr.love));const gd=s.querySelectorAll('.gdoor');T.GROUPS.forEach((g,i)=>{});s.querySelectorAll('.gdoor').forEach(c=>{if(c.querySelector('b').textContent===(T.GROUPS[fg]||{}).n){c.classList.add('fav');c.appendChild(h('span','favh','❤️'));}});
-  const sg=suggestion();const head=h('div','hhead');head.style.setProperty('--fc',pr.col||'#4fae4f');
-  head.innerHTML=`<span class="hpet bob">${ALLSPR(pr.an)}</span><div class="hbub"><b>${hello()}, אוֹרֶן!</b><span>${sg.t}</span></div>`;
-  const hb=head.querySelector('.hbub');if(sg.a||sg.b){const go=h('button','bigbtn sm',ICON.play+'<span>בּוֹא!</span>');go.onclick=()=>sg.a?sg.a.run(T.openHub):T.openBuilding(sg.b);hb.appendChild(go);}
-  const wh=s.querySelector('.whead');wh.after(head);O.sayNow=plain(hello()+' אורן. '+sg.t);});
+  const sg=suggestion();if(sg.b)setTimeout(()=>toast(sg.t),D(300));O.sayNow=sg.b?plain(sg.t):'עיר הכשרונות. בחר דלת.';});
 O.on('group',s=>{const pr=prof();if(!pr)return;s.querySelectorAll('.bld').forEach(c=>{const b=BUILD.find(x=>x.name===c.querySelector('.nm').textContent);if(b&&b.id===pr.love){c.classList.add('fav');c.appendChild(h('span','favh','❤️'));}});});
 /* remember the last activity */
 Object.values(ACT).forEach(a=>{const r=a.run;a.run=back=>{const s=T.S();s.last={id:a.id,d:O.today()};return r(back);};});
@@ -1139,42 +1136,66 @@ function runStep(i){const d=T.dailyEnsure();const id=d.t[i];if(id==='math'){cons
     if(!O.save.story[lv.w.id+'-in'])O.showWorld(lv.w);else O.startLevel(lv);return;}
   const a=ACT[id];if(a)a.run(O.showMap);}
 window.TAL_step=runStep;
+/* a small story for every day: each mission brings back one piece */
+const QUESTS=[
+ {e:'🦸',t:'הַגִּבּוֹר שֶׁל הָעִיר',k:'💎',a:'אוֹי! גְּבִישֵׁי הַכֹּחַ נֶעֶלְמוּ מֵהָעִיר. כָּל מְשִׂימָה מַחְזִירָה גָּבִישׁ אֶחָד!',z:'כָּל הַגְּבִישִׁים חָזְרוּ, וְהָעִיר שׁוּב מְאִירָה. אַתָּה גִּבּוֹר אֲמִתִּי!'},
+ {e:'🧱',t:'הַגֶּשֶׁר לָאִי',k:'🧱',a:'הַגֶּשֶׁר לָאִי נִשְׁבַּר. כָּל מְשִׂימָה מוֹסִיפָה לַגֶּשֶׁר עוֹד חֵלֶק!',z:'הַגֶּשֶׁר מוּכָן! עַכְשָׁו כֻּלָּם יְכוֹלִים לַעֲבֹר לָאִי.'},
+ {e:'⚽',t:'מִשְׂחַק הַגְּמָר',k:'⚽',a:'הַיּוֹם מִשְׂחַק הַגְּמָר! כָּל מְשִׂימָה הִיא גּוֹל לַקְּבוּצָה שֶׁלְּךָ.',z:'נִצַּחְתָּ בַּגְּמָר! הַגָּבִיעַ שֶׁלְּךָ!'},
+ {e:'🌊',t:'הַדָּג הָאָבוּד',k:'🫧',a:'דָּג קָטָן הָלַךְ לְאִבּוּד בַּיָּם. כָּל מְשִׂימָה מְקָרֶבֶת אוֹתְךָ אֵלָיו!',z:'מָצָאתָ אֶת הַדָּג! הוּא שׂוֹחֶה הַבַּיְתָה שָׂמֵחַ.'},
+ {e:'🎵',t:'הַהוֹפָעָה הַגְּדוֹלָה',k:'🎵',a:'הָעֶרֶב יֵשׁ הוֹפָעָה, אֲבָל הַתָּוִים בָּרְחוּ! כָּל מְשִׂימָה מַחְזִירָה תָּו.',z:'הַשִּׁיר שָׁלֵם, וְכָל הַקָּהָל מוֹחֵא כַּפַּיִם!'},
+ {e:'🏀',t:'הַסַּל הַמְּנַצֵּחַ',k:'🏀',a:'מִשְׂחַק כַּדּוּרְסַל גָּדוֹל! כָּל מְשִׂימָה הִיא סַל.',z:'קָלַעְתָּ אֶת הַסַּל הַמְּנַצֵּחַ! הַקְּבוּצָה חוֹגֶגֶת!'},
+ {e:'🗝️',t:'הַמְּעָרָה הַסּוֹדִית',k:'🔑',a:'חָבֵר נִתְקַע בַּמְּעָרָה. כָּל מְשִׂימָה פּוֹתַחַת מַנְעוּל אֶחָד!',z:'פָּתַחְתָּ אֶת כָּל הַמַּנְעוּלִים, וְהֶחָבֵר יָצָא!'},
+ {e:'🚀',t:'הַחֲלָלִית',k:'⭐',a:'הַחֲלָלִית צְרִיכָה כּוֹכָבִים כְּדֵי לָטוּס. כָּל מְשִׂימָה נוֹתֶנֶת כּוֹכָב!',z:'הַחֲלָלִית מְלֵאָה כּוֹכָבִים — וְהִיא טָסָה לַיָּרֵחַ!'}];
+const dayNum=()=>{const [y,m,d]=O.today().split('-').map(Number);return Math.floor(Date.UTC(y,m-1,d)/864e5);};
+const quest=()=>QUESTS[dayNum()%QUESTS.length];
+T.quest=quest;
 const stepInfo=id=>id==='math'?{n:'שָׁלָב בְּחֶשְׁבּוֹן',ic:SPR.tree,c:'#d99a2b'}:ACT[id]?{n:ACT[id].name,ic:ACT[id].icon(),c:ACT[id].b.color}:{n:'',ic:'',c:'#999'};
 function home(){const S0=T.S();
   if(O.save.story.intro&&!S0.prof){T.profile(O.showMap);return;}
   O.setScreen('sHome','meadow',null);O.hud(`<div class="starcount">${SPR.star}<span>${O.totalStars()}</span></div>`);const s=$('#sHome');s.innerHTML='';
-  const pr=S0.prof||{};const st=S0.set;
-  /* greeting */
-  const d=st.noDaily?null:T.dailyEnsure();const left=d?d.done.filter(x=>!x).length:0;
-  const sub=!d?'מָה נַעֲשֶׂה הַיּוֹם?':left===0?(d.claimed?'סִיַּמְתָּ אֶת הַיּוֹם שֶׁלְּךָ! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ הַכֹּל! קַח אֶת הַפְּרָס 🎁'):left===1?'עוֹד צַעַד אֶחָד לַפְּרָס 🌟':`עוֹד ${left} צְעָדִים לַפְּרָס 🌟`;
-  const hd=h('div','hmhead',`<span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}<div class="hbub" style="--fc:${pr.col||'#4fae4f'}"><b>${T.hello()}, אוֹרֶן!</b><span>${sub}</span>${T.timeLeft&&T.timeLeft()!=null?`<span class="tleft">⏱️ נִשְׁאֲרוּ ${T.timeLeft()} דַּקּוֹת לְהַיּוֹם</span>`:''}</div>`);s.appendChild(hd);
-  O.sayNow=T.plainHe(T.hello()+' אורן. '+sub);
-  /* today's path */
-  if(d){const card=h('div','today');card.appendChild(h('div','tdh','📅 הַיּוֹם שֶׁלִּי'));const path=h('div','tpath');
-    const nx=d.done.findIndex(x=>!x);
+  const pr=S0.prof||{};const st=S0.set;const d=st.noDaily?null:T.dailyEnsure();const q=quest();const nx=d?d.done.findIndex(x=>!x):-1;
+  /* Oren, his friend, and one sentence */
+  const say=!d?`${T.hello()}, אוֹרֶן! בְּמָה נְשַׂחֵק?`:nx>=0?`${q.e} ${q.a}`:d.claimed?'כָּל הַכָּבוֹד! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ! פְּתַח אֶת הַפְּרָס 🎁';
+  const tl=T.timeLeft&&T.timeLeft()!=null?`<small class="tleft">⏱️ ${T.timeLeft()} דַּקּוֹת</small>`:'';
+  s.appendChild(h('div','hstage',`<div class="hbub2" style="--fc:${pr.col||'#4fae4f'}">${say}${tl}</div><div class="hpair"><span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}</div>`));
+  O.sayNow=T.plainHe(say);
+  /* the path: circles only, and one big button */
+  if(d){const card=h('div','today');const path=h('div','tpath');
     d.t.forEach((id,i)=>{const inf=stepInfo(id);if(i)path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
-      const b=h('button','tstep2'+(d.done[i]?' done':i===nx?' cur':''),`<span class="tn">${d.done[i]?'✓':i+1}</span><span class="ti2">${inf.ic}</span><span class="tl">${inf.n}</span>`);b.style.setProperty('--sc',inf.c);
-      b.onclick=()=>{sfx.pop(2);runStep(i);};
-      if(false){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');sw.onclick=e=>{e.stopPropagation();const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;d.t[i]=O.pick(pool);d.sw=1;O.persist();sfx.whoosh&&sfx.whoosh();home();};b.appendChild(sw);}
-      path.appendChild(b);});
+      const b=h('button','tstep2'+(d.done[i]?' done':i===nx?' cur':''),`<span class="ti2">${d.done[i]?`<span class="qk">${q.k}</span>`:inf.ic}</span>`);b.style.setProperty('--sc',inf.c);b.title=T.plainHe(inf.n);b.setAttribute('aria-label',T.plainHe(inf.n));
+      b.onclick=()=>{sfx.pop(2);runStep(i);};path.appendChild(b);});
+    path.appendChild(h('i','tlink'+(nx<0?' on':'')));path.appendChild(h('span','tgoal'+(nx<0?' won':''),`<span>${nx<0?'🏆':'🎁'}</span>`));
     card.appendChild(path);const row=h('div','btnrow');
-    if(nx>=0){const go=h('button','bigbtn huge',ICON.play+`<span>מַמְשִׁיכִים: ${stepInfo(d.t[nx]).n}</span>`);go.onclick=()=>{sfx.pop(3);runStep(nx);};row.appendChild(go);}
-    else if(!d.claimed){const c=h('button','bigbtn gold huge',SPR.gem+'<span>קַבֵּל 15 יַהֲלוֹמִים!</span>');c.onclick=()=>{d.claimed=1;O.addGems(15,c);sfx.win();O.rain();O.persist();setTimeout(home,D(900));};row.appendChild(c);}
-    else row.appendChild(h('div','tfree','🎈 בְּחַר מָה שֶׁבָּא לְךָ!'));
-    card.appendChild(row);s.appendChild(card);}
-  /* three doors */
-  const doors=h('div','doors');
-  const pct=(a,b)=>b?Math.round(a/b*100):0;const lvDone=O.ALLLV.filter(l=>O.stars(l.id)).length;
-  const talGot=T.BUILD.reduce((a,b)=>a+b.acts.reduce((x,y)=>x+((S0.tl[y.id]||{}).s|0),0),0),talMax=T.BUILD.reduce((a,b)=>a+b.acts.length*3,0);
-  [['journey','הַמַּסָּע','חֶשְׁבּוֹן וְהַרְפַּתְקָאוֹת','#d99a2b',SPR.mount||SPR.tree,()=>O.showJourney(),pct(lvDone,O.ALLLV.length)],
-   ['city','עִיר הַכִּשְׁרוֹנוֹת','קְרִיאָה, מַדָּע, אָמָּנוּת וְעוֹד','#6c4fc1',X.portal,()=>T.openHub(),pct(talGot,talMax)],
-   ['king','הַמַּמְלָכָה שֶׁלִּי','בּוֹנִים עִם הַיַּהֲלוֹמִים','#3a8fc4',SPR.tower,()=>O.kingdom(),null]].forEach(([k,n,sb,c,ic,fn,p])=>{
-    const b=h('button','door '+k,`<span class="dico">${ic}</span><b>${n}</b><small>${sb}</small>${p!=null?`<span class="bar"><i style="width:${p}%"></i></span>`:`<span class="dg">${SPR.gem}<b>${O.save.gems|0}</b></span>`}`);b.style.setProperty('--dc',c);b.onclick=()=>{sfx.pop(2);fn();};doors.appendChild(b);});
+    if(nx>=0){const go=h('button','bigbtn huge',ICON.play+'<span>מַמְשִׁיכִים</span>');go.onclick=()=>{sfx.pop(3);runStep(nx);};row.appendChild(go);}
+    else if(!d.claimed){const c=h('button','bigbtn gold huge','🎁 <span>פְּתַח אֶת הַפְּרָס!</span>');c.onclick=()=>{d.claimed=1;O.addGems(15,c);O.persist();const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card qwin"><div class="qbig">${q.e}</div><h2>${q.t}</h2><div class="sub">${q.z}</div><div class="gain">+15 ${SPR.gem}</div></div>`;const r=h('div','btnrow');const ok=h('button','bigbtn',ICON.play+'<span>יֶשׁ!</span>');ok.onclick=()=>{ov.hidden=true;home();};r.appendChild(ok);ov.firstChild.appendChild(r);sfx.win();O.rain();O.say(T.plainHe(q.z));};row.appendChild(c);}
+    if(row.children.length)card.appendChild(row);s.appendChild(card);}
+  /* round doors, one word each */
+  const doors=h('div','doors2');
+  const DOORS=[['journey','מַסָּע',SPR.mount||SPR.tree,'#d99a2b',()=>O.showJourney()],['city','עִיר',X.portal,'#6c4fc1',()=>T.openHub()],['king','מַמְלָכָה',SPR.tower,'#3a8fc4',()=>O.kingdom()]];
+  if(window.TAL_arcade)DOORS.push(['arcade','אַרְקֵייד','<span style="font-size:46px;line-height:1">🕹️</span>','#ff3fa4',()=>window.TAL_arcade(O.showMap)]);
+  DOORS.forEach(([k,n,ic,c,fn])=>{const b=h('button','door '+k,`<span class="dico">${ic}</span><b>${n}</b>`);b.style.setProperty('--dc',c);b.onclick=()=>{sfx.pop(2);fn();};doors.appendChild(b);});
   s.appendChild(doors);
-  /* small corner of "me" */
-  const pb=h('button','parbtn','🔒 כניסת הורים');pb.onclick=()=>window.TAL_parentGate();s.appendChild(pb);
+  const pb=h('button','parbtn','🔒');pb.title='כניסת הורים';pb.setAttribute('aria-label','כניסת הורים');pb.onclick=()=>window.TAL_parentGate();s.appendChild(pb);
   T.checkMsg&&T.checkMsg();}
 window.TAL_home=home;T.home=home;
+/* the guide: points at the one thing to press, says it, then gets out of the way */
+let coachEl=null;
+function coach(target,text,key,times){if(!target||!target.isConnected)return;const S0=T.S();S0.coach=S0.coach||{};const n=S0.coach[key]|0;if(n>=(times||1))return;S0.coach[key]=n+1;
+  uncoach();const pr=S0.prof||{};const el=h('div','coach',`<div class="cbub"><span class="cpet">${pr.an?ALLSPR(pr.an):O.AV()}</span><span>${text}</span></div><div class="chand">👆</div>`);document.body.appendChild(el);coachEl=el;
+  const place=()=>{if(!target.isConnected){uncoach();return;}const r=target.getBoundingClientRect();const hand=el.querySelector('.chand'),bub=el.querySelector('.cbub');
+    hand.style.left=(r.left+r.width/2-22)+'px';hand.style.top=(r.bottom-8)+'px';const bw=Math.min(340,innerWidth-24);bub.style.width=bw+'px';
+    let top=r.bottom+48;if(top+90>innerHeight){top=r.top-100;hand.classList.add('up');hand.style.top=(r.top-56)+'px';}else hand.classList.remove('up');
+    bub.style.top=top+'px';bub.style.left=Math.max(12,Math.min(innerWidth-bw-12,r.left+r.width/2-bw/2))+'px';};
+  place();el._iv=setInterval(place,400);const off=()=>uncoach();target.addEventListener('click',off,{once:true});el.querySelector('.cbub').onclick=off;el._to=setTimeout(off,D(14000));
+  setTimeout(()=>O.say(T.plainHe(text)),D(400));}
+function uncoach(){if(coachEl){clearInterval(coachEl._iv);clearTimeout(coachEl._to);coachEl.remove();coachEl=null;}}
+T.coach=coach;O.on('screen',()=>uncoach());
+/* where the guide points the first times */
+const later=(f)=>setTimeout(f,D(700));
+O.on('screen',id=>{if(id==='sHome')later(()=>{const d=T.S().daily;const b=$('#sHome .bigbtn.huge');if(b&&$('#ov').hidden)coach(b,d&&d.done.some(x=>!x)?'לְחַץ עַל הַכַּפְתּוֹר הַגָּדוֹל כְּדֵי לְהַתְחִיל!':'כָּאן פּוֹתְחִים אֶת הַפְּרָס!','home',4);});});
+O.on('hub',s=>later(()=>{const b=s.querySelector('.gdoor');if(b)coach(b,'בְּחַר דֶּלֶת — וּבוֹא נְשַׂחֵק!','hub',2);}));
+O.on('group',s=>later(()=>{const b=s.querySelector('.bld:not(.lockb)');if(b)coach(b,'לְחַץ עַל בִּנְיָן כְּדֵי לְהִכָּנֵס','group',2);}));
+O.on('map',m=>later(()=>{const b=m.querySelector('.worlds .wcard2:not(.locked)');if(b&&!$('#sMap').hidden)coach(b,'לְחַץ עַל עוֹלָם כְּדֵי לְהַתְחִיל אֶת הַמַּסָּע','map',2);}));
 O.on('synced',()=>{if(!$('#sHome').hidden&&$('#ov').hidden)home();});
 /* a home button that is always in the same place */
 (()=>{const bb=$('#btnBack');if(!bb)return;const hb=h('button','ibtn','');hb.id='btnHome';hb.innerHTML=ICON.home;hb.setAttribute('aria-label','בית');hb.title='הַבַּיִת';hb.hidden=true;hb.onclick=()=>{O.hush&&O.hush();sfx.pop(1);O.showMap();};bb.after(hb);
