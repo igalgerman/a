@@ -1,0 +1,41 @@
+/* ===== the friend on activity screens + the day's path strip ===== */
+.frc{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start}
+.frc{direction:ltr}.frc[hidden]{display:none}
+.frbadge{display:inline-block;margin:6px auto 0;background:#4fae4f;color:#fff;font-weight:800;font-size:18px;border-radius:999px;padding:3px 14px;border:2px solid #2f7a2f}
+.frdone{gap:14px;flex-wrap:wrap;justify-content:center}
+body.pplay .frc{bottom:62px}
+.frc .frs{display:block;width:60px;height:60px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.18));animation:frbob 2.4s ease-in-out infinite}
+.frc .frs svg{width:100%;height:100%;display:block}
+.frc.joy .frs{animation:frhop .55s ease-out 2}
+.frc.sad .frs{animation:frtilt .9s ease-in-out 1}
+.frb{position:relative;margin-bottom:8px;max-width:min(240px,60vw);background:#fffdf5;color:#2b2b3a;border:3px solid #2b2b3a;border-radius:14px;padding:6px 12px;font-size:19px;font-weight:700;line-height:1.35;box-shadow:0 3px 0 rgba(0,0,0,.2);direction:rtl}
+.frb::after{content:'';position:absolute;left:20px;bottom:-11px;border:8px solid transparent;border-top-color:#2b2b3a;border-bottom:0}
+.frb[hidden]{display:none}
+.frb.pop{animation:frpop .25s ease-out}
+body.fron #screens{padding-bottom:84px}
+.frpic{cursor:pointer}
+@keyframes frbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes frhop{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px) scale(1.06)}}
+@keyframes frtilt{0%,100%{transform:rotate(0)}30%{transform:rotate(-12deg) translateY(3px)}70%{transform:rotate(-8deg) translateY(3px)}}
+@keyframes frpop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+/* the path strip in the top bar */
+.frpath{display:flex;align-items:center;gap:4px;background:rgba(255,253,245,.92);border:2px solid #2b2b3a;border-radius:999px;padding:2px 8px;flex:none}
+.frpath .fpq,.frpath .fpg{font-size:16px;line-height:1}
+.frpath .fpg{opacity:.45}.frpath .fpg.won{opacity:1}
+.frpath i{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #8d939a;box-sizing:border-box}
+.frpath i.on{background:#4fae4f;border-color:#2f7a2f}
+.frpath i.cur{background:#ffd166;border-color:#c98a00;animation:frcur 1.2s ease-in-out infinite}
+@keyframes frcur{50%{transform:scale(1.3)}}
+/* one story line on the result card */
+.frstory{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px auto 4px;font-size:19px;font-weight:700;background:#fff6d6;border-radius:12px;padding:6px 12px}
+.frstory .frq{font-size:24px}
+@media (max-width:520px){
+  .frc .frs{width:46px;height:46px}
+  .frb{font-size:17px;padding:5px 10px}
+  body.fron #screens{padding-bottom:66px}
+  .frpath{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-2px;padding:1px 6px;gap:3px;z-index:4}
+  body.frpon #screens{padding-top:16px}
+  .frpath i{width:8px;height:8px}
+  .frpath .fpq,.frpath .fpg{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){.frc .frs,.frpath i.cur{animation:none}}
