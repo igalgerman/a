@@ -44,10 +44,12 @@ for (const sk of Object.keys(C.GEN)) for (let lv = 1; lv <= 5; lv++) {
     if (want && q.opts.length !== want) bad(sk, lv, `options ${q.opts.length} != ${want}`);
     if (sk === 'mth' && q.opts.length < 2) bad(sk, lv, 'too few options');
     if (!q.rule) bad(sk, lv, 'no explanation');
+    [...(q.items || []), ...(q.cells || []), q.a, q.b, q.c, ...q.opts].forEach(o => { if (o && o.t === 'tile' && !(o.v.n >= 1 && o.v.n <= 5)) bad(sk, lv, 'tile count ' + o.v.n); });
+    if (q.kind === 'series' && (q.items[q.qi] !== null || q.items.filter(x => x === null).length !== 1)) bad(sk, lv, 'series must hide exactly the answer (a ? slot)');
     q.opts.forEach(o => { if (o.t === 'num' && (o.v < 0 || o.v > 999 || !Number.isInteger(o.v))) bad(sk, lv, 'number out of range ' + o.v); });
     // independent checks that exactly one option fits
     let fits = null;
-    if (sk === 'ser') { fits = q.opts.map(o => o.v === (q.key.split('|')[0].split(',').map(Number))[q.qi]); q.items.forEach(o => { if (o.v < 0) bad(sk, lv, 'negative item'); }); }
+    if (sk === 'ser') { fits = q.opts.map(o => o.v === (q.key.split('|')[0].split(',').map(Number))[q.qi]); q.items.forEach(o => { if (o && o.v < 0) bad(sk, lv, 'negative item'); }); }
     if (sk === 'shp') {
       const vals = k => { const a = q.items.map(o => o ? o.v[k] : null); if (q.qi >= a.length) a.push(null); else a[q.qi] = null; return a; };
       const pred = {}; ATTR.forEach(k => { pred[k] = predict(vals(k), q.qi, k === 'r' ? 360 : 0); });

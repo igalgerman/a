@@ -50,7 +50,7 @@ function genSer(lv){let sq,rule,cands=[];const step=d=>d>0?'+'+d:'−'+(-d);
     else{const a=ri(3,6),b=ri(1,a-1);sq=[ri(1,10)];for(let j=1;j<6;j++)sq.push(sq[j-1]+(j%2?a:-b));rule=`הַקְּפִיצוֹת מִתְחַלְּפוֹת: ${L(step(a)+', '+step(-b))}`;}}
   const qi=lv>=3&&rnd()<.4?ri(1,4):5;const a=sq[qi];
   if(qi>0&&qi<5)cands.push(sq[qi-1]+(sq[qi+1]-sq[qi]),sq[qi+1]+1);else cands.push(sq[4]+(sq[4]-sq[3])+1,sq[4]);
-  return mk('ser',lv,{kind:'series',items:sq.map(v=>({t:'num',v})),qi,ans:{t:'num',v:a},ds:numDs(a,nOpts(lv)-1,cands.filter(c=>c!==a)),
+  return mk('ser',lv,{kind:'series',items:sq.map((v,j)=>j===qi?null:{t:'num',v}),qi,ans:{t:'num',v:a},ds:numDs(a,nOpts(lv)-1,cands.filter(c=>c!==a)),
     text:qi===5?'אֵיזֶה מִסְפָּר בָּא אַחַר כָּךְ?':'אֵיזֶה מִסְפָּר חָסֵר?',rule:'הַכְּלָל: '+rule,key:sq.join(',')+'|'+qi});}
 
 /* ---------- shape series ---------- */
@@ -71,11 +71,11 @@ function genShp(lv){let items,ans,ds,rule,attrs;const n=nOpts(lv);
     else if(k==='rc'){const r0=pk([0,90,180,270]);f=j=>tile({s:'arrow',c:cs[j%2],r:(r0+90*j)%360});rule='הַחֵץ מִסְתּוֹבֵב רֶבַע סִבּוּב, וְהַצֶּבַע מִתְחַלֵּף';}
     else{f=j=>tile({s:ss[j%2],c:cs[0],n:1+(j%4)});rule='כָּל פַּעַם עוֹד אֶחָד (עַד 4), וְהַצּוּרָה מִתְחַלֶּפֶת';}
     const len=lv===4?6:7;const all=Array.from({length:len+1},(_,j)=>f(j));const qi=lv===5&&rnd()<.5?ri(3,len-1):len;
-    ans=all[qi];items=all.slice(0,len+1);items[qi]=null;if(qi===len)items.pop();
+    ans=all[qi];items=all.slice(0,len+1);items[qi]=null;
     ds=tileDs(ans,k==='sc'?['s','c']:k==='rc'?['r','c']:['n','s'],n-1);
-    return mk('shp',lv,{kind:'series',items:items.map(v=>v&&{t:'tile',v}),qi:items.indexOf(null)<0?items.length:items.indexOf(null),ans:{t:'tile',v:ans},ds,text:'מָה חָסֵר?',rule:'הַכְּלָל: '+rule,key:all.map(t=>okey({t:'tile',v:t})).join('|')+qi});}
+    return mk('shp',lv,{kind:'series',items:items.map(v=>v&&{t:'tile',v}),qi,ans:{t:'tile',v:ans},ds,text:'מָה חָסֵר?',rule:'הַכְּלָל: '+rule,key:all.map(t=>okey({t:'tile',v:t})).join('|')+qi});}
   const show=lv<=2?attrs.slice(0,lv===1?2:attrs.length).map(v=>({t:'tile',v})):null;
-  return mk('shp',lv,{kind:'series',items:items.map(v=>({t:'tile',v})),qi:items.length,ans:{t:'tile',v:ans},ds:ds.slice(0,n-1),text:'מָה בָּא אַחַר כָּךְ?',rule,ruleItems:show,key:items.map(t=>okey({t:'tile',v:t})).join('|')});}
+  return mk('shp',lv,{kind:'series',items:[...items.map(v=>({t:'tile',v})),null],qi:items.length,ans:{t:'tile',v:ans},ds:ds.slice(0,n-1),text:'מָה בָּא אַחַר כָּךְ?',rule,ruleItems:show,key:items.map(t=>okey({t:'tile',v:t})).join('|')});}
 
 /* ---------- matrices ---------- */
 function genMat(lv){const ss=shuf(SHP),cs=shuf([0,1,2,3,4]);let N,cell,rule,attrs;
@@ -93,10 +93,8 @@ function genMat(lv){const ss=shuf(SHP),cs=shuf([0,1,2,3,4]);let N,cell,rule,attr
   return mk('mat',lv,{kind:'matrix',N,cells:cells.map((v,i)=>i===mi?null:{t:'tile',v}),ans:{t:'tile',v:ans},ds,text:'מָה חָסֵר בַּמִּשְׁבֶּצֶת?',rule:'הַכְּלָל: '+rule,key:cells.map(t=>okey({t:'tile',v:t})).join('|')+mi});}
 
 /* ---------- analogies ---------- */
-const FLIPS=['fish','bird','car','boat','turtle','whale','key','pencil'];
 const OBJ1=['apple','fish','bird','car','star','heart','ball','boat','flower','tree','sheep','turtle','cake','cat','dog','cup','rabbit','carrot'];
-const TR={two:{b:{},f:{n:2},r:'מֵאֶחָד נִהְיוּ שְׁנַיִם'},three:{b:{},f:{n:3},r:'מֵאֶחָד נִהְיוּ שְׁלוֹשָׁה'},big:{b:{z:0},f:{z:2},r:'מִקָּטָן נִהְיָה גָּדוֹל'},
-  flip:{b:{},f:{fl:1},r:'הַתְּמוּנָה הִסְתּוֹבְבָה לַצַּד הַשֵּׁנִי',only:FLIPS},up:{b:{},f:{up:1},r:'הַתְּמוּנָה הִתְהַפְּכָה'}};
+const TR={two:{b:{},f:{n:2},r:'מֵאֶחָד נִהְיוּ שְׁנַיִם'},three:{b:{},f:{n:3},r:'מֵאֶחָד נִהְיוּ שְׁלוֹשָׁה'},big:{b:{z:0},f:{z:2},r:'מִקָּטָן נִהְיָה גָּדוֹל'}};
 const spr=(v,o)=>Object.assign({t:'spr',v,n:1,z:1,fl:0,up:0},o);
 const TRN={s:'הַצּוּרָה',c:'הַצֶּבַע',n:'הַכַּמּוּת',z:'הַגֹּדֶל',r:'הַכִּוּוּן'};
 function genAna(lv){
@@ -106,7 +104,7 @@ function genAna(lv){
     return mk('ana',1,{kind:'analogy',a:A,b:Bx,c:C,ans,ds,text:'כְּמוֹ בַּזּוּג הָרִאשׁוֹן — מָה חָסֵר?',rule:t.r+'. אוֹתוֹ דָּבָר בַּזּוּג הַשֵּׁנִי.',key:'p'+o1+o2+tk});}
   const pic=lv===2||(lv===3&&rnd()<.3)||(lv===5&&rnd()<.2);
   if(pic){/* shapes: one (or two) things change from A to B; C changes the same way */
-    const nch=lv===2?1:2;const ch=shuf(['s','c','z','n']).slice(0,nch);const A=tile({s:pk(SHP),c:ri(0,4)}),Bt=tile(A);ch.forEach(k=>{Bt[k]=pk(RANGE[k].filter(v=>v!==A[k]));});
+    const nch=lv===2?1:2;const ch=shuf(['s','c','n']).slice(0,nch);const A=tile({s:pk(SHP),c:ri(0,4)}),Bt=tile(A);ch.forEach(k=>{Bt[k]=pk(RANGE[k].filter(v=>v!==A[k]));});
     const keep=['s','c'].filter(k=>!ch.includes(k));const C=tile(A);if(keep.length){const k=keep[0];C[k]=pk(RANGE[k].filter(v=>v!==A[k]));}else{C.f=0;}
     const ans=tile(C);ch.forEach(k=>{ans[k]=Bt[k];});
     const ds=tileDs(ans,ch,(lv<=3?3:4)-1,[C]);
@@ -255,7 +253,7 @@ function shapeSVG(s,cx,cy,r,col,fill,rot){const st=fill?`fill="${col}" stroke="#
   else if(s==='star'){let p='';for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,rr=k%2?r*.45:r*1.08;p+=`${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)} `;}el=`<polygon points="${p}" ${st}/>`;}
   else el=`<polygon points="${cx},${cy-r*1.1} ${cx+r*.9},${cy} ${cx+r*.35},${cy} ${cx+r*.35},${cy+r*1.05} ${cx-r*.35},${cy+r*1.05} ${cx-r*.35},${cy} ${cx-r*.9},${cy}" ${st}/>`;
   return rot?`<g transform="rotate(${rot} ${cx} ${cy})">${el}</g>`:el;}
-const POS={1:[[30,30]],2:[[17,30],[43,30]],3:[[30,17],[17,42],[43,42]],4:[[18,18],[42,18],[18,42],[42,42]]};
+const POS={1:[[30,30]],2:[[17,30],[43,30]],3:[[30,17],[17,42],[43,42]],4:[[18,18],[42,18],[18,42],[42,42]],5:[[16,16],[44,16],[30,30],[16,44],[44,44]]};
 function tileSVG(t){const col=C.COL[t.c]||'#888';const n=t.n||1;const r=n>1?(t.z===0?6:t.z===2?11:9):[10,16,23][t.z==null?1:t.z];
   return `<svg class="tl" viewBox="0 0 60 60" aria-hidden="true">${POS[n].map(([x,y])=>shapeSVG(t.s,x,y,r,col,t.f!==0,t.r)).join('')}</svg>`;}
 function sprHTML(o){const one=`<span class="ths${o.z===0?' s0':o.z===2?' s2':''}${o.fl?' fl':''}${o.up?' up':''}">${ALLSPR(o.v)}</span>`;return `<span class="thsg n${Math.min(o.n||1,9)}">${one.repeat(o.n||1)}</span>`;}
@@ -264,7 +262,7 @@ const optCls=o=>o.t==='tile'?'thc tile':o.t==='spr'?'thc picb':o.t==='num'?'num'
 const sprTok=html=>String(html).replace(/\[([a-zA-Z]+)\]/g,(m,k)=>`<span class="ths">${ALLSPR(k)}</span>`);
 /* the visual part of a question */
 function promptHTML(q){
-  if(q.kind==='series')return `<div class="thser${q.items[0]&&q.items[0].t==='num'?' lr':''}">${[...q.items.map((o,i)=>i===q.qi&&q.qi<q.items.length&&!o?optHTML(null):optHTML(o)),...(q.qi>=q.items.length?[optHTML(null)]:[])].map(x=>`<span class="thi">${x}</span>`).join('')}</div>`;
+  if(q.kind==='series')return `<div class="thser${q.ans.t==='num'?' lr':''}">${q.items.map(o=>`<span class="thi${o?'':' miss'}">${optHTML(o)}</span>`).join('')}</div>`;
   if(q.kind==='matrix')return `<div class="thmat n${q.N}">${q.cells.map(o=>`<span class="thi${o?'':' miss'}">${optHTML(o)}</span>`).join('')}</div>`;
   if(q.kind==='analogy'){const w=q.a.t==='txt';return `<div class="thana${w?' w':''}"><div class="thpair"><span class="thi">${optHTML(q.a)}</span><span class="arr">←</span><span class="thi">${optHTML(q.b)}</span></div><div class="thpair"><span class="thi">${optHTML(q.c)}</span><span class="arr">←</span><span class="thi miss">${optHTML(null)}</span></div></div>`;}
   return sprTok(q.html||'');}
@@ -287,11 +285,11 @@ function round(o){/* o: {id, sk, title, bg, back, n, next(i) → q, again} */
   const render=()=>{let q;for(let t=0;t<30;t++){q=o.next(i);if(!qs.some(x=>x.key===q.key))break;}qs.push(q);let tries=0,lock=false,first=true;
     T.hudT(o.title,T.progressBar(i,o.n));O.sayNow=T.plainHe((q.say||'')+' '+(q.text||''));wrap.innerHTML='';
     const card=h('div','prq tqc',`${promptHTML(q)}${q.text?`<div class="qq">${q.text}</div>`:''}`);wrap.appendChild(card);if(T.rdQ&&q.text)T.rdQ(q,card);
-    const row=h('div','chs'+(q.opts[0].t==='num'?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op),optHTML(op));b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+    const row=h('div','chs n'+q.opts.length+(q.opts[0].t==='num'?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op),optHTML(op));b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');
     const done=(ok)=>{if(!first)return;first=false;const ch=C.answer(TH(),o.sk,ok);hit(o.sk,ok);O.persist();if(ch===1)O.floatText(card,'🎉 עָלִיתָ שָׁלָב!');};
     const explain=()=>{ex.hidden=false;ex.innerHTML=`<div class="cap"><div>${sprTok(q.rule)}</div>${q.ruleItems?`<div class="thser sm">${q.ruleItems.map(x=>`<span class="thi">${optHTML(x)}</span>`).join('')}</div>`:''}</div>`;
-      const nb=h('button','bigbtn sm',O.ICON.play+'<span>הָלְאָה</span>');nb.onclick=()=>{sfx.pop(1);next();};ex.appendChild(nb);setTimeout(()=>nb.focus(),50);T.setKey(e=>{if(e.key==='Enter'||e.key===' ')nb.click();});};
+      const nb=h('button','bigbtn sm',O.ICON.play+'<span>הַמְשֵׁךְ</span>');nb.onclick=()=>{sfx.pop(1);next();};ex.appendChild(nb);setTimeout(()=>nb.focus(),50);T.setKey(e=>{if(e.key==='Enter'||e.key===' ')nb.click();});};
     function pickA(k,b){if(lock||b.disabled)return;
       if(k===q.ans){lock=true;done(tries===0);if(T.rdA)T.rdA(q,tries,b);b.classList.add('ok');sfx.ok(i);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);
         if(tries)explain();else setTimeout(next,D(900));return;}
@@ -307,13 +305,13 @@ function track(sk,back){round({id:SK[sk].id,sk,title:SK[sk].n,bg:'mount',back,n:
 function readRC(back){const th=TH();th.rcR=th.rcR||[];let lv=C.level(th,'rc');let pi=0,err=0,gems=0;const NP=lv<=2?3:2;O.setScreen('sTal','city',back);const s=$('#sTal');
   let wrapNow=null;const passage=()=>{lv=C.level(TH(),'rc');const pick=C.rcPick(lv,th.rcR);th.rcR=[...th.rcR,pick.i].slice(-12);let qi=0;
     const ask=()=>{const q=pick.qs[qi];const nk=TH().nk|0;let tries=0,lock=false,first=true;
-      T.hudT('קוֹרְאִים וּמְבִינִים',T.progressBar(pi,NP));O.sayNow='';s.innerHTML='';const wrap=h('div','tq thq rcq');wrapNow=wrap;s.appendChild(wrap);
+      T.hudT('קוֹרְאִים וּמְבִינִים',T.progressBar(pi,NP));O.sayNow=qi?'':'קרא את הסיפור ובחר תשובה';s.innerHTML='';const wrap=h('div','tq thq rcq');wrapNow=wrap;s.appendChild(wrap);
       const card=h('div','prq tqc');const ps=h('div','thp'+(nk?' nk':''),T.nikudText(pick.P.t,pick.P.p));
       /* 🔊 for the passage: always at levels 1–2, after a mistake at level 3, not above */
-      const addSay=()=>{if(card.querySelector('.thsay'))return;const b=h('button','hintbtn thsay',O.ICON.say+'<span>הַקְרֵא לִי</span>');b.onclick=()=>{sfx.pop(1);T.readEl?T.readEl(ps):O.say(T.plainHe(pick.P.t));};card.insertBefore(b,ps.nextSibling);};
-      card.appendChild(ps);if(lv<=2)addSay();
-      const qq=h('div',lv>=4?'qq rcqq':'qq',T.nikudText(q.text,q.textP,true));card.appendChild(qq);wrap.appendChild(card);
-      const row=h('div','chs');q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op),optHTML(op));b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+      const addSay=()=>{if(card.querySelector('.thsay'))return;const b=h('button','hintbtn thsay',O.ICON.say+'<span>הַקְרֵא לִי</span>');b.onclick=()=>{sfx.pop(1);if(T.readSeq)T.readSeq([ps,qq]);else O.say(T.plainHe(pick.P.t+' '+q.text));};card.appendChild(b);};
+      /* the question is not a .qq, so it gets no second 🔊: one "read to me" button reads the story and the question */
+      const qq=h('div','rcqq',T.nikudText(q.text,q.textP,true));card.append(ps,qq);if(lv<=2)addSay();wrap.appendChild(card);
+      const row=h('div','chs n'+q.opts.length);q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op),optHTML(op));b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
       const done=ok=>{if(!first)return;first=false;const ch=C.answer(TH(),'rc',ok);hit('rc',ok);if(nk||ch.nk)hit('nk',ok);O.persist();if(ch.lv===1)O.floatText(card,'🎉 עָלִיתָ שָׁלָב!');else if(ch.nk===1)O.floatText(card,'🎉 קוֹרֵא גַּם בְּלִי נִקּוּד!');};
       function pickA(k,b){if(lock||b.disabled)return;
         if(k===q.ans){lock=true;done(tries===0);b.classList.add('ok');sfx.ok(qi);const g=tries?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);setTimeout(nextQ,D(tries?1600:900));return;}
@@ -333,15 +331,15 @@ function challenge(back){const tl=testLv();if(!tl)return back();const plan=C.tes
     O.sayNow=T.plainHe(`פֶּרֶק ${ci+1}. ${ch.n} שְׁאֵלוֹת.`);
     s.appendChild(h('div','whead',`<span class="gd">🏆</span><h1>אֶתְגַּר הָאַלּוּפִים</h1>`));
     s.appendChild(h('div','lsent',`${plan.length>1?`פֶּרֶק ${ci+1} מִתּוֹךְ ${plan.length}.<br>`:''}${ch.n} שְׁאֵלוֹת. יֵשׁ ${ch.sec/60} דַּקּוֹת.<br>קוֹרְאִים בְּעִיּוּן וּבוֹחֲרִים. אֶפְשָׁר לְדַלֵּג וְלַחְזֹר.`));
-    const row=h('div','btnrow');const go=h('button','bigbtn',O.ICON.play+'<span>מַתְחִילִים!</span>');go.onclick=()=>{sfx.pop(2);chapter(ch);};row.appendChild(go);s.appendChild(row);setTimeout(()=>go.focus(),100);};
+    const row=h('div','btnrow');const go=h('button','bigbtn',O.ICON.play+'<span>הַמְשֵׁךְ</span>');go.onclick=()=>{sfx.pop(2);chapter(ch);};row.appendChild(go);s.appendChild(row);setTimeout(()=>go.focus(),100);};
   function chapter(ch){const sks=C.testSkills(ch);const qs=sks.map(sk=>{if(sk!=='rc')return C.GEN[sk](C.level(TH(),sk));const p=C.rcPick(Math.min(C.level(TH(),'rc'),3));return Object.assign(O.pick(p.qs),{pt:p.P.t,pp:p.P.p});});
     const got=qs.map(()=>null);let i=0,left=ch.sec;const t0=Date.now();O.setScreen('sTal','final',()=>{clearInterval(iv);back();});
     const wrap=h('div','tq thq');s.innerHTML='';const bar=h('div','thtime','<i></i><span></span>');s.appendChild(bar);s.appendChild(wrap);
-    const tick=()=>{left=Math.max(0,ch.sec-Math.round((Date.now()-t0)/1000));bar.firstChild.style.width=(left/ch.sec*100)+'%';bar.lastChild.textContent=`⏳ ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;bar.classList.toggle('low',left<=30);if(left<=0)finish();};
+    const tick=()=>{left=Math.max(0,ch.sec-Math.round((Date.now()-t0)/1000));bar.firstChild.style.width=(left/ch.sec*100)+'%';bar.lastChild.textContent='⏳';bar.classList.toggle('low',left<=30);if(left<=0)finish();};
     const iv=setInterval(()=>{if(!wrap.isConnected){clearInterval(iv);return;}tick();},1000);
     const render=()=>{const q=qs[i];T.hudT('אֶתְגַּר הָאַלּוּפִים',T.progressBar(i,qs.length));wrap.innerHTML='';
       const card=h('div','prq tqc',`${q.pt?`<div class="thp${TH().nk?' nk':''}">${T.nikudText(q.pt,q.pp)}</div>`:''}${promptHTML(q)}${q.text?`<div class="qq">${q.pt?T.nikudText(q.text,q.textP,true):q.text}</div>`:''}`);wrap.appendChild(card);
-      const row=h('div','chs'+(q.opts[0].t==='num'?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op)+(got[i]===k?' pick':''),optHTML(op));b.onclick=()=>{sfx.pop(1);got[i]=k;b.classList.add('pick');setTimeout(()=>step(1),D(250));};row.appendChild(b);});wrap.appendChild(row);
+      const row=h('div','chs n'+q.opts.length+(q.opts[0].t==='num'?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+optCls(op)+(got[i]===k?' pick':''),optHTML(op));b.onclick=()=>{sfx.pop(1);got[i]=k;b.classList.add('pick');setTimeout(()=>step(1),D(250));};row.appendChild(b);});wrap.appendChild(row);
       const nav=h('div','thnav');const skip=h('button','plink',got[i]==null?'דַּלֵּג ←':'הַבָּא ←');skip.onclick=()=>step(1);nav.appendChild(skip);wrap.appendChild(nav);
       T.setKey(e=>{if(/^[1-9]$/.test(e.key)){const b=row.children[+e.key-1];if(b)b.click();}});window.__think={q,get ans(){return q.ans;},wrap,i,test:true};};
     /* after the last question, go back to the ones that were skipped; finish when all are answered */
@@ -351,7 +349,7 @@ function challenge(back){const tl=testLv();if(!tl)return back();const plan=C.tes
       ci++;if(ci<plan.length)return pause();end();}
     tick();render();}
   const pause=()=>{s.innerHTML='';O.setScreen('sTal','final',back);s.appendChild(h('div','whead',`<span class="gd">⭐</span><h1>סִיַּמְתָּ פֶּרֶק!</h1>`));s.appendChild(h('div','lsent','נְשִׁימָה עֲמֻקָּה, מִתְמַתְּחִים... וּמַמְשִׁיכִים.'));
-    const row=h('div','btnrow');const go=h('button','bigbtn',O.ICON.play+'<span>לַפֶּרֶק הַבָּא</span>');go.onclick=intro;row.appendChild(go);s.appendChild(row);};
+    const row=h('div','btnrow');const go=h('button','bigbtn',O.ICON.play+'<span>הַמְשֵׁךְ</span>');go.onclick=intro;row.appendChild(go);s.appendChild(row);};
   const end=()=>{const pct=tot?Math.round(ok/tot*100):0;const th=TH();th.best=th.best||{};th.best[tl]=Math.max(th.best[tl]|0,pct);th.tn=(th.tn|0)+1;
     const st=pct>=90?3:pct>=60?2:1;T.record('think-test',st);O.addGems(5+st*3);
     T.result({title:'כָּל הַכָּבוֹד עַל הָאֶתְגָּר!',sub:`עָנִיתָ נָכוֹן עַל ${ok} מִתּוֹךְ ${tot}`,stars:st,gems:5+st*3,back,again:()=>challenge(back)});};
@@ -413,9 +411,12 @@ T.thinkSummary=(box,sec)=>{const L=skillList().filter(x=>x.n>=6);
       <div class="pdin">${acts.map(([k,n])=>`<div class="prow"><span class="pn">${actName(k)}</span><span class="pc">×${n}</span></div>`).join('')}${a?`<div class="pnote">דיוק בניסיון ראשון: ${pct(o/a)} (${a} שאלות)${ks.length?' · '+ks.map(([k,c])=>`${NAMES[k]||actName(k.replace('m:','w:'))} ${Math.round(c[1]/c[0]*100)}%`).join(' · '):''}</div>`:''}</div></details>`;}).join('');
   const w1=C.lastDays(14).slice(0,7),w2=C.lastDays(14).slice(7);const mins=w1.map(d=>(s0.time[d]|0)/60),played=mins.filter(m=>m>=1).length;const avg=played?Math.round(mins.reduce((a,b)=>a+b,0)/played):0;
   const [a1,o1]=C.sumK(O.save,w1),[a2,o2]=C.sumK(O.save,w2);
-  sec(box,'מה עשה השבוע',`${rows}<div class="pnote thavg">ממוצע: <b>${avg} דק׳</b> ביום משחק (${played} ימים השבוע) · דיוק השבוע: <b>${a1?pct(o1/a1):'—'}</b>${a2?` (שבוע שעבר ${pct(o2/a2)})`:''}</div>`);};
+  /* compact: one line for today, the week behind one tap */
+  const t0=days[0],L0=log[t0]||{a:{}},m0=Math.round((s0.time[t0]|0)/60),a0=Object.keys(L0.a||{});
+  sec(box,'היום',`<div class="pnote">${m0} דק׳${a0.length?' · '+a0.slice(0,3).map(actName).join(', '):' · עוד לא שיחק'}${L0.s?' · ⭐ '+L0.s:''}</div>
+    <details class="pdet"><summary>📅 7 ימים אחרונים</summary><div class="pdin">${rows}<div class="pnote thavg">ממוצע ${avg} דק׳ ביום משחק · דיוק השבוע ${a1?pct(o1/a1):'—'}${a2?` (שבוע קודם ${pct(o2/a2)})`:''}</div></div></details>`);};
 /* inside "full details": every skill in one table */
-T.thinkSkills=(box,sec,BAR)=>{const L=skillList();
+T.thinkSkills=(box,sec,BAR)=>{const L=skillList().filter(x=>x.n||x.k==='nk'&&(TH().nk|0));if(!L.length)return;
   sec(box,'כל המיומנויות',`${L.map(x=>`<div class="prow"><span class="pn">${x.name} <small>${x.lvTxt}</small></span>${BAR(x.acc||0,1,x.acc==null?'#ccc':x.acc<.6?'#e4572e':x.acc<.8?'#e9b949':'#4fae4f')}<span class="pc">${pct(x.acc)}${arrow(x.tr)} <small>(${x.n})</small></span></div>`).join('')}
     <div class="pnote">אחוז = תשובות נכונות בניסיון ראשון ב-14 הימים האחרונים (בסוגריים: מספר שאלות). ▲▼ = השבוע לעומת שבוע שעבר. "קריאה בלי ניקוד" עולה לבד כשהבנת הנקרא בשלב 4 ומעלה מדויקת, ויורדת אם יש קושי.</div>`);};
 /* parent switch: the champions' challenge (closed by default) */
