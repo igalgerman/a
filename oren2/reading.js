@@ -23,7 +23,7 @@ function words(el){if(el._rw&&el._rw.length&&el._rw.every(w=>w.isConnected))retu
 let cur=null;
 function stop(){if(!cur)return;const r=cur;cur=null;r.timers.forEach(clearTimeout);r.words.forEach(w=>w.classList.remove('on'));r.el.classList.remove('reading');r.resolve();}
 const light=(r,k)=>r.words.forEach((w,j)=>w.classList.toggle('on',j===k));
-const rate=()=>(((T.S().set||{}).voice||{}).rate)||1;
+const rate=()=>.9;                             /* the game voice speaks at 0.9 */
 function estimate(r,from){r.timers.forEach(clearTimeout);r.timers=[];let t=0;
   for(let k=from;k<r.words.length;k++){const len=(r.words[k].textContent.match(/[א-תA-Za-z0-9]/g)||[]).length;r.timers.push(setTimeout(()=>{if(cur===r)light(r,k);},t));t+=(170+70*len)/rate();}
   r.timers.push(setTimeout(()=>{if(cur===r)stop();},t+250));}

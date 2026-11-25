@@ -30,5 +30,9 @@ Needs Node and the `playwright` package with Chromium (no npm install inside the
 | entry | start screen Oren / parent buttons, parent choice (panel or play) |
 | arcade (desktop/phone) | all arcade cabinets, tickets, records, prize counter, real clicks |
 | family-sync | website mode: two devices, family code link, settings/progress sync through a fake `/api/save` |
-| worker | the Cloudflare `_worker.js` bundle: page, icons, manifest, save API (GET/PUT/400/404/405/413) |
+| worker | the Cloudflare `_worker.js` bundle: page, icons, manifest, save API (GET/PUT/400/404/405/413), Google voice cache and `/api/tts/pregen` (fake Google) |
 | playthrough (FULL=1) | plays every world level by level on a viewport, extras, layout overflow |
+
+## Voice in advance
+
+`node oren2/cf/tools/pregen.js` (after each deploy that changes kid text) plays the built game headless, collects every sentence the game would send to the Google voice (plus worlds, quests, words, sentences and stories), and creates the missing ones on the site through `POST /api/tts/pregen`. Paced to 15 a minute, stops at 700 new sentences a day (KV free tier); run it again the next day to continue. State: `~/.cache/oren-pregen/`.

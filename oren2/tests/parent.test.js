@@ -80,7 +80,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
    const doors=document.querySelectorAll('#sHome .door').length;document.querySelector('.door.city').click();await new Promise(r=>setTimeout(r,200));const groups=document.querySelectorAll('.gdoor').length;
    const homeBtn=!document.querySelector('#btnHome').hidden;T.openBuilding(T.BUILD[0]);await new Promise(r=>setTimeout(r,100));const homeBtn2=!document.querySelector('#btnHome').hidden;document.querySelector('#btnHome').click();await new Promise(r=>setTimeout(r,200));
    const back=!document.querySelector('#sHome').hidden;document.querySelector('.today .bigbtn').click();await new Promise(r=>setTimeout(r,300));const math=!document.querySelector('#sPlay').hidden||!document.querySelector('#sLearn').hidden||!document.querySelector('#sWorld').hidden;
-   window.TAL.parentPanel('voice');const v=document.querySelector('#sPar').textContent.includes('מנוע');window.TAL.parentPanel('plan');const pl=document.querySelectorAll('#sPar .plrow').length;
+   window.TAL.parentPanel('voice');const v=document.querySelector('#sPar').textContent.includes('Kore');window.TAL.parentPanel('plan');const pl=document.querySelectorAll('#sPar .plrow').length;
    return {steps,ok2,doors,groups,homeBtn,homeBtn2,back,math,v,pl};});
  ok('home: plan respected, 3 doors, grouped city, home button, continue starts math, voice+plan tabs',r8.steps===3&&r8.ok2&&r8.doors>=3&&r8.groups===4&&!r8.homeBtn&&r8.homeBtn2&&r8.back&&r8.math&&r8.v&&r8.pl===3,JSON.stringify(r8));
  await p.evaluate(()=>{window.TAL.parentPanel('voice');});await sleep(200);await shot('voice');await p.evaluate(()=>{window.OREN.showMap();});await sleep(300);await shot('home');

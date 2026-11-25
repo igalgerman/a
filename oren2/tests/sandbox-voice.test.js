@@ -9,6 +9,11 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  await p.waitForFunction(()=>!document.querySelector('#sPar').hidden&&document.querySelector('#sPar').textContent.includes('בדקתם את הקול'),null,{timeout:8000}).catch(()=>{});
  ok('summary nudges to check voice',(await p.textContent('#sPar')).includes('בדקתם את הקול'));
  await p.evaluate(()=>window.TAL.parentPanel('voice'));await sleep(200);ok('voice check section',(await p.textContent('#sPar')).includes('בדיקת קול'));
+ const fv=await p.evaluate(()=>{const t=document.querySelector('#sPar').textContent;const G=window.__gv,A0=window.Audio,ok0=G.ok;let u='';
+   window.Audio=function(x){u=x;return {play:()=>Promise.resolve(),pause(){}};};G.ok=true;window.__fast=false;
+   window.TAL.S().set.voice={eng:'browser',name:'x',gv:'he-IL-Wavenet-D',rate:1.2};window.OREN.say('שָׁלוֹם');
+   window.__fast=true;G.ok=ok0;window.Audio=A0;try{G.audio=null;}catch(e){}return {u,opts:/מהירות|קול אחר|מנוע:/.test(t)};});
+ ok('one fixed voice: Kore 0.9 even with old saved choices, no voice options',/[?&]v=he-IL-Chirp3-HD-Kore&r=0\.9$/.test(fv.u)&&!fv.opts,JSON.stringify(fv));
  await p.locator('#sPar .bigbtn',{hasText:'אוקי'}).click();await sleep(200);ok('voice approved saved',await p.evaluate(()=>!!window.TAL.S().set.voiceOk));
  await p.evaluate(()=>window.TAL.parentPanel('try'));await sleep(200);await L.shot(p,{path:L.SHOTDIR+'/try.png',fullPage:true});
  await p.locator('#sPar .bigbtn',{hasText:'כניסה למשחק כהורה'}).click();await sleep(400);
