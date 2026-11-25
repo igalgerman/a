@@ -13,6 +13,11 @@ CFG = tomllib.loads((HERE / "config.toml").read_text(encoding="utf-8"))
 REPO, REMOTE, BRANCH, MODEL = CFG["repo"], CFG["remote"], CFG["branch"], CFG["model"]
 BASH = CFG["bash"]
 DRY = "--dry-run" in sys.argv
+HC = CFG.get("hc", "")                            # herdr CLI; missing -> old hidden `claude -p` path
+USE_HERDR = bool(HC) and Path(HC).exists() and not DRY and os.environ.get("RUNNER_NO_HERDR") != "1"
+TERM = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--term=")), "")   # our own herdr terminal name (set by launch_self)
+INTERACTIVE_NOTE = ("\nWhen you are completely finished, make the very last line of your final message exactly the marker line described above, "
+                    "then stay open: the owner may open this terminal and ask you questions.")
 
 COMMON_TOOLS = ["Read", "Glob", "Grep", "Bash(gh:*)"]
 WORKER_TOOLS = COMMON_TOOLS + ["Edit", "Write", "Bash(git:*)", "Bash(node:*)", "Bash(npx:*)", "Bash(python3:*)",
@@ -44,6 +49,15 @@ def select(issues, max_parallel):
             core_busy = True
         chosen.append(i); slots -= 1
     return chosen
+
+def find_marker(text, prefix):
+    """Last RESULT:/VERDICT: line on a terminal screen (skips the echoed prompt: it has backticks / placeholders)."""
+    hits = []
+    for l in text.splitlines():
+        s = l.strip().lstrip("\u25cf\u23fa\u2022").strip()
+        if s.startswith(prefix) and "`" not in s and "<why>" not in s and " or " not in s:
+            hits.append(s)
+    return hits[-1] if hits else ""
 
 def last_line(text, prefix):
     hits = [l.strip() for l in text.splitlines() if l.strip().startswith(prefix)]
@@ -115,12 +129,74 @@ class FileLock:
     def __exit__(self, *a):
         self.path.unlink(missing_ok=True)
 
-def claude(prompt, cwd, tools, log):
+def claude_hidden(prompt, cwd, tools, log):
     cmd = [shutil.which("claude") or "claude", "-p", "--model", MODEL, "--permission-mode", "acceptEdits",
            "--allowedTools", *tools]
     # prompt goes via stdin; "--allowedTools" is variadic so keep it last
     rc, out = run(cmd, cwd=cwd, input=prompt, log=log, timeout=3 * 3600)
     return out
+
+# ---------- herdr terminals ----------
+def hc(*args, timeout=300):
+    return run([HC, *args], timeout=timeout)
+
+def hc_json(*args):
+    rc, out = hc(*args)
+    for line in reversed(out.strip().splitlines()):
+        try:
+            return json.loads(line)
+        except ValueError:
+            continue
+    return {}
+
+def parent_args():
+    """Notes go to the main session: config `parent`, else the parent of our own run-<n> terminal, else herdr's default."""
+    p = CFG.get("parent", "")
+    if not p and TERM:
+        p = hc_json("get", TERM, "--json").get("parent", "")
+    return ["--parent", p] if p else []
+
+def agent(name, prompt, cwd, tools, log, marker, n, role):
+    """Run an INTERACTIVE claude in a herdr terminal the owner can open; return (screen text, marker line).
+    Terminals are left open afterwards. Falls back to the hidden `claude -p` when herdr is unavailable."""
+    if not USE_HERDR:
+        out = claude_hidden(prompt, cwd, tools, log)
+        return out, last_line(out, marker)
+    # bash wrapper only puts the python3 shim on PATH; the prompt goes after `--` ("--allowedTools" is variadic)
+    cmd = [HC, "run", "--bg", "--name", name, "--cwd", str(cwd), "--label", f"issue={n}", "--label", f"role={role}", *parent_args(),
+           BASH, "-c", 'export PATH="$1:$PATH"; shift; exec "$@"', "_", CFG["extra_path"],
+           shutil.which("claude") or "claude", "--model", MODEL, "--permission-mode", "acceptEdits",
+           "--allowedTools", *tools, "--", prompt + INTERACTIVE_NOTE]
+    rc, out = run(cmd, log=log)
+    if rc: raise Blocked(f"cannot start terminal {name}: {out.strip()[:200]}")
+    deadline, screen = time.time() + 3 * 3600, ""
+    try:
+        while time.time() < deadline:
+            info = hc_json("wait", name, "--timeout", "120", "--json")
+            rc, screen = hc("read", name, "--lines", "400")
+            if info.get("status") == "blocked" and "trust this folder" in screen:   # fresh worktree: accept the folder-trust dialog
+                hc("keys", name, "down", "enter"); time.sleep(5); continue
+            if find_marker(screen, marker) and info.get("status") in ("done", "idle", None):
+                break
+            if hc_json("get", name, "--json").get("state") == "finished":
+                break
+            time.sleep(10)           # agent idle without a marker (e.g. the owner is talking to it): look again later
+        else:
+            raise Blocked(f"{name}: no {marker} line after 3h")
+    finally:
+        rc, full = hc("read", name, "--lines", "3000")
+        Path(log).with_suffix(".screen.txt").write_text(redact(full), encoding="utf-8")
+    return screen, find_marker(screen, marker)
+
+def launch_self():
+    """run.cmd entry: start this whole run as terminal run-<n> (its exit note goes to the main session) and return at once."""
+    pos = [a for a in sys.argv[1:] if not a.startswith("--")]
+    name = f"run-{pos[0].lstrip('#')}" if pos else "run-pass"
+    cmd = [HC, "run", "--bg", "--name", name, "--cwd", str(ROOT), "--label", "role=runner",
+           sys.executable, str(HERE / "runner.py"), *sys.argv[1:], f"--term={name}"]
+    rc, out = run(cmd)
+    print(out.strip() or f"started terminal {name}")
+    return rc
 
 def worker_prompt(n, lane, review_text=None):
     base = (f"You are an unattended worker for GitHub issue #{n} in repo {REPO} (lane: {lane}). Read CLAUDE.md and FLOW.md, then the issue "
@@ -194,7 +270,7 @@ def process(issue):
                     return process_locked(issue)
             return process_locked(issue)
     except Blocked:
-        return "skipped (already running)"
+        return "BLOCKED: already running"
 
 def process_locked(issue):
     n = issue["number"]; lane = lane_of(issue["labels"])
@@ -211,30 +287,29 @@ def process_locked(issue):
         rc, _ = run([BASH, "tools/lane.sh", str(n), BRANCH], cwd=ROOT, env={"REMOTE": REMOTE}, log=log)
         if rc: raise Blocked("lane.sh failed")
 
-        out = claude(worker_prompt(n, lane), wt, WORKER_TOOLS if lane != "review" else REVIEW_LANE_TOOLS, d / "worker1.log")
-        (d / "worker1.out").write_text(out, encoding="utf-8")
-        res = last_line(out, "RESULT:")
+        out, res = agent(f"issue-{n}", worker_prompt(n, lane), wt, WORKER_TOOLS if lane != "review" else REVIEW_LANE_TOOLS,
+                         d / "worker1.log", "RESULT:", n, "worker")
+        (d / "worker1.out").write_text(redact(out), encoding="utf-8")
         if not res.startswith("RESULT: DONE"):
             raise Blocked(res or "worker gave no RESULT line")
         if lane == "review":
             gh("issue", "close", str(n), "--comment", "Review report posted above (runner).")
-            set_labels(n, remove=["in-progress"]); return "report posted"
+            set_labels(n, remove=["in-progress"]); return "DONE report posted"
 
         verdict = ""
         for rnd in (1, 2):
             pr = find_pr(n)
             if not pr: raise Blocked("worker said DONE but no open PR for lane/%d" % n)
-            rv = claude(review_prompt(n, pr), wt, READ_TOOLS, d / f"review{rnd}.log")
-            (d / f"review{rnd}.out").write_text(rv, encoding="utf-8")
-            verdict = last_line(rv, "VERDICT:")
+            rv, verdict = agent(f"review-{n}" + ("" if rnd == 1 else f"-{rnd}"), review_prompt(n, pr), wt, READ_TOOLS,
+                                d / f"review{rnd}.log", "VERDICT:", n, "reviewer")
+            (d / f"review{rnd}.out").write_text(redact(rv), encoding="utf-8")
             if verdict.startswith("VERDICT: PASS"):
                 break
             if not verdict.startswith("VERDICT: FIX"):
                 raise Blocked(verdict or "reviewer gave no VERDICT line")
             if rnd == 2:
-                block(n, "reviewer asked for fixes twice; needs a human", log, human=True); return "blocked (review x2)"
-            out = claude(worker_prompt(n, lane, rv), wt, WORKER_TOOLS, d / "worker2.log")
-            res = last_line(out, "RESULT:")
+                block(n, "reviewer asked for fixes twice; needs a human", log, human=True); return "BLOCKED: reviewer asked for fixes twice; needs a human"
+            out, res = agent(f"issue-{n}-fix", worker_prompt(n, lane, rv), wt, WORKER_TOOLS, d / "worker2.log", "RESULT:", n, "worker")
             if not res.startswith("RESULT: DONE"):
                 raise Blocked(res or "fix worker gave no RESULT line")
 
@@ -248,11 +323,11 @@ def process_locked(issue):
         gh("issue", "close", str(n), "--comment", f"Merged to {BRANCH}, tests green, {dep}.")
         set_labels(n, remove=["in-progress"])
         run(["git", "worktree", "remove", "--force", str(wt)], cwd=ROOT, log=log)
-        return "done"
+        return f"DONE {dep}"
     except Blocked as e:
-        block(n, str(e), log); return f"blocked ({e})"
+        block(n, str(e), log); return f"BLOCKED: {e}"
     except Exception as e:                      # any crash: never leave the issue in-progress
-        block(n, f"runner error: {e!r}", log); return f"blocked (error {e!r})"
+        block(n, f"runner error: {e!r}", log); return f"BLOCKED: runner error {e!r}"
 
 # ---------- main ----------
 def issue_by_number(n):
@@ -273,6 +348,8 @@ def log_line(line):
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if USE_HERDR and not TERM:        # started from run.cmd / a shell: re-launch inside a herdr terminal and return at once
+        return launch_self()
     if args:   # run.cmd <issue>: run that one issue now (ignores the queue label and the parallel cap)
         n = int(args[0].lstrip("#"))
         issue = issue_by_number(n)
@@ -280,7 +357,9 @@ def main():
             print(f"[dry-run] would run #{n} ({lane_of(issue['labels'])}): {issue['title']}"
                   + ("; core: waits for any running core issue" if lane_of(issue["labels"]) == "core" else "")); return 0
         ensure_labels()
-        log_line(f"{now()} #{n}: {process(issue)}"); return 0
+        res = process(issue)
+        log_line(f"{now()} #{n}: {res}")
+        print(f"ISSUE {n}: {res}"); return 0
     rc, out = gh("issue", "list", "--state", "open", "--limit", "200", "--json", "number,labels,createdAt,updatedAt,title")
     if rc: print("gh failed:", out); return 1
     issues = [{**i, "labels": [l["name"] for l in i["labels"]]} for i in json.loads(out)]
@@ -304,6 +383,7 @@ def main():
         with ThreadPoolExecutor(max_workers=len(chosen)) as ex:
             results = list(ex.map(lambda c: (c["number"], process(c)), chosen))
     log_line(f"{now()} pass: started={len(chosen)} stuck={len(stuck)} " + " ".join(f"#{n}:{r}" for n, r in results))
+    for n, r in results: print(f"ISSUE {n}: {r}")
     return 0
 
 if __name__ == "__main__":
