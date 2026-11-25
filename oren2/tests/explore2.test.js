@@ -113,6 +113,16 @@ const noNikud = s => String(s).replace(/<[^>]+>/g, ' ').split(/[\s\-–.,:;!?()"
   ok(cards === 4, 'space building shows its 4 activities');
   const hScroll = await p.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2);
   ok(!hScroll, 'no horizontal page scroll');
+  // merge option: fewer doors (nature → lab, maps + calendar → world)
+  const p2 = await ctx.newPage(); await p2.goto(L.URL); await L.noCoach(p2);
+  await p2.addStyleTag({ content: CSS }); await p2.addScriptTag({ content: JS });
+  const mg = await p2.evaluate(() => { const T = window.TAL, made = window.EXPLORE2.register(T.building, T.GROUPS, { merge: true });
+    const acts = id => (T.BUILD.find(b => b.id === id) || { acts: [] }).acts.map(a => a.id);
+    return { made, lab: acts('lab'), world: acts('world'), explore: T.GROUPS.find(g => g.id === 'explore').ids, all: window.EXPLORE2.ids().every(id => T.ACT[id] && T.ACT[id].b) }; });
+  ok(JSON.stringify(mg.made) === '["sky","blocks"]' && mg.lab.includes('nat-cycle') && mg.world.includes('map-il') && mg.world.includes('yr-hol') && mg.all && !mg.explore.includes('nature') && mg.explore.includes('sky'),
+    'merge option: nature→lab, maps+calendar→world, new doors only sky+blocks ' + JSON.stringify(mg.made));
+  await p2.evaluate(() => window.TAL.ACT['nat-cycle'].run(() => {})); await sleep(150);
+  ok(await p2.evaluate(() => !!document.querySelector('#sTal .e2card')), 'merged activity runs');
   ok(!errs.length, 'no JS errors ' + errs.slice(0, 5).join(' | '));
   await b.close(); L.finish('explore2-' + L.variant, res);
 })();

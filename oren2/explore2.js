@@ -35,8 +35,8 @@ const PLANETS=[['mercury','כּוֹכַב חַמָּה',6.5],['venus','נֹגַ�
 const PL=k=>PLANETS.find(p=>p.k===k);
 const planetSVG=k=>SV('-30 -30 60 60',pl(k,0,0,PL(k).r));
 const ROWX=[496,456,414,372,306,222,148,80],ROWR=[5,8,8.5,6.5,25,17,12,11.5];
-const planetRow=(names,hi)=>SV('0 0 560 '+(names?150:110),`<rect width="560" height="${names?150:110}" rx="14" fill="#1d2140"/><circle cx="600" cy="55" r="70" fill="#ffcf4d"/>`+
-  PLANETS.map((p,i)=>`<g opacity="${hi&&!hi.includes(p.k)?.3:1}">${pl(p.k,ROWX[i],55,ROWR[i])}${names?`<text x="${ROWX[i]}" y="${i%2?138:112}" class="e2lbl" font-size="16">${p.n}</text>`:''}</g>`).join(''),'e2wide');
+const planetRow=hi=>SV('0 0 560 110',`<rect width="560" height="110" rx="14" fill="#1d2140"/><circle cx="600" cy="55" r="70" fill="#ffcf4d"/>`+
+  PLANETS.map((p,i)=>`<g opacity="${hi&&!hi.includes(p.k)?.3:1}">${pl(p.k,ROWX[i],55,ROWR[i])}</g>`).join(''),'e2wide');
 const EARTH_DN=SV('0 0 400 170',`<rect width="400" height="170" rx="14" fill="#1d2140"/><circle cx="345" cy="85" r="42" fill="#ffcf4d"/><g stroke="#ffcf4d" stroke-width="4" opacity=".55">${[-30,-15,0,15,30].map(d=>`<line x1="290" y1="${85+d}" x2="200" y2="${85+d*1.4}"/>`).join('')}</g>
   ${pl('earth',120,85,62)}<path d="M120 23 A62 62 0 0 0 120 147 Z" fill="rgba(8,12,35,.62)"/><text x="160" y="90" class="e2lbl" font-size="15" fill="#1d2631">☀ יוֹם</text><text x="80" y="90" class="e2lbl" font-size="15" style="fill:#fff;stroke:none">לַיְלָה</text>
   <path d="M75 15 A70 70 0 0 1 170 20" fill="none" stroke="#fff" stroke-width="3" marker-end="url(#e2ar)"/><defs><marker id="e2ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#fff"/></marker></defs>`);
@@ -89,23 +89,23 @@ const CITIES={jer:['יְרוּשָׁלַיִם',[31.78,35.22],[-4,20]],ta:['תֵ
 const SEAS={med:['הַיָּם הַתִּיכוֹן',[32.45,34.18]],kin:['הַכִּנֶּרֶת',[32.8,35.585],[14,-16]],dead:['יָם הַמֶּלַח',[31.42,35.49],[-4,52]],red:['יָם סוּף',[29.35,34.88],[-36,5]]};
 const REGIONS={galil:['הַגָּלִיל',[[33.1,35.11],[33.2,35.6],[32.72,35.55],[32.6,35.3],[32.75,35.12]],[32.95,35.33]],negev:['הַנֶּגֶב',[[31.35,34.25],[31.3,35.3],[30.6,35.2],[29.6,34.99],[29.55,34.9],[30.4,34.45]],[30.6,34.85]]};
 const cityPos=k=>ilP(CITIES[k][1]);
-function ilMap(o={}){const lab=o.labels||[],hit=o.hit||'';const L=(k,n,[x,y],off=[0,0],fs=14)=>lab.includes(k)?`<text x="${x+off[0]}" y="${y+off[1]}" class="e2lbl" font-size="${fs}">${n}</text>`:'';
+function ilMap(o={}){const lab=o.labels||[],hit=o.hit||'';const L=(k,n,[x,y],off=[0,0],fs=16)=>lab.includes(k)?`<text x="${x+off[0]}" y="${y+off[1]}" class="e2lbl" font-size="${fs}">${n}</text>`:'';
   let s=`<defs><linearGradient id="e2land" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8d08d"/><stop offset=".45" stop-color="#cfe0a0"/><stop offset=".6" stop-color="#ead39a"/><stop offset="1" stop-color="#e6c27f"/></linearGradient></defs>
   <rect x="0" y="0" width="204" height="420" fill="url(#e2land)"/>
   <polygon points="0,0 ${pts(MED)} 0,232" fill="#7cc3ea" data-k="med" class="${hit==='sea'?'e2hit':''}"/>
   <polygon points="${pts(GULF)}" fill="#7cc3ea"/>${hit==='sea'?`<rect x="80" y="380" width="40" height="40" fill="transparent" data-k="red" class="e2hit"/><polygon points="${pts(GULF)}" fill="transparent" data-k="red" class="e2hit"/>`:''}
   <polyline points="${pts(JORDAN)}" fill="none" stroke="#5fa8d8" stroke-width="2.5"/><polyline points="${pts(JORDAN2)}" fill="none" stroke="#5fa8d8" stroke-width="2.5"/>
   <polygon points="${pts(DEAD)}" fill="#5fb0d8" stroke="#3a8fc4" stroke-width="1"/><polygon points="${pts(KIN)}" fill="#4aa3e0" stroke="#3a8fc4" stroke-width="1"/>`;
-  if(hit==='sea'){const[dx,dy]=ilP([31.42,35.49]),[kx,ky]=ilP([32.8,35.585]);s+=`<circle cx="${dx}" cy="${dy}" r="22" fill="transparent" data-k="dead" class="e2hit"/><circle cx="${kx}" cy="${ky}" r="17" fill="transparent" data-k="kin" class="e2hit"/>`;}
+  if(hit==='sea'){const[dx,dy]=ilP([31.42,35.49]),[kx,ky]=ilP([32.8,35.585]);s+=`<circle cx="${dx}" cy="${dy}" r="24" fill="transparent" data-k="dead" class="e2hit"/><circle cx="${kx}" cy="${ky}" r="22" fill="transparent" data-k="kin" class="e2hit"/>`;}
   if(hit==='region')for(const k in REGIONS)s+=`<polygon points="${pts(REGIONS[k][1])}" fill="transparent" stroke="${lab.includes(k)?'#6b4423':'none'}" stroke-dasharray="4 3" data-k="${k}" class="e2hit"/>`;
-  for(const k in CITIES){const [x,y]=cityPos(k);s+=`<circle cx="${x}" cy="${y}" r="4.5" fill="#e4572e" stroke="#fff" stroke-width="2"/>${hit==='city'?`<circle cx="${x}" cy="${y}" r="15" fill="transparent" data-k="${k}" class="e2hit"/>`:''}`;}
+  for(const k in CITIES){const [x,y]=cityPos(k);s+=`<circle cx="${x}" cy="${y}" r="4.5" fill="#e4572e" stroke="#fff" stroke-width="2"/>${hit==='city'?`<circle cx="${x}" cy="${y}" r="21" fill="transparent" data-k="${k}" class="e2hit"/>`:''}`;}
   s+=`<g class="e2lbls" pointer-events="none">`;
-  for(const k in SEAS){const [x,y]=ilP(SEAS[k][1]);s+=L(k,SEAS[k][0],[x,y],SEAS[k][2],k==='med'?15:13);}
+  for(const k in SEAS){const [x,y]=ilP(SEAS[k][1]);s+=L(k,SEAS[k][0],[x,y],SEAS[k][2],k==='med'?17:16);}
   for(const k in CITIES){const [x,y]=cityPos(k);s+=L(k,CITIES[k][0],[x,y],CITIES[k][2]);}
-  for(const k in REGIONS){const [x,y]=ilP(REGIONS[k][2]);s+=L(k,REGIONS[k][0],[x,y],[0,0],15);}
-  s+=`</g>`+compass(186,22,13);
+  for(const k in REGIONS){const [x,y]=ilP(REGIONS[k][2]);s+=L(k,REGIONS[k][0],[x,y],[0,0],18);}
+  s+=`</g>`+compass(186,32,14);
   return SV('0 0 204 420',s,'e2il');}
-const compass=(x,y,r)=>`<g pointer-events="none"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1d2631" stroke-width="1.5"/><path d="M${x} ${y-r+2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#e4572e"/><path d="M${x} ${y+r-2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#9aa1a8"/><text x="${x}" y="${y-r-3}" class="e2lbl" font-size="${r*.7}">צָפוֹן</text></g>`;
+const compass=(x,y,r)=>`<g pointer-events="none"><circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1d2631" stroke-width="1.5"/><path d="M${x} ${y-r+2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#e4572e"/><path d="M${x} ${y+r-2} L${x+r*.35} ${y} L${x-r*.35} ${y}Z" fill="#9aa1a8"/><text x="${x}" y="${y-r-3}" class="e2lbl" font-size="${r*1.1}">צָפוֹן</text></g>`;
 
 /* ---------- world map (continents; simplified, equirectangular) ---------- */
 const wP=([la,lo])=>[lo+180,85-la];const wpts=a=>a.map(p=>wP(p).map(v=>+v.toFixed(1)).join(',')).join(' ');
@@ -124,13 +124,13 @@ const CONT={
  australia:['אוֹסְטְרַלְיָה',[[[-11,142.5],[-17,141],[-12.5,136.5],[-12,131],[-14.5,129],[-15,125],[-19,121.5],[-22,114],[-26,113.5],[-32,115.7],[-35,117.5],[-32,126],[-31.5,131],[-35,135.5],[-35,138],[-38,140.5],[-39,146.5],[-37.5,150],[-33,151.5],[-28,153.5],[-24.5,152.5],[-19,146.5],[-14.5,144]],[[-0.8,131],[-1.5,134.5],[-2.5,137.5],[-2.6,141],[-5.5,145.8],[-6.8,147.5],[-10.5,150.5],[-8.5,143.5],[-8,139],[-4,135],[-3.8,132.5]]],[-25,134]],
  antarctica:['אַנְטַארְקְטִיקָה',[[[-90,-180],[-70,-180],[-71,-160],[-74,-140],[-73,-120],[-73,-100],[-71,-80],[-68,-68],[-64,-60],[-63,-57],[-65,-58],[-70,-60],[-73,-60],[-77,-50],[-75,-35],[-71,-15],[-70,0],[-69,20],[-69,40],[-67,55],[-67,70],[-69,75],[-66,90],[-66,110],[-67,130],[-68,150],[-71,165],[-72,170],[-70,180],[-90,180]]],[-75,10]]};
 const CONT_COL={namerica:'#f2a65a',samerica:'#e9c46a',europe:'#8e9fe0',africa:'#e88f6b',asia:'#7cc35f',australia:'#c895e0',antarctica:'#eef3f7'};
-const OCEANS={pacific:['הָאוֹקְיָנוֹס הַשָּׁקֵט',[0,-140]],atlantic:['הָאוֹקְיָנוֹס הָאַטְלַנְטִי',[22,-42]],indian:['הָאוֹקְיָנוֹס הַהֹדִּי',[-20,75]]};
+const OCEANS={pacific:['הָאוֹקְיָנוֹס הַשָּׁקֵט',[0,-140],'הַשָּׁקֵט'],atlantic:['הָאוֹקְיָנוֹס הָאַטְלַנְטִי',[22,-42],'הָאַטְלַנְטִי'],indian:['הָאוֹקְיָנוֹס הַהֹדִּי',[-20,75],'הַהֹדִּי']};
 function worldMap(o={}){const lab=o.labels||[];let s=`<rect width="360" height="165" fill="#8fd0f2"/>`;
   for(const k in CONT){const [n,polys]=CONT[k];s+=`<g data-k="${k}" class="${o.hit?'e2hit':''}" fill="${o.plain?'#c9d6a3':CONT_COL[k]}" stroke="#5c6b73" stroke-width=".5">${polys.map(p=>`<polygon points="${wpts(p)}"/>`).join('')}</g>`;}
   s+=`<polygon points="${wpts([[63,-94],[60,-94],[57,-92.5],[55,-85],[52,-80],[55,-77],[58,-77],[61,-78],[62.5,-82],[64,-87]])}" fill="#8fd0f2"/><ellipse cx="${wP([43.2,34.5])[0]}" cy="${wP([43.2,34.5])[1]}" rx="6.5" ry="2.2" fill="#8fd0f2"/><ellipse cx="${wP([42,50.5])[0]}" cy="${wP([42,50.5])[1]}" rx="2.6" ry="5" fill="#8fd0f2"/>`;
   if(o.il){const [x,y]=wP([31.5,35]);s+=`<circle cx="${x}" cy="${y}" r="2.6" fill="#e4572e" stroke="#fff" stroke-width="1" pointer-events="none"/>`;}
   if(o.mark){const [x,y]=wP(OCEANS[o.mark][1]);s+=`<g pointer-events="none"><circle cx="${x}" cy="${y}" r="9" fill="#ffd166" stroke="#1d2631" stroke-width="1.5"/><text x="${x}" y="${y+4}" class="e2lbl" font-size="11">?</text></g>`;}
-  s+=`<g pointer-events="none">`;for(const k of lab){if(CONT[k]){const [x,y]=wP(CONT[k][2]);s+=`<text x="${x}" y="${y}" class="e2lbl" font-size="9">${CONT[k][0]}</text>`;}if(OCEANS[k]){const [x,y]=wP(OCEANS[k][1]);s+=`<text x="${x}" y="${y}" class="e2lbl e2sea" font-size="8">${OCEANS[k][0]}</text>`;}}
+  s+=`<g pointer-events="none">`;for(const k of lab){if(CONT[k]){const [x,y]=wP(CONT[k][2]);s+=`<text x="${x}" y="${y}" class="e2lbl" font-size="9">${CONT[k][0]}</text>`;}if(OCEANS[k]){const [x,y]=wP(OCEANS[k][1]);s+=`<text x="${x}" y="${y}" class="e2lbl e2sea" font-size="9">${OCEANS[k][2]}</text>`;}}
   s+=`</g>`;return SV('0 0 360 165',s,'e2world');}
 
 /* ---------- neighbourhood map ---------- */
@@ -175,17 +175,20 @@ const gridSVG=(rows,cell=18,col='#3a8fc4')=>{const R=rows.length,C=rows[0].lengt
 const spk=T.spk;
 /* fact cards, one per screen, read aloud with highlighted words; then().
    card = {art, t} */
+/* a card shows one short line; the whole text is spoken (the line lights up, the rest follows) */
+const HEB_PL=x=>x.replace(/[\u0591-\u05C7]/g,'');
+function splitLine(t){const re=/[.!?:,–]/g;let m;while((m=re.exec(t))){const head=t.slice(0,m.index+1),rest=t.slice(m.index+1).trim();if(!rest)break;if(HEB_PL(head).length>=12)return [head.replace(/\s*[,:–]$/,''),rest];}return [t,''];}
 function lesson(o){const cards=o.cards.filter(c=>c);if(!cards.length)return o.then();let i=0;O.setScreen('sTal',o.bg,o.back);const s=$('#sTal');
   const show=()=>{const c=cards[i];T.hudT(o.title,T.progressBar(i,cards.length));O.sayNow=spk(c.t);s.innerHTML='';
-    const card=h('div','prq tqc e2card',`<div class="e2art">${c.art||''}</div><div class="sent">${c.t}</div>`);s.appendChild(card);card.classList.add('flashin');
-    const last=i===cards.length-1;const nx=h('button','bigbtn e2next',ICON.play+`<span>${last?'לַשְּׁאֵלוֹת':'הַמְשֵׁךְ'}</span>`);
+    const [vis,rest]=splitLine(c.t);const card=h('div','prq tqc e2card',`<div class="e2art">${c.art||''}</div><div class="sent">${vis}</div>`);s.appendChild(card);card.classList.add('flashin');
+    const nx=h('button','bigbtn e2next',ICON.play+'<span>הַמְשֵׁךְ</span>');
     nx.onclick=()=>{T.readStop&&T.readStop();sfx.pop(2);i++;if(i<cards.length)show();else{STEP=null;o.then();}};s.appendChild(nx);
-    setTimeout(()=>{const se=card.querySelector('.sent');if(card.isConnected&&se&&T.readEl)T.readEl(se);},D(450));setStep(()=>nx.click());};
+    setTimeout(async()=>{const se=card.querySelector('.sent');if(!card.isConnected||!se)return;if(T.readEl)await T.readEl(se);else O.say(spk(vis));if(rest&&card.isConnected&&cards[i]===c)O.say(spk(rest));},D(450));setStep(()=>nx.click());};
   show();}
 /* question bank → T.quiz. q = {lv, q, a, ds, art, ex, cls} */
 const Q=(lv,q,a,ds,x)=>Object.assign({lv,q,a,ds},x||{});
 function pickQs(bank,L,n){const pool=shuffle(bank.filter(q=>q.lv<=L));pool.sort((a,b)=>(b.lv===L)-(a.lv===L));return pool.slice(0,Math.min(n,pool.length)).sort((a,b)=>a.lv-b.lv);}
-const mkQ=q=>{const opts=shuffle([q.a,...q.ds]);return {pr:`${q.art?`<div class="e2art sm">${q.art}</div>`:''}<div class="qq">${q.q}</div>`,opts:opts.map(x=>q.fmt?q.fmt(x):x),ans:opts.indexOf(q.a),cls:q.cls||'tx',key:q.q+'|'+q.a,explain:q.ex||''};};
+const mkQ=q=>{const opts=shuffle([q.a,...q.ds]);return {pr:`${q.art?`<div class="e2art sm">${q.art}</div>`:''}<div class="qq">${q.q}</div>`,opts:opts.map(x=>q.fmt?q.fmt(x):x),ans:opts.indexOf(q.a),cls:(q.cls||'tx')+' e2o',key:q.q+'|'+q.a,explain:q.ex||''};};
 function runQuiz(o,list){STEP=null;T.quiz({id:o.id,title:o.title,bg:o.bg,back:o.back,n:list.length,gen:i=>typeof list[i]==='function'?list[i]():mkQ(list[i])});}
 /* a lesson + quiz activity: def = {id,name,icon,bg,title,cards:[{lv,art,t}],bank:[Q...],n} */
 function lessonAct(def){return Object.assign({},def,{run:back=>{const L=lvl(def.id),o={id:def.id,title:def.title||def.name,bg:def.bg,back};
@@ -201,7 +204,7 @@ function orderGame(o){let r=0,err=0,gems=0;O.setScreen('sTal',o.bg,o.back);const
           setTimeout(()=>{if(!card.isConnected)return;r++;if(r<o.rounds.length)play();else T.finishAct(o.id,err,o.rounds.reduce((a,x)=>a+x.items.length,0),gems,o.back,()=>o.again(),o.doneTitle);},D(R.ex?2600:1500));}}
       else{err++;sfx.no();b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');}};
     const btns=new Map();shuffle(R.items.slice()).forEach(it=>{const b=h('button','chb e2it',`${it.html}<b>${it.lbl}</b>`);b.onclick=()=>tap(it,b);btns.set(it,b);row.appendChild(b);});
-    s.append(row,ex);setStep(()=>{const it=R.items[k];if(it)btns.get(it).click();});};
+    const n=R.items.length;row.style.setProperty('--cols',n<=3?n:n===4?2:Math.ceil(n/2));s.append(row,ex);setStep(()=>{const it=R.items[k];if(it)btns.get(it).click();});};
   play();}
 
 /* tap the right place on a map; items = [{q, map(html), k, ex}] or plain multiple-choice items {mc:Q} */
@@ -225,7 +228,7 @@ const SKY_SUN=lessonAct({id:'sky-sun',name:'שֶׁמֶשׁ וְיָרֵחַ',ico
   {lv:1,art:EARTH_DN,t:'כַּדּוּר הָאָרֶץ מִסְתּוֹבֵב. הַצַּד שֶׁמּוּל הַשֶּׁמֶשׁ – יוֹם. הַצַּד הַשֵּׁנִי – לַיְלָה.'},{lv:1,art:MOONF,t:'הַיָּרֵחַ מִסְתּוֹבֵב סְבִיב כַּדּוּר הָאָרֶץ. הוּא לֹא מֵאִיר בְּעַצְמוֹ – הַשֶּׁמֶשׁ מְאִירָה אוֹתוֹ.'},
   {lv:2,art:MOONS,t:'בְּכָל לַיְלָה הַיָּרֵחַ נִרְאֶה קְצָת אַחֶרֶת. פַּעַם הוּא דַּק כְּמוֹ בָּנָנָה, וּפַעַם הוּא עִגּוּל מָלֵא.'},{lv:2,art:MOONF,t:'בְּעֵרֶךְ פַּעַם בְּחֹדֶשׁ רוֹאִים יָרֵחַ מָלֵא.'},
   {lv:2,art:SUN,t:'הַשֶּׁמֶשׁ הִיא הַכּוֹכָב הֲכִי קָרוֹב אֵלֵינוּ. אֶת הַכּוֹכָבִים הָאֲחֵרִים רוֹאִים בַּלַּיְלָה.'},
-  {lv:3,art:planetRow(false,['earth']),t:'כַּדּוּר הָאָרֶץ מַקִּיף אֶת הַשֶּׁמֶשׁ. סִבּוּב אֶחָד שָׁלֵם לוֹקֵחַ שָׁנָה.'},{lv:3,art:SUN,t:'אָסוּר לְהִסְתַּכֵּל יָשָׁר אֶל הַשֶּׁמֶשׁ – זֶה מַזִּיק לָעֵינַיִם!'}],
+  {lv:3,art:planetRow(['earth']),t:'כַּדּוּר הָאָרֶץ מַקִּיף אֶת הַשֶּׁמֶשׁ. סִבּוּב אֶחָד שָׁלֵם לוֹקֵחַ שָׁנָה.'},{lv:3,art:SUN,t:'אָסוּר לְהִסְתַּכֵּל יָשָׁר אֶל הַשֶּׁמֶשׁ – זֶה מַזִּיק לָעֵינַיִם!'}],
  bank:[Q(1,'מָה נוֹתֵן לָנוּ אוֹר וְחֹם בַּיּוֹם?','הַשֶּׁמֶשׁ',['הַיָּרֵחַ','הָעֲנָנִים']),Q(1,'הַשֶּׁמֶשׁ הִיא...','כּוֹכָב',['כּוֹכַב לֶכֶת','יָרֵחַ']),Q(1,'מִי הֲכִי גָּדוֹל?','הַשֶּׁמֶשׁ',['כַּדּוּר הָאָרֶץ','הַיָּרֵחַ']),
   Q(1,'לָמָּה יֵשׁ יוֹם וְלַיְלָה?','כַּדּוּר הָאָרֶץ מִסְתּוֹבֵב',['הַשֶּׁמֶשׁ הוֹלֶכֶת לִישֹׁן','הַיָּרֵחַ מַסְתִּיר אֶת הַשֶּׁמֶשׁ'],{art:EARTH_DN}),Q(1,'מִי מִסְתּוֹבֵב סְבִיב כַּדּוּר הָאָרֶץ?','הַיָּרֵחַ',['הַשֶּׁמֶשׁ','כָּל הַכּוֹכָבִים']),
   Q(1,'הַאִם הַיָּרֵחַ מֵאִיר בְּעַצְמוֹ?','לֹא, הַשֶּׁמֶשׁ מְאִירָה אוֹתוֹ',['כֵּן, יֵשׁ בּוֹ מְנוֹרָה','כֵּן, הוּא בּוֹעֵר']),
@@ -236,9 +239,9 @@ const SKY_SUN=lessonAct({id:'sky-sun',name:'שֶׁמֶשׁ וְיָרֵחַ',ico
   Q(3,'כַּמָּה זְמַן לוֹקֵחַ לְכַדּוּר הָאָרֶץ לְהַקִּיף אֶת הַשֶּׁמֶשׁ?','שָׁנָה',['יוֹם','שָׁבוּעַ']),Q(3,'כַּמָּה זְמַן לוֹקֵחַ לְכַדּוּר הָאָרֶץ לְהִסְתּוֹבֵב פַּעַם אַחַת סְבִיב עַצְמוֹ?','יוֹם',['שָׁנָה','שָׁעָה']),
   Q(3,'כְּשֶׁבְּיִשְׂרָאֵל יוֹם, בַּצַּד הַשֵּׁנִי שֶׁל כַּדּוּר הָאָרֶץ...','לַיְלָה',['גַּם יוֹם','תָּמִיד חֹרֶף']),Q(3,'מֻתָּר לְהִסְתַּכֵּל יָשָׁר אֶל הַשֶּׁמֶשׁ?','לֹא, זֶה מַזִּיק לָעֵינַיִם',['כֵּן, כַּמָּה שֶׁרוֹצִים','רַק בַּבֹּקֶר'])]});
 const SKY_PL=lessonAct({id:'sky-planets',name:'כּוֹכְבֵי הַלֶּכֶת',icon:()=>planetSVG('saturn'),bg:'final',skill:'מדע: כוכבי הלכת',
- cards:[{lv:1,art:planetRow(true),t:'סְבִיב הַשֶּׁמֶשׁ מִסְתּוֹבְבִים שְׁמוֹנָה כּוֹכְבֵי לֶכֶת. אֶחָד מֵהֶם הוּא כַּדּוּר הָאָרֶץ – הַבַּיִת שֶׁלָּנוּ!'},
-  {lv:1,art:planetRow(true,['mercury','venus','earth','mars']),t:'הֲכִי קָרוֹב לַשֶּׁמֶשׁ: כּוֹכַב חַמָּה. אַחֲרָיו: נֹגַהּ, כַּדּוּר הָאָרֶץ וּמַאְדִּים.'},{lv:1,art:planetSVG('mars'),t:'לְמַאְדִּים קוֹרְאִים "הַכּוֹכָב הָאָדֹם", כִּי הָאֲדָמָה שֶׁלּוֹ אֲדַמְדַּמָּה.'},
-  {lv:2,art:planetRow(true,['jupiter','saturn','uranus','neptune']),t:'אַחֲרֵי מַאְדִּים בָּאִים הָעֲנָקִים: צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.'},{lv:2,art:planetSVG('jupiter'),t:'צֶדֶק הוּא כּוֹכַב הַלֶּכֶת הֲכִי גָּדוֹל.'},{lv:2,art:planetSVG('saturn'),t:'לְשַׁבְּתַאי יֵשׁ טַבָּעוֹת גְּדוֹלוֹת שֶׁל חֲתִיכוֹת קֶרַח.'},
+ cards:[{lv:1,art:planetRow(),t:'סְבִיב הַשֶּׁמֶשׁ מִסְתּוֹבְבִים שְׁמוֹנָה כּוֹכְבֵי לֶכֶת. אֶחָד מֵהֶם הוּא כַּדּוּר הָאָרֶץ – הַבַּיִת שֶׁלָּנוּ!'},
+  {lv:1,art:planetRow(['mercury','venus','earth','mars']),t:'הֲכִי קָרוֹב לַשֶּׁמֶשׁ: כּוֹכַב חַמָּה. אַחֲרָיו: נֹגַהּ, כַּדּוּר הָאָרֶץ וּמַאְדִּים.'},{lv:1,art:planetSVG('mars'),t:'לְמַאְדִּים קוֹרְאִים "הַכּוֹכָב הָאָדֹם", כִּי הָאֲדָמָה שֶׁלּוֹ אֲדַמְדַּמָּה.'},
+  {lv:2,art:planetRow(['jupiter','saturn','uranus','neptune']),t:'אַחֲרֵי מַאְדִּים בָּאִים הָעֲנָקִים: צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.'},{lv:2,art:planetSVG('jupiter'),t:'צֶדֶק הוּא כּוֹכַב הַלֶּכֶת הֲכִי גָּדוֹל.'},{lv:2,art:planetSVG('saturn'),t:'לְשַׁבְּתַאי יֵשׁ טַבָּעוֹת גְּדוֹלוֹת שֶׁל חֲתִיכוֹת קֶרַח.'},
   {lv:3,art:planetSVG('venus'),t:'נֹגַהּ הוּא כּוֹכַב הַלֶּכֶת הֲכִי חַם. נֶפְטוּן רָחוֹק מְאוֹד מֵהַשֶּׁמֶשׁ, וְשָׁם קַר מְאוֹד.'},{lv:3,art:planetSVG('mercury'),t:'כּוֹכַב חַמָּה הוּא כּוֹכַב הַלֶּכֶת הֲכִי קָטָן.'}],
  bank:[Q(1,'כַּמָּה כּוֹכְבֵי לֶכֶת מִסְתּוֹבְבִים סְבִיב הַשֶּׁמֶשׁ?','8',['3','20']),Q(1,'עַל אֵיזֶה כּוֹכַב לֶכֶת אֲנַחְנוּ גָּרִים?','כַּדּוּר הָאָרֶץ',['מַאְדִּים','צֶדֶק']),
   Q(1,'אֵיזֶה כּוֹכַב לֶכֶת הֲכִי קָרוֹב לַשֶּׁמֶשׁ?','כּוֹכַב חַמָּה',['נֶפְטוּן','צֶדֶק']),Q(1,'לְאֵיזֶה כּוֹכַב לֶכֶת קוֹרְאִים "הַכּוֹכָב הָאָדֹם"?','מַאְדִּים',['נֹגַהּ','אוּרָנוּס']),
@@ -251,7 +254,7 @@ const pItem=p=>({html:`<span class="e2pi">${planetSVG(p.k)}</span>`,lbl:p.n,k:p.
 const SKY_ORD={id:'sky-order',name:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ',icon:()=>planetSVG('earth'),skill:'מדע: סדר כוכבי הלכת',run:function run(back){const L=lvl('sky-order');const all=PLANETS.map(pItem);
   const R=n=>({q:'לְחַץ עַל כּוֹכְבֵי הַלֶּכֶת לְפִי הַסֵּדֶר: מֵהַקָּרוֹב לַשֶּׁמֶשׁ – עַד הָרָחוֹק.',start:`<span class="e2pi">${SUN}</span>`,items:all.slice(0,n),ex:n<8?'כָּל הַכָּבוֹד! אַחֲרֵי מַאְדִּים בָּאִים צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.':'מְעֻלֶּה! זֶה הַסֵּדֶר שֶׁל כָּל שְׁמוֹנַת כּוֹכְבֵי הַלֶּכֶת.'});
   const go=()=>orderGame({id:'sky-order',title:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ',bg:'final',back,again:()=>run(back),rounds:L===1?[R(4)]:L===2?[R(4),R(8)]:[R(8)]});
-  if(L===1)lesson({title:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ',bg:'final',back,cards:[{art:planetRow(true),t:'כָּךְ מְסֻדָּרִים כּוֹכְבֵי הַלֶּכֶת: כּוֹכַב חַמָּה, נֹגַהּ, כַּדּוּר הָאָרֶץ, מַאְדִּים, צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.'}],then:go});else go();}};
+  if(L===1)lesson({title:'בַּסֵּדֶר מֵהַשֶּׁמֶשׁ',bg:'final',back,cards:[{art:planetRow(),t:'כָּךְ מְסֻדָּרִים כּוֹכְבֵי הַלֶּכֶת. מֵהַשֶּׁמֶשׁ וְהָלְאָה: כּוֹכַב חַמָּה, נֹגַהּ, כַּדּוּר הָאָרֶץ, מַאְדִּים, צֶדֶק, שַׁבְּתַאי, אוּרָנוּס וְנֶפְטוּן.'}],then:go});else go();}};
 const SKY_AST=lessonAct({id:'sky-astro',name:'אַסְטְרוֹנָאוּטִים',icon:()=>ASTRO,bg:'final',skill:'מדע: חלל ואסטרונאוטים',
  cards:[{lv:1,art:ROCKET,t:'אַסְטְרוֹנָאוּטִים הֵם אֲנָשִׁים שֶׁטָּסִים לֶחָלָל בַּחֲלָלִית.'},{lv:1,art:ASTRO,t:'בֶּחָלָל אֵין אֲוִיר לִנְשִׁימָה, לָכֵן לוֹבְשִׁים חֲלִיפַת חָלָל עִם קַסְדָּה.'},{lv:1,art:ASTRO,t:'בְּתוֹךְ הַחֲלָלִית הָאַסְטְרוֹנָאוּטִים מְרַחֲפִים, כְּאִלּוּ אֵין לָהֶם מִשְׁקָל.'},
   {lv:2,art:MOONF,t:'לִפְנֵי יוֹתֵר מֵחֲמִשִּׁים שָׁנָה אֲנָשִׁים נָחֲתוּ עַל הַיָּרֵחַ וְהָלְכוּ עָלָיו.'},{lv:2,art:ROCKET,t:'בְּתַחֲנַת הֶחָלָל אַסְטְרוֹנָאוּטִים גָּרִים וְעוֹבְדִים כַּמָּה חֳדָשִׁים.'},
@@ -330,7 +333,7 @@ const MAP_IL={id:'map-il',name:'מַפַּת יִשְׂרָאֵל',icon:()=>SV('
 const MAP_WORLD={id:'map-world',name:'יַבָּשׁוֹת וְאוֹקְיָנוֹסִים',icon:()=>em('🌍'),skill:'גאוגרפיה: יבשות ואוקיינוסים',
  run:function run(back){const L=lvl('map-world');const o={id:'map-world',title:'יַבָּשׁוֹת וְאוֹקְיָנוֹסִים',bg:'sea',back,again:()=>run(back)};
   const tq=k=>({q:`לְחַץ עַל ${CONT[k][0]}`,k,map:worldMap({hit:1}),reveal:worldMap({hit:1,labels:[k]})});
-  const oq=k=>{const opts=shuffle(Object.keys(OCEANS));return {q:'אֵיזֶה אוֹקְיָנוֹס מְסֻמָּן בְּסִימַן שְׁאֵלָה?',k,map:`<div class="e2ocean">${worldMap({mark:k})}<div class="chs">${opts.map(x=>`<button class="chb tx e2hit" data-k="${x}">${OCEANS[x][0]}</button>`).join('')}</div></div>`};};
+  const oq=k=>{const opts=shuffle(Object.keys(OCEANS));return {q:'אֵיזֶה אוֹקְיָנוֹס מְסֻמָּן בְּסִימַן שְׁאֵלָה?',k,map:`<div class="e2ocean">${worldMap({mark:k})}<div class="chs">${opts.map(x=>`<button class="chb tx e2o e2hit" data-k="${x}">${OCEANS[x][0]}</button>`).join('')}</div></div>`};};
   const items=L===1?['asia','africa','europe'].map(tq).concat([{...tq('asia'),q:'יִשְׂרָאֵל מְסֻמֶּנֶת בִּנְקֻדָּה אֲדֻמָּה. לְחַץ עַל הַיַּבֶּשֶׁת שֶׁלָּהּ.',map:worldMap({hit:1,il:1}),reveal:worldMap({hit:1,il:1,labels:['asia']}),ex:'יִשְׂרָאֵל נִמְצֵאת בְּאַסְיָה.'}])
    :L===2?shuffle(['namerica','samerica','australia','antarctica','europe','africa']).map(tq):shuffle(['pacific','atlantic','indian']).map(oq).concat(shuffle(Object.keys(CONT)).slice(0,3).map(tq));
   const cards=L===1?[{art:worldMap({labels:Object.keys(CONT)}),t:'בָּעוֹלָם יֵשׁ שֶׁבַע יַבָּשׁוֹת – חֲלָקִים גְּדוֹלִים שֶׁל אֲדָמָה.'},{art:worldMap({il:1,labels:['asia','africa','europe']}),t:'יִשְׂרָאֵל נִמְצֵאת בְּאַסְיָה, קָרוֹב לְאַפְרִיקָה וּלְאֵירוֹפָּה.'},{art:worldMap({labels:Object.keys(OCEANS)}),t:'רֹב כַּדּוּר הָאָרֶץ מְכֻסֶּה בְּמַיִם: אוֹקְיָנוֹסִים גְּדוֹלִים.'}]
@@ -478,7 +481,7 @@ function freeBuild(back){const E=T.S();E.e2=E.e2||{};let cells=(E.e2.fb||'').spl
   const board=h('div','e2free');const pal=h('div','e2pal');s.append(h('div','lsent','לוֹחֲצִים עַל הָרִצְפָּה אוֹ עַל מִגְדָּל כְּדֵי לִבְנוֹת.'),board,pal);
   const cols=()=>Array.from({length:FD},(_,z)=>Array.from({length:FW},(_,x)=>cells[z*FW+x]));
   const draw=()=>{board.innerHTML=cab(cols(),{s:40,floor:true,maxH:FH});};
-  const pb=()=>{pal.innerHTML='';['R','B','Y','G','K','W'].forEach(c=>{const b=h('button','e2pc'+(!erase&&c===sel?' on':''),'');b.style.setProperty('--c',BC[c]);b.setAttribute('aria-label',BN[c]);b.onclick=()=>{sel=c;erase=false;sfx.pop(1);pb();};pal.appendChild(b);});
+  const pb=()=>{pal.innerHTML='';['R','B','Y','G','K'].forEach(c=>{const b=h('button','e2pc'+(!erase&&c===sel?' on':''),'');b.style.setProperty('--c',BC[c]);b.setAttribute('aria-label',BN[c]);b.onclick=()=>{sel=c;erase=false;sfx.pop(1);pb();};pal.appendChild(b);});
     const er=h('button','e2pc er'+(erase?' on':''),'🧽');er.setAttribute('aria-label','מחק');er.onclick=()=>{erase=true;sfx.pop(1);pb();};pal.appendChild(er);};
   board.onclick=e=>{const t=e.target.closest('.e2cell');if(!t)return;const i=(+t.dataset.z)*FW+(+t.dataset.x);
     if(erase){if(!cells[i])return;cells[i]=cells[i].slice(0,-1);sfx.pop(1);}else{if(cells[i].length>=FH){sfx.no();return;}cells[i]+=sel;sfx.pop(Math.min(5,cells[i].length+1));placed++;}
@@ -498,8 +501,14 @@ const BLD=[
 const GROUP_OF={sky:'explore',nature:'explore',maps:'explore',year:'readg',blocks:'create'};
 const SKILLS={};BLD.forEach(b=>b.acts.forEach(a=>{SKILLS[a.id]=a.skill;}));
 let done=false;
-function register(buildingFn,groups){if(done)return;done=true;const bf=buildingFn||T.building;BLD.forEach(b=>bf(b));
-  if(groups)for(const bid in GROUP_OF){const g=groups.find(x=>x.id===GROUP_OF[bid]);if(g&&!g.ids.includes(bid))g.ids.push(bid);}return BLD.map(b=>b.id);}
+/* register(T.building, T.GROUPS)                 → 5 new buildings (sky, nature, maps, year → their groups; blocks → create)
+   register(T.building, T.GROUPS, {merge:true})   → fewer doors: nature's activities join 'lab', maps+year join 'world',
+                                                    only sky (explore) and blocks (create) are new buildings */
+const MERGE_INTO={nature:'lab',maps:'world',year:'world'};
+function register(buildingFn,groups,opt){if(done)return;done=true;const bf=buildingFn||T.building;const made=[];
+  BLD.forEach(b=>{const host=opt&&opt.merge&&MERGE_INTO[b.id]&&(T.BUILD||[]).find(x=>x.id===MERGE_INTO[b.id]);
+    if(host){b.acts.forEach(a=>{host.acts.push(a);a.b=host;if(T.ACT)T.ACT[a.id]=a;});}else{bf(b);made.push(b.id);}});
+  if(groups)made.forEach(bid=>{const g=groups.find(x=>x.id===GROUP_OF[bid]);if(g&&!g.ids.includes(bid))g.ids.push(bid);});return made;}
 /* everything a child sees as text, for the nikud check in tests */
 function kidTexts(){const out=[];const add=s=>{if(s)out.push(String(s));};
   BLD.forEach(b=>{add(b.name);add(b.blurb);b.acts.forEach(a=>{add(a.name);(a.cards||[]).forEach(c=>add(c.t));(a.bank||[]).forEach(q=>{add(q.q);add(q.a);q.ds.forEach(add);add(q.ex);});});});

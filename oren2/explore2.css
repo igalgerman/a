@@ -91,3 +91,15 @@ circle.e2hit.e2show,rect.e2hit.e2show{fill:rgba(255,209,102,.6)!important;stroke
   .e2fl{font-size:24px}
 }
 .e2start .e2svg{width:44px;height:44px}
+/* audit: readable map labels, balanced options, ≥44px taps */
+.e2world .e2lbl{font-size:10px}.e2world .e2sea{font-size:10px}
+.e2items{display:grid;grid-template-columns:repeat(var(--cols,3),auto);justify-content:center}
+.chs:has(> .e2o){flex-wrap:nowrap}
+@media (max-width:760px){
+  .e2world .e2lbl,.e2world .e2sea{font-size:17px}
+  .chs:has(> .chb.tx.e2o){flex-direction:column;align-items:stretch;width:min(340px,100%)}
+  .e2slot b,.e2it b{font-size:16px}
+  .chb.e2it{min-width:64px;padding:6px 4px}
+  .e2bgrid{--bc:44px}
+  .e2pc{width:44px;height:44px}.e2pal{gap:8px}
+}
