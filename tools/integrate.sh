@@ -17,4 +17,5 @@ git add $BUILT
 (cd oren2 && JOBS="${JOBS:-4}" bash tests/run.sh) || { echo "TESTS FAILED: merge left uncommitted; rerun a flaky suite alone, or 'git merge --abort'"; exit 4; }
 git commit -qm "Integrate $lane
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git push -q origin "$into" && echo "integrated $lane into $into"
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git push -q origin "$into" && echo "integrated $lane into $into" || { echo "commit/push failed"; exit 5; }
+n="${lane#lane/}"; if [[ "$n" =~ ^[0-9]+$ ]]; then gh issue close "$n" --comment "Integrated into $into ($(git rev-parse --short HEAD)), all tests green." && echo "closed #$n"; fi

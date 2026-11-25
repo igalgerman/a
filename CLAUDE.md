@@ -20,3 +20,20 @@
 - Publish: the Claude artifact from `oren2/index.html`; the website via `oren2/cf/tools/deploy.sh` (Cloudflare Pages, project `oren-game`).
 - Voice: after pregen, run `node oren2/cf/tools/voicecheck.js` so new sentences are pronunciation-checked (parent picks spellings at https://oren-game.pages.dev/api/tts/listen; results at /api/tts/review).
 - Game voice is fixed: Google he-IL-Chirp3-HD-Kore at 0.9. After adding/changing missions or kid text, run `node oren2/cf/tools/pregen.js` after deploy so all audio exists in advance (resumable, ~700 new sentences/day).
+
+## Parallel work
+Several Claude sessions may work at once. Read `FLOW.md` (rules) — the owner's short guide is `HOWTO.md`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues of igalgerman/a (`gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) plus lane labels `core` / `pack` / `review`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root (created lazily). See `docs/agents/domain.md`.
