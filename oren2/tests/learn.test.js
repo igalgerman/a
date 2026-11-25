@@ -224,6 +224,33 @@ let rr = seeded(7); C.setRandom(seeded(11));
   const big = fresh(); for (let i = 0; i < 220; i++) K.record(big, 's' + i, true, true, 1000); ok(Object.keys(big.k).length <= 150 && JSON.stringify(big).length < 25000, 'state is capped (≤150 skills, small JSON)', JSON.stringify(big).length);
   ok(K.done(fresh(), 'nothing') === null, 'done without a round is harmless');
 }
+{ // finite banks: no repeats, wrong items back on schedule, recycling oldest first, runway
+  C.setRandom(seeded(21)); const st = fresh(); const items = Array.from({ length: 20 }, (_, i) => ({ k: 'story' + i, lv: i < 12 ? 1 : 2 }));
+  const got = []; for (let i = 0; i < 12; i++) { const r = K.pickItem(st, 'st', items, { lv: 1 }); got.push(r.item.k); K.seen(st, 'st', r.item.k, true); }
+  ok(new Set(got).size === 12 && got.every(k => +k.slice(5) < 12), 'bank: every item at his level once, no repeats', got.join(','));
+  const nx = K.pickItem(st, 'st', items, { lv: 1 }); ok(nx.why === 'recycle' && nx.item.k === got[0], 'bank exhausted at his level → the oldest seen comes back first', JSON.stringify(nx));
+  const st2 = fresh(); K.seen(st2, 'b', 'x1', false); K.seen(st2, 'b', 'x2', true); const its = ['x1', 'x2', 'x3', 'x4'];
+  ok(K.pickItem(st2, 'b', its).item.k !== 'x1', 'a wrong item does not come back the same day');
+  const back = []; for (const gap of [1, 2, 4, 8]) { const start = day; let n = 0; while (K.pickItem(st2, 'b', its).item.k !== 'x1' || K.pickItem(st2, 'b', its).why !== 'review') { day++; n++; if (n > 20) break; } back.push(day - start); K.seen(st2, 'b', 'x1', true); }
+  ok(back.join(',') === '1,2,4,8', 'a wrong item comes back after 1, 2, 4, 8 days', back.join(','));
+  ok(!(st2.wr && st2.wr.b && st2.wr.b[C.hash('x1')]), 'after 4 good reviews it leaves the review list');
+  const st3 = fresh(); K.seen(st3, 'b', 'h1', true, true); day++; ok(K.pickItem(st3, 'b', ['h1', 'h2']).item.k === 'h1', 'a helped item counts like a wrong one');
+  // mastered: occasional spot review of a seen item
+  const st4 = fresh(); for (let i = 0; i < 5; i++) K.seen(st4, 'm', 'm' + i, true); const big = Array.from({ length: 50 }, (_, i) => 'm' + i); let spot = 0;
+  for (let i = 0; i < 400; i++) if (K.pickItem(st4, 'm', big, { mastered: true }).why === 'spot') spot++; ok(spot / 400 > .08 && spot / 400 < .22, 'mastered skill: ~15% spot reviews of seen items', (spot / 400).toFixed(2));
+  ok([...Array(100)].every(() => K.pickItem(st4, 'm', big).why === 'new'), 'not mastered: never repeats while unseen items remain');
+  // runway: pace from the last 14 days
+  const st5 = fresh(); const bank = Array.from({ length: 30 }, (_, i) => ({ k: 's' + i, lv: 2 }));
+  for (let d = 0; d < 7; d++) { for (let j = 0; j < 3; j++) { const r = K.pickItem(st5, 'sto', bank, { lv: 2 }); K.seen(st5, 'sto', r.item.k, true); } day++; }
+  const rw = K.runwayOf(st5, 'sto', bank, { lv: 2 }); ok(rw.left === 9 && Math.abs(rw.weekly - 10.5) < .01 && rw.low, 'runway: 9 left at 10.5 a week → running low (<2 weeks)', JSON.stringify(rw));
+  const rw2 = K.runwayOf(st5, 'sto', bank.concat(Array.from({ length: 40 }, (_, i) => ({ k: 'n' + i, lv: 2 }))), { lv: 2 }); ok(!rw2.low && rw2.left === 49, 'runway: plenty left → not flagged');
+  ok(K.runwayOf(fresh(), 'z', bank, { lv: 2 }).low === false, 'runway: unused bank is not flagged');
+  // merge of seen lists
+  const a = fresh(), b = fresh(); K.seen(a, 'q', 'a1', true); K.seen(b, 'q', 'b1', true); K.seen(b, 'q', 'b2', false); const m = C.merge(JSON.parse(JSON.stringify(a)), b);
+  ok(m.sn.q.split(',').length === 3 && m.wr.q[C.hash('b2')] && C.merge(JSON.parse(JSON.stringify(m)), m).sn.q === m.sn.q, 'merge: seen lists unite, wrong items kept');
+  const cap = fresh(); for (let i = 0; i < 400; i++) K.seen(cap, 'c', 'i' + i, true); ok(cap.sn.c.split(',').length === 300, 'seen list capped at 300 per bank');
+  ok(C.PW.length >= 15 && new Set(C.PW.map(x => x.k)).size === C.PW.length, 'writing tasks are a keyed finite bank');
+}
 { // stateless API (Node default: math drills)
   C.bind({ state: null }); const s = C.state(); C.record('mm-ten', true, true, 2000); ok(s.k['mm-ten'] && C.done('mm-ten').lv >= 1, 'stateless API works on the bound state');
   const p = C.plan('math', 3); ok(Array.isArray(p) && p.length >= 1 && p.every(x => x === 'ln-math'), 'LEARN.plan returns step ids (Node: drills only → one ln-math)', p.join(','));
@@ -287,6 +314,11 @@ async function ui(variant) {
   await p.locator('#sTal .lnpaper .bigbtn').click(); await sleep(200); await shot(p, '12-selfcheck'); await p.locator('#sTal .lnpaper .btnrow .bigbtn').last().click(); await sleep(300);
   ok(await p.evaluate(() => !document.getElementById('ov').hidden), V + 'writing: self-check, then "show a parent"');
   await p.evaluate(() => { document.getElementById('ov').hidden = true; });
+  // runway: a small bank that is almost used up shows one parent line and "נשארו X חדשים"
+  const rwy = await p.evaluate(() => { const C = window.LEARN; C.bank('test-st', { name: 'סיפורים', acts: ['ln-math'], items: () => Array.from({ length: 6 }, (_, i) => ({ k: 't' + i, lv: 2 })), level: () => 2 });
+    const before = C.runwayLine(); for (let i = 0; i < 4; i++) C.seen('test-st', 't' + i, true); return { before, line: C.runwayLine(), of: C.runwayOf('ln-math'), all: C.runwayAll().map(r => r.bank) }; });
+  ok(rwy.before === '' && /📦 כמעט נגמר תוכן: סיפורים ברמה 2 \(נשארו 2\) — כדאי להוסיף/.test(rwy.line) && rwy.of === 'נשארו 2 חדשים', V + 'runway: one parent line only when relevant + "נשארו X חדשים"', JSON.stringify(rwy));
+  ok(rwy.all.includes('pp-write') && rwy.all.includes('together'), V + 'finite banks of the game are registered', rwy.all.join(','));
   // parent block + skills controls
   await p.evaluate(() => { const O = window.OREN, s = document.getElementById('sTal'); O.setScreen('sTal', 'valley', O.showMap); s.innerHTML = ''; const box = document.createElement('div'); box.className = 'ppanel'; box.style.cssText = 'background:#fff;padding:12px;max-width:760px;margin:auto;direction:rtl;font-size:15px'; s.appendChild(box);
     const sec = (b, t, html) => { const d = document.createElement('section'); d.className = 'psec'; d.innerHTML = `<h3>${t}</h3>` + (html || ''); b.appendChild(d); return d; };

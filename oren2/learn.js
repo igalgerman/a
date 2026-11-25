@@ -107,7 +107,7 @@ function merge(dst,src){dst=ensure(dst);if(!src||typeof src!=='object')return ds
   for(const d in src.pl)dst.pl[d]=Math.max(dst.pl[d]|0,src.pl[d]|0);
   if(newer){dst.pf=src.pf;dst.pt=src.pt;}
   if(src.pp&&(!dst.pp||(src.pp.d|0)>(dst.pp.d|0)))dst.pp=src.pp;
-  prune(dst);return dst;}
+  mergeSeen(dst,src);prune(dst);return dst;}
 
 /* ---------- parent summary (plain text) ---------- */
 function summary(st,names,t){st=ensure(st);t=t==null?today():t;const rows=Object.keys(st.k).filter(sk=>st.k[sk].n>=3).map(sk=>{const k=st.k[sk];return {skill:sk,name:(names&&names(sk))||sk,acc:Math.round((acc(k.h)||0)*100),lv:k.l,zone:zone(k,t),due:isDue(k,t),n:k.n,lk:!!k.lk};});
@@ -294,16 +294,17 @@ const PM={
  groups:lv=>{const k=ri(2,lv>=3?5:3),q=ri(2,lv>=3?6:4);return {kind:'groups',p:{n:k*q,k},v:q,task:`צַיֵּר ${B(k*q)} כּוֹכָבִים, וְהַקֵּף קְבוּצוֹת שֶׁל ${B(k)}. כַּמָּה קְבוּצוֹת יֵשׁ?`,sol:`<div class="lngr">${Array(q).fill(`<span>${'★'.repeat(k)}</span>`).join('')}</div><div>${L(`${k*q} : ${k} = ${q}`)}</div>`};},
  line:lv=>{const j=ri(2,lv>=3?5:4),n=ri(2,4),s=lv>=4?ri(1,10):0;const end=s+j*n;return {kind:'line',p:{s,j,n},v:end,task:`צַיֵּר קַו מִסְפָּרִים מִ-${B(0)} עַד ${B(Math.ceil((end+2)/5)*5)}. הַתְחֵל בְּ-${B(s)} וּקְפֹץ ${count(n,'jump')} שֶׁל ${B(j)}. אֵיפֹה נָחַתָּ?`,sol:`<div>${L(Array.from({length:n+1},(_,i)=>s+i*j).join(' → '))}</div>`};}
 };
-const PW=[
- ()=>{const s=pk(['הַכַּדּוּר עָף גָּבוֹהַּ.','אֲנִי שׂוֹחֶה בַּבְּרֵכָה.','הַחֲלָלִית טָסָה לַיָּרֵחַ.','אֲנִי מְנַגֵּן בִּפְסַנְתֵּר.','בָּנִיתִי מִגְדָּל גָּבוֹהַּ.','קָלַעְתִּי סַל!']);return {kind:'copy',task:'הַעְתֵּק לַדַּף אֶת הַמִּשְׁפָּט (בְּלִי נִקּוּד):',big:s,check:['רֶוַח בֵּין מִלָּה לְמִלָּה','סִימָן בַּסּוֹף (. אוֹ !)','כָּל הָאוֹתִיּוֹת עַל הַשּׁוּרָה']};},
- ()=>{const [l,ws]=pk([['מ','מַיִם, מִטָּה, מְכוֹנִית'],['ש','שֶׁמֶשׁ, שִׁיר, שָׁעוֹן'],['ב','בַּיִת, בַּלּוֹן, בָּנָנָה'],['כ','כַּדּוּר, כֶּלֶב, כּוֹכָב'],['ת','תַּפּוּחַ, תֹּף, תִּיק'],['ר','רַכֶּבֶת, רֶגֶל, רוֹבּוֹט'],['ל','לֵב, לֶחֶם, לִימוֹן'],['ד','דָּג, דֶּלֶת, דְּבוֹרָה']]);
-   return {kind:'words',task:`כְּתֹב עַל הַדַּף ${count(3,'word')} שֶׁמַּתְחִילוֹת בָּאוֹת:`,big:l,check:[`כָּל מִלָּה מַתְחִילָה בְּ-${l}`,'רֶוַח בֵּין הַמִּלִּים'],eg:ws};},
- ()=>{const t=pk(['כְּתֹב מִשְׁפָּט אֶחָד עַל הַסְּפּוֹרְט שֶׁאַתָּה הֲכִי אוֹהֵב.','כְּתֹב מִשְׁפָּט אֶחָד: מָה הָיִיתָ לוֹקֵחַ אִתְּךָ לֶחָלָל?','צַיֵּר מִגְדָּל, וּכְתֹב מִתַּחְתָּיו כַּמָּה קוֹמוֹת יֵשׁ בּוֹ.','כְּתֹב אֶת הַשֵּׁם שֶׁלְּךָ וְאֶת הַשֵּׁם שֶׁל חָבֵר טוֹב.','צַיֵּר אֶת הַמִּשְׂחָק שֶׁאַתָּה אוֹהֵב, וּכְתֹב לוֹ שֵׁם.']);
-   return {kind:'free',task:t,check:['רֶוַח בֵּין מִלָּה לְמִלָּה','סִימָן בַּסּוֹף']};}];
+/* writing tasks: a finite bank (each item has a key; the game picks unseen ones first) */
+const PW_COPY=['הַכַּדּוּר עָף גָּבוֹהַּ.','אֲנִי שׂוֹחֶה בַּבְּרֵכָה.','הַחֲלָלִית טָסָה לַיָּרֵחַ.','אֲנִי מְנַגֵּן בִּפְסַנְתֵּר.','בָּנִיתִי מִגְדָּל גָּבוֹהַּ.','קָלַעְתִּי סַל!'];
+const PW_LET=[['מ','מַיִם, מִטָּה, מְכוֹנִית'],['ש','שֶׁמֶשׁ, שִׁיר, שָׁעוֹן'],['ב','בַּיִת, בַּלּוֹן, בָּנָנָה'],['כ','כַּדּוּר, כֶּלֶב, כּוֹכָב'],['ת','תַּפּוּחַ, תֹּף, תִּיק'],['ר','רַכֶּבֶת, רֶגֶל, רוֹבּוֹט'],['ל','לֵב, לֶחֶם, לִימוֹן'],['ד','דָּג, דֶּלֶת, דְּבוֹרָה']];
+const PW_FREE=['כְּתֹב מִשְׁפָּט אֶחָד עַל הַסְּפּוֹרְט שֶׁאַתָּה הֲכִי אוֹהֵב.','כְּתֹב מִשְׁפָּט אֶחָד: מָה הָיִיתָ לוֹקֵחַ אִתְּךָ לֶחָלָל?','צַיֵּר מִגְדָּל, וּכְתֹב מִתַּחְתָּיו כַּמָּה קוֹמוֹת יֵשׁ בּוֹ.','כְּתֹב אֶת הַשֵּׁם שֶׁלְּךָ וְאֶת הַשֵּׁם שֶׁל חָבֵר טוֹב.','צַיֵּר אֶת הַמִּשְׂחָק שֶׁאַתָּה אוֹהֵב, וּכְתֹב לוֹ שֵׁם.'];
+const PW=[...PW_COPY.map(s=>({k:'c'+s,kind:'copy',task:'הַעְתֵּק לַדַּף אֶת הַמִּשְׁפָּט (בְּלִי נִקּוּד):',big:s,check:['רֶוַח בֵּין מִלָּה לְמִלָּה','סִימָן בַּסּוֹף (. אוֹ !)','כָּל הָאוֹתִיּוֹת עַל הַשּׁוּרָה']})),
+  ...PW_LET.map(([l,ws])=>({k:'l'+l,kind:'words',task:`כְּתֹב עַל הַדַּף ${count(3,'word')} שֶׁמַּתְחִילוֹת בָּאוֹת:`,big:l,check:[`כָּל מִלָּה מַתְחִילָה בְּ-${l}`,'רֶוַח בֵּין הַמִּלִּים'],eg:ws})),
+  ...PW_FREE.map(t=>({k:'f'+t,kind:'free',task:t,check:['רֶוַח בֵּין מִלָּה לְמִלָּה','סִימָן בַּסּוֹף']}))];
 function colSol(a,b,op){const v=op==='+'?a+b:a-b;/* op: '+' or '−' */const w=String(Math.max(a,b,v)).length+2;const r=x=>String(x).padStart(w,' ');
   return `<pre class="lncol" dir="ltr">${r(a)}\n${op}${r(b).slice(1)}\n${'─'.repeat(w)}\n${r(v)}</pre>`;}
 const dots=(r,c)=>`<div class="lndots">${Array(r).fill(`<div>${'●'.repeat(c)}</div>`).join('')}</div>`;
-function paperQ(kind,lv){if(kind==='write'){const t=pk(PW)();return Object.assign({sk:'pp-write',lv,self:true},t);}
+function paperQ(kind,lv,item){if(kind==='write'){const t=item||pk(PW);return Object.assign({sk:'pp-write',lv,self:true},t);}
   const ks=lv<=1?['calc','draw','groups']:lv===2?['calc','draw','groups','line']:['calc','calc','draw','groups','line'];const q=PM[pk(ks)](lv);return Object.assign({sk:'pp-math',lv},q);}
 
 /* one question of any engine skill */
@@ -315,13 +316,50 @@ const MATH_LADDER=[['mm-ten',1],['mm-dbl',1],['mm-skip',1],['mm-ten',2],['mm-dbl
 const KID={'mm-ten':'מַשְׁלִימִים לְ-10','mm-dbl':'כְּפוּלִים','mm-comp':'מְעַגְּלִים וּמְתַקְּנִים','mm-skip':'סְפִירָה בְּדִלּוּגִים','mm-pv':'לוּחַ הַמֵּאָה','wp':'סִפּוּרֵי חֶשְׁבּוֹן','ch':'חִידוֹת לָאַלּוּפִים','mix':'חֲזָרָה מְעֻרְבֶּבֶת','pp-math':'דַּף וְעִפָּרוֹן','pp-write':'דַּף וְעִפָּרוֹן'};
 const PAR={'mm-ten':'השלמה ל-10 ולעשרת','mm-dbl':'כפולים וכמעט כפולים','mm-comp':'עיגול ותיקון (+9, +19, −9)','mm-skip':'ספירה בדילוגים','mm-pv':'קפיצות בלוח המאה','wp':'בעיות מילוליות','ch':'אתגרי חשיבה','pp-math':'דף ועיפרון: חשבון','pp-write':'דף ועיפרון: כתיבה'};
 
+/* ---------- finite banks: what he has seen, wrong items back on schedule, runway ----------
+   st.sn[bank] = "h,h,…" seen item ids, oldest first (capped) · st.wr[bank][h] = [due day, step] wrong/helped items (1,2,4,8 days)
+   st.bu[bank][day] = new items seen that day (last 21 days) — the pace for the runway */
+const SN_CAP=300,WR_CAP=40;
+const hash=k=>{let x=0x811c9dc5;const s=String(k);for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,0x01000193)>>>0;}return x.toString(36);};
+const snList=(st,b)=>{const v=(st.sn||{})[b];return v?v.split(','):[];};
+function seen(st,bank,key,ok,helped){st=ensure(st);st.sn=st.sn||{};st.wr=st.wr||{};st.bu=st.bu||{};const h=hash(key),t=today();
+  const l=snList(st,bank);const at=l.indexOf(h);const isNew=at<0;if(!isNew)l.splice(at,1);l.push(h);st.sn[bank]=l.slice(-SN_CAP).join(',');
+  if(isNew){const u=st.bu[bank]||(st.bu[bank]={});u[t]=(u[t]|0)+1;for(const d in u)if(+d<t-21)delete u[d];}
+  const w=st.wr[bank]||(st.wr[bank]={});
+  if(!ok||helped){w[h]=[t+IV[0],0];}
+  else if(w[h]&&w[h][0]<=t){const step=w[h][1]+1;if(step>3)delete w[h];else w[h]=[t+IV[step],step];}
+  const ks=Object.keys(w);if(ks.length>WR_CAP)ks.sort((a,b)=>w[a][0]-w[b][0]).slice(0,ks.length-WR_CAP).forEach(k=>delete w[k]);
+  if(!ks.length)delete st.wr[bank];return isNew;}
+/* items: [{k, lv?}] or keys · o: {lv: level filter, upto: ≤ lv, exclude: Set of keys, mastered: allow spot reviews}
+   order: a wrong item that is due → an unseen item at his level → (mastered) a 15% spot review → the oldest seen item */
+function pickItem(st,bank,items,o){st=ensure(st);o=o||{};const t=today();const ex=o.exclude||new Set();
+  const all=items.map(x=>typeof x==='object'?x:{k:x}).filter(x=>!ex.has(x.k));
+  const atLv=o.lv==null?all:all.filter(x=>x.lv==null||(o.upto?x.lv<=o.lv:x.lv===o.lv));const pool=atLv.length?atLv:all;if(!pool.length)return null;
+  const w=(st.wr||{})[bank]||{};const sn=snList(st,bank);const pos=new Map(sn.map((h,i)=>[h,i]));
+  const due=pool.filter(x=>{const e=w[hash(x.k)];return e&&e[0]<=t;}).sort((a,b)=>w[hash(a.k)][0]-w[hash(b.k)][0]);
+  if(due.length)return {item:due[0],why:'review'};
+  const fresh=pool.filter(x=>!pos.has(hash(x.k)));const old=pool.filter(x=>pos.has(hash(x.k))&&!w[hash(x.k)]);
+  if(o.mastered&&old.length&&rnd()<.15)return {item:pk(old),why:'spot'};
+  if(fresh.length)return {item:pk(fresh),why:'new'};
+  const rec=pool.filter(x=>!w[hash(x.k)]||w[hash(x.k)][0]<=t);const src=rec.length?rec:pool;
+  return {item:src.slice().sort((a,b)=>pos.get(hash(a.k))-pos.get(hash(b.k)))[0],why:'recycle'};}
+/* unseen items left at his level, and how many weeks that is at his pace (new items a week, last 14 days; perWeek when no data) */
+function runwayOf(st,bank,items,o){st=ensure(st);o=o||{};const t=today();const sn=new Set(snList(st,bank));
+  const all=items.map(x=>typeof x==='object'?x:{k:x});const atLv=o.lv==null?all:all.filter(x=>x.lv==null||(o.upto?x.lv<=o.lv:x.lv===o.lv));
+  const left=atLv.filter(x=>!sn.has(hash(x.k))).length;const u=(st.bu||{})[bank]||{};let n14=0;for(const d in u)if(+d>t-14)n14+=u[d];
+  const weekly=n14?n14/2:(o.perWeek||0);const weeks=weekly?left/weekly:Infinity;
+  return {bank,total:atLv.length,left,weekly,weeks,low:weekly>0&&weeks<2,used:n14>0};}
+function mergeSeen(dst,src){for(const b in src.sn||{}){dst.sn=dst.sn||{};const a=snList(dst,b),set=new Set(a);const add=snList(src,b).filter(h=>!set.has(h));dst.sn[b]=[...add,...a].slice(-SN_CAP).join(',');}
+  for(const b in src.wr||{}){dst.wr=dst.wr||{};const w=dst.wr[b]||(dst.wr[b]={});for(const h in src.wr[b]){const x=src.wr[b][h],y=w[h];if(!y||x[1]>y[1]||(x[1]===y[1]&&x[0]>y[0]))w[h]=x;}}
+  for(const b in src.bu||{}){dst.bu=dst.bu||{};const u=dst.bu[b]||(dst.bu[b]={});for(const d in src.bu[b])u[d]=Math.max(u[d]|0,src.bu[b][d]|0);}}
+
 /* ---------- the stateless API: works on the bound state (the game binds save.lrn; Node tests get a private one) ---------- */
 const BIND={};
 const S=()=>BIND.state?BIND.state():(BIND._st=ensure(BIND._st));
 const DRILL_IDS=['mm-ten','mm-dbl','mm-comp','mm-skip','mm-pv','wp','ch'];
 const drillCands=st=>DRILL_IDS.map(sk=>({skill:sk,step:'ln-math',dom:'math',topic:sk==='wp'?'word':sk==='ch'?'chal':'mental',frontier:!(st.k[sk]||{}).n,name:PAR[sk]}));
 const candsOf=dom=>BIND.cands?BIND.cands(dom):drillCands(S());
-const core={blank,ensure,record,done,start,setLevel,setPrefs,pick,plan,merge,summary,applyPlacement};
+const core={blank,ensure,record,done,start,setLevel,setPrefs,pick,plan,merge,summary,applyPlacement,seen,pickItem,runwayOf};
 return {core,
   /* "what next?" for a domain ('math', a group id, or nothing for anything) */
   next:(dom,o)=>pick(S(),o&&o.cands||candsOf(dom),o),
@@ -336,8 +374,10 @@ return {core,
   summary:()=>summary(S(),BIND.names||(sk=>PAR[sk]||sk)),
   state:()=>S(),
   bind:o=>{Object.assign(BIND,o);},
+  seen:(bank,key,ok,helped)=>{const r=seen(S(),bank,key,ok,helped);BIND.after&&BIND.after();return r;},
+  pickItem:(bank,items,o)=>pickItem(S(),bank,items,o),hash,
   merge,zone,eff,acc,isDue,placeStart,placeStep,placeDone,placeResult,
-  MM,MM_IDS,DRILL_IDS,WT,WT_BY_LV,wordQ,solve,CH,CH_BY_LV,chalQ,PM,PW,paperQ,gen,count,NOUN,NAMES_M,NAMES_F,lp,vav,MATH_LADDER,KID,PAR,IV,QUICK,maxLv,dayNum,
+  MM,MM_IDS,DRILL_IDS,PW,WT,WT_BY_LV,wordQ,solve,CH,CH_BY_LV,chalQ,PM,PW,paperQ,gen,count,NOUN,NAMES_M,NAMES_F,lp,vav,MATH_LADDER,KID,PAR,IV,QUICK,maxLv,dayNum,
   setRandom:f=>{rnd=f||Math.random;},setNow:f=>{nowFn=f||(()=>Date.now());}};})();
 
 /* ======================= part 2: the game ======================= */
@@ -387,6 +427,40 @@ C.parentView=()=>{const st=ST(),t=C.dayNum();const doms=['math',...T.GROUPS.map(
   const out=doms.map(d=>{const cs=cands(d);const p=K.plan(JSON.parse(snap),cs,4,{t}).map(x=>({skill:x.skill,name:x.name||nameOf(x.skill),lv:x.lv,why:x.why}));
     const due=cs.filter(c=>C.isDue(st.k[c.skill],t)||(c.ext&&c.ext.dueNow)).map(c=>c.name||nameOf(c.skill));return {dom:d,name:DOMN[d]||d,next:p,due};});
   const sm=C.summary();return {doms:out,strong:sm.strong.slice(0,4),weak:sm.weak.slice(0,4),prefs:JSON.parse(JSON.stringify(st.pf)),placed:Object.assign({},st.pl)};};
+
+/* ---------- finite banks: registry, runway ----------
+   LEARN.bank(id, {name (parent text), acts:[activity ids], items:()=>[{k, lv}], level:()=>his level (or null), upto, perWeek})
+   Packs call LEARN.pickItem(bank, items, {lv}) to choose and LEARN.seen(bank, key, ok, helped) after each item. */
+const BANKS={};
+C.bank=(id,cfg)=>{BANKS[id]=Object.assign({id,acts:[],perWeek:0},cfg);return BANKS[id];};
+const tryv=f=>{try{return f();}catch(e){return null;}};
+/* the banks that exist in the game today (each only when its pack is loaded) */
+function autoBanks(){const W=window;
+  const TB=W.THINK_BANK,TH=W.THINK;if(TB){
+    if(TB.RC&&!BANKS.rc)C.bank('rc',{name:'קטעי הבנת הנקרא',acts:['read-rc'],items:()=>TB.RC.map(x=>({k:x.p,lv:x.lv})),level:()=>TH&&O.save.th?TH.level(O.save.th,'rc'):1,perWeek:4});
+    if(TB.SEN&&!BANKS['th-sen'])C.bank('th-sen',{name:'השלמת משפטים',acts:['think-sen'],items:()=>TB.SEN.map(x=>({k:JSON.stringify(x).slice(0,80)})),perWeek:6});
+    if(TB.ANA&&!BANKS['th-ana'])C.bank('th-ana',{name:'אנלוגיות',acts:['think-ana'],items:()=>TB.ANA.map(x=>({k:JSON.stringify(x).slice(0,80)})),perWeek:6});
+    if(TB.OPP&&!BANKS['th-rel'])C.bank('th-rel',{name:'קשרים בין מילים',acts:['think-rel'],items:()=>[...TB.OPP,...(TB.SYN||[]),...(TB.PART||[]),...(TB.ODD||[])].map(x=>({k:JSON.stringify(x).slice(0,80)})),perWeek:6});}
+  const R=W.READBANK2;if(R&&R.words){const lv=sk=>tryv(()=>R.level(sk))||1;
+    if(!BANKS['rb-word'])C.bank('rb-word',{name:'מילים לקריאה',acts:['read-first','read-pw','read-wp','read-build'],items:()=>R.words.map(x=>({k:x.w,lv:x.lv})),level:()=>lv('word'),perWeek:25});
+    if(R.sentences&&!BANKS['rb-sent'])C.bank('rb-sent',{name:'משפטים',acts:['read-sent'],items:()=>R.sentences.map(x=>({k:x.t,lv:x.lv})),level:()=>lv('sent'),perWeek:10});
+    if(R.stories&&!BANKS['rb-story'])C.bank('rb-story',{name:'סיפורים',acts:['story-new'],items:()=>R.stories.map(x=>({k:x.t,lv:x.lv})),level:()=>lv('story'),perWeek:3});}
+  const G=W.GAPS;if(G&&Array.isArray(G.STORIES)&&!BANKS['gaps-story'])C.bank('gaps-story',{name:'סיפורי הספרייה',acts:G.STORIES.map((_,i)=>'story-'+i),items:()=>G.STORIES.map(x=>({k:x.t})),perWeek:2});
+  const E=W.ENGLISH2;if(E&&Array.isArray(E.THEMES)&&!BANKS['eng-words'])C.bank('eng-words',{name:'מילים באנגלית',acts:['eng-voc'],items:()=>E.THEMES.flatMap(th=>(th.words||th.w||th.items||[]).map(w=>({k:Array.isArray(w)?w[0]:typeof w==='object'?(w.en||w.k||JSON.stringify(w)):w}))),perWeek:12});
+  const X=W.EXPLORE2;if(X&&typeof X.kidTexts==='function'&&!BANKS['explore-facts'])C.bank('explore-facts',{name:'עובדות בחוקרים',acts:tryv(()=>X.ids())||[],items:()=>X.kidTexts().map(k=>({k})),perWeek:15});
+  if(T.TOG&&!BANKS.together)C.bank('together',{name:'משחקים ביחד',acts:[],items:()=>T.TOG.map(a=>({k:a.k})),perWeek:2});
+  if(T.RW&&!BANKS.realworld)C.bank('realworld',{name:'משימות בבית',acts:[],items:()=>Object.keys(T.RW).map(k=>({k})),perWeek:1});
+  if(!BANKS['pp-write'])C.bank('pp-write',{name:'משימות כתיבה על דף',acts:['ln-paper'],items:()=>C.PW.map(x=>({k:x.k})),perWeek:2});}
+C.banks=()=>{autoBanks();return BANKS;};
+/* every bank: unseen items left at his level and the weeks they last; LEARN.runway() = only the ones running low (under ~2 weeks) */
+C.runwayAll=()=>{autoBanks();return Object.values(BANKS).map(b=>{const items=tryv(b.items)||[];const lv=b.level?tryv(b.level):null;
+  return Object.assign(K.runwayOf(ST(),b.id,items,{lv,upto:b.upto,perWeek:b.perWeek}),{name:b.name,lv,acts:b.acts});}).filter(r=>r.total>0);};
+C.runway=()=>C.runwayAll().filter(r=>r.low&&r.used);
+/* one line for the parent summary, only when relevant */
+C.runwayLine=()=>{const r=C.runway().sort((a,b)=>a.weeks-b.weeks).slice(0,3);if(!r.length)return '';
+  return '📦 כמעט נגמר תוכן: '+r.map(x=>`${x.name}${x.lv?' ברמה '+x.lv:''} (נשארו ${x.left})`).join(', ')+' — כדאי להוסיף';};
+/* for the content map: "נשארו X חדשים" for an activity with a finite bank */
+C.runwayOf=actId=>{const rs=C.runwayAll().filter(r=>r.acts.includes(actId));if(!rs.length)return '';return `נשארו ${rs.reduce((a,r)=>a+r.left,0)} חדשים`;};
 
 /* ---------- the screen pieces ---------- */
 const hundred=(chart,show)=>{let s='<div class="lnhc" dir="ltr">';for(let i=1;i<=100;i++){const cls=i===chart.start?' st':show&&chart.path.includes(i)?(i===chart.path[chart.path.length-1]?' en':' pt'):'';s+=`<span class="${cls.trim()}">${i}</span>`;}return s+'</div>';};
@@ -438,11 +512,11 @@ function placement(dom,back,then){const lad=C.MATH_LADDER;const ps=C.placeStart(
 /* ---------- paper & pencil ---------- */
 function paper(back){const st=ST();const last=st.pp&&st.pp.k;const kind=last==='math'?'write':'math';const sk=kind==='math'?'pp-math':'pp-write';
   const lv=kind==='math'?Math.max(1,Math.min(5,Math.round(['mm-ten','mm-comp','mm-pv'].reduce((a,x)=>a+((st.k[x]||{}).l||1),0)/3))):1;
-  const q=C.paperQ(kind,lv);K.start(st,sk,lv);const t0=Date.now();
+  const wi=kind==='write'?K.pickItem(st,'pp-write',C.PW):null;const q=C.paperQ(kind,lv,wi&&wi.item);K.start(st,sk,lv);const t0=Date.now();
   O.setScreen('sTal','meadow',back);T.hudT('✏️ דַּף וְעִפָּרוֹן');const s=$('#sTal');s.innerHTML='';
   const box=h('div','tspec lnpaper',`<div class="tse bob">📝</div><h1>קַח דַּף וְעִפָּרוֹן</h1><div class="lsent">${q.task}${q.big?`<div class="lnbig${kind==='math'?' lnnum':''}">${q.big}</div>`:''}</div>`);s.appendChild(box);
   O.sayNow=plain(q.task+' '+(q.big||''));setTimeout(()=>{if(box.isConnected)O.say(O.sayNow);},D(400));
-  const finish=(ok,tries)=>{st.pp={d:C.dayNum(),k:kind};C.record(sk,ok,tries===0,Date.now()-t0);C.done(sk);O.persist();const stars=ok?(tries?2:3):1;O.addGems(3+stars*2);T.record('ln-paper',stars);};
+  const finish=(ok,tries)=>{st.pp={d:C.dayNum(),k:kind};if(q.self)K.seen(st,'pp-write',q.k,true);C.record(sk,ok,tries===0,Date.now()-t0);C.done(sk);O.persist();const stars=ok?(tries?2:3):1;O.addGems(3+stars*2);T.record('ln-paper',stars);};
   const row=h('div','btnrow');box.appendChild(row);
   if(q.self){/* writing: a short self-check, then show a parent */
     const b=h('button','bigbtn huge','<span>כָּתַבְתִּי ✓</span>');b.onclick=()=>{sfx.pop(2);row.remove();
@@ -468,7 +542,8 @@ const WHY={learn:'בתרגול',new:'חדש',review:'חזרה',stretch:'מתקד
 C.parentPanel=(box,sec,rerender)=>{const v=C.parentView();const st=ST();
   const lines=v.doms.map(d=>{const [a,b]=d.next;if(!a)return '';return `<div class="lnp-row"><b>${d.name}:</b> ${a.name}${a.lv>1||a.skill[0]!=='a'?`, רמה ${a.lv}`:''} <small>(${WHY[a.why]||''})</small>${b?` → אחריו: ${b.name}`:''}</div>`;}).join('');
   const due=[...new Set(v.doms.flatMap(d=>d.due))];
-  const el=sec(box,'המסלול של אורן — הבא בתור',`${lines}${due.length?`<div class="lnp-row"><b>לחזרה:</b> ${due.slice(0,5).join(', ')}</div>`:''}`);
+  const rl=C.runwayLine();
+  const el=sec(box,'המסלול של אורן — הבא בתור',`${rl?`<div class="lnp-row lnp-run">${rl}</div>`:''}${lines}${due.length?`<div class="lnp-row"><b>לחזרה:</b> ${due.slice(0,5).join(', ')}</div>`:''}`);
   const fr=h('div','lnp-ctl','<span class="lnp-l">מיקוד (עד 2):</span>');const opts=[...v.doms.map(d=>[d.dom,d.name]),...['wp','ch'].map(k=>[k,PAR[k]])];
   opts.forEach(([id,nm])=>{const on=st.pf.focus.includes(id);const b=h('button','pchip'+(on?' on':''),nm);b.onclick=()=>{let f=st.pf.focus.filter(x=>x!==id);if(!on)f=[...f,id].slice(-2);C.setPrefs({focus:f});rerender&&rerender();};fr.appendChild(b);});el.appendChild(fr);
   const pr=h('div','lnp-ctl','<span class="lnp-l">קצב:</span>');[['רגוע',0],['רגיל',1],['מהיר',2]].forEach(([nm,p])=>{const b=h('button','pchip'+((st.pf.pace|0)===p?' on':''),nm);b.onclick=()=>{C.setPrefs({pace:p});rerender&&rerender();};pr.appendChild(b);});el.appendChild(pr);
@@ -490,6 +565,6 @@ C.register=()=>{addAct('think',{id:'ln-math',name:'אִמּוּן חֶשְׁבּ
     if(!k||!k.n)C.noteAct(id,(T.S().tl[id]||{}).s|0);else{k.d=C.dayNum();s.rc=['a:'+id,...s.rc.filter(x=>x!=='a:'+id)].slice(0,6);}C._noted=null;});}};
 /* parent names of the activities (read by the content map, like every pack's SKILLS) */
 C.SKILLS={'ln-math':'אימון חשבון: השלמה ל-10, כפולים, עיגול ותיקון, דילוגים, לוח המאה, בעיות מילוליות ואתגרים — המשחק בוחר רמה ונושא','ln-paper':'דף ועיפרון: פעם ביום משימה על דף (חשבון או כתיבה) ובדיקה'};
-C.levelOf=id=>{if(id==='ln-math'){const st=ST();const ls=DRILLS.map(sk=>(st.k[sk]||{}).l||1);return 'רמה ממוצעת '+(ls.reduce((a,b)=>a+b,0)/ls.length).toFixed(1)+'/5';}return '';};
+C.levelOf=id=>{if(id==='ln-math'){const st=ST();const ls=DRILLS.map(sk=>(st.k[sk]||{}).l||1);return 'רמה ממוצעת '+(ls.reduce((a,b)=>a+b,0)/ls.length).toFixed(1)+'/5';}return tryv(()=>C.runwayOf(id))||'';};
 C.register();
 })();
