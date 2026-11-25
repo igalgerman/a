@@ -650,6 +650,7 @@ const qkey=q=>q.k==='word'?q.tx:q.k==='ch'?q.pr+'|'+q.opts.join():q.k==='eq'?q.t
 function uniq(gen,n){const out=[],seen=new Set();let t=0;while(out.length<n&&t++<800){const q=gen(out.length);const k=qkey(q);if(seen.has(k))continue;seen.add(k);out.push(q);}return out;}
 const mix=gens=>i=>pick(gens)(i);
 const nb=n=>`<b>${n}</b>`;
+const vav=n=>[2,8].includes(n)?'וּ':'וְ';
 const L_=t=>`<span class="ltr">${t}</span>`;
 
 /* ---- numbers valley ---- */
@@ -659,18 +660,18 @@ function baseTen(n,c){const hh=n/100|0,t=(n%100)/10|0,o=n%10;let s=`<div class="
   if(o)s+='<div class="ones">'+'<i class="one"></i>'.repeat(o)+'</div>';return s+`</div><div class="btlbl">${n}</div></div>`;}
 const GN={
   pv2:()=>{const v=pick(['t','u','c']);
-    if(v==='c'){const t=rand(2,9),u=rand(2,9),n=t*10+u;return W(`${nb(t)} עֲשָׂרוֹת וְ-${nb(u)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`כָּל מַקֵּל = 10${baseTen(n,'#e8873a')}`,[`${t} × 10 = ${t*10}`,`${t*10} + ${u} = ?`],1);}
+    if(v==='c'){const t=rand(2,9),u=rand(2,9),n=t*10+u;return W(`${nb(t)} עֲשָׂרוֹת ${vav(u)}-${nb(u)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`כָּל מַקֵּל = 10${baseTen(n,'#e8873a')}`,[`${t} × 10 = ${t*10}`,`${t*10} + ${u} = ?`],1);}
     const t=rand(1,9),u=rand(1,9),n=t*10+u;
-    if(v==='t')return W(`בַּמִּסְפָּר ${nb(n)} יֵשׁ כַּמָּה עֲשָׂרוֹת?`,t,'עֲשָׂרוֹת',`כָּל מַקֵּל = 10. סוֹפְרִים מַקְלוֹת.${baseTen(n,'#e8873a')}`,[`${t*10} + ${u} = ${n}`,`${t*10} : 10 = ?`],1);
-    return W(`בַּמִּסְפָּר ${nb(n)} יֵשׁ כַּמָּה אֲחָדוֹת?`,u,'אֲחָדוֹת',`הָאֲחָדוֹת הֵן הַקֻּבִּיּוֹת הַבּוֹדְדוֹת${baseTen(n,'#e8873a')}`,[`${n} − ${t*10} = ?`],1);},
+    if(v==='t')return W(`כַּמָּה עֲשָׂרוֹת יֵשׁ בַּמִּסְפָּר ${nb(n)}?`,t,'עֲשָׂרוֹת',`כָּל מַקֵּל = 10. סוֹפְרִים מַקְלוֹת.${baseTen(n,'#e8873a')}`,[`${t*10} + ${u} = ${n}`,`${t*10} : 10 = ?`],1);
+    return W(`כַּמָּה אֲחָדוֹת יֵשׁ בַּמִּסְפָּר ${nb(n)}?`,u,'אֲחָדוֹת',`הָאֲחָדוֹת הֵן הַקֻּבִּיּוֹת הַבּוֹדְדוֹת${baseTen(n,'#e8873a')}`,[`${n} − ${t*10} = ?`],1);},
   pv3:()=>{const v=pick(['h','t','u','c']);
-    if(v==='c'){const a=rand(2,9),b=rand(2,9),c=rand(2,9),n=a*100+b*10+c;return W(`${nb(a)} מֵאוֹת, ${nb(b)} עֲשָׂרוֹת וְ-${nb(c)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`מֵאָה = לוּחַ, עֶשֶׂר = מַקֵּל, אֶחָד = קֻבִּיָּה`,[`${a} × 100 = ${a*100}`,`${b} × 10 = ${b*10}`,`${a*100} + ${b*10} + ${c} = ?`],1);}
+    if(v==='c'){const a=rand(2,9),b=rand(2,9),c=rand(2,9),n=a*100+b*10+c;return W(`${nb(a)} מֵאוֹת, ${nb(b)} עֲשָׂרוֹת ${vav(c)}-${nb(c)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`מֵאָה = לוּחַ, עֶשֶׂר = מַקֵּל, אֶחָד = קֻבִּיָּה`,[`${a} × 100 = ${a*100}`,`${b} × 10 = ${b*10}`,`${a*100} + ${b*10} + ${c} = ?`],1);}
     const n=rand(101,999),a=n/100|0,b=(n%100)/10|0,c=n%10;const nm={h:'הַמֵּאוֹת',t:'הָעֲשָׂרוֹת',u:'הָאֲחָדוֹת'}[v];const ans={h:a,t:b,u:c}[v];
     return W(`בַּמִּסְפָּר ${nb(n)}, מַהִי סִפְרַת ${nm}?`,ans,'',`מְפָרְקִים: ${L_(a*100+' + '+b*10+' + '+c)}${ptab([n])}`,[`${a*100} + ${b*10} + ${c} = ${n}`],1);},
   exp:()=>{const a=rand(1,9),b=rand(1,9),c=rand(1,9),n=a*100+b*10+c;const v=rand(1,3);
     if(v===1)return {k:'add3',a:a*100,b:b*10,c,res:n,ans:n};
     if(v===2)return EQ([n,'=',a*100,'+','?','+',c],b*10,`מַה חָסֵר? סִפְרַת הָעֲשָׂרוֹת הִיא ${L_(b)}${ptab([n])}`,[`${n} − ${a*100} − ${c} = ?`]);
-    const t=rand(2,9),u=rand(1,9);return EQ([t*10+u,'=','?','+',u],t*10,`כַּמָּה עֲשָׂרוֹת יֵשׁ בַּמִּסְפָּר?${baseTen(t*10+u,'#e8873a')}`,[`${t*10+u} − ${u} = ?`]);},
+    const t=rand(2,9),u=rand(1,9);return EQ([t*10+u,'=','?','+',u],t*10,`מַה הַמִּסְפָּר בְּלִי הָאֲחָדוֹת?${baseTen(t*10+u,'#e8873a')}`,[`${t*10+u} − ${u} = ?`]);},
   eo:()=>{if(mm(.25)){const n=rand(10,98);const ev=n%2===0;return W(`מַהוּ הַמִּסְפָּר ${ev?'הַזּוּגִי':'הָאִי-זוּגִי'} הַבָּא אַחֲרֵי ${nb(n)}?`,n+2,'',`${ev?'זוּגִי':'אִי-זוּגִי'} ← מְדַלְּגִים ${L_(2)}: ${L_(n+' → '+(n+1)+' → ?')}`,[`${n} + 2 = ?`],1);}
     const n=mm(.5)?rand(2,20):rand(21,999);const odd=n%2;
     return Object.assign(CH(`<div class="qq">זוּגִי אוֹ אִי-זוּגִי?</div><div class="big">${n}</div>`,['זוּגִי','אִי-זוּגִי'],odd,
@@ -795,8 +796,8 @@ const WP={
   cmp:(lo,hi)=>()=>{const [p,q]=two(),X=pick(ITEMS),g1=(m,f)=>p[1]==='m'?m:f,g2=(m,f)=>q[1]==='m'?m:f;const a=rand(lo,hi),b=rand(Math.max(2,Math.floor(a/3)),a-2),d=a-b;const t=rand(1,4);
     if(t===1)return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}, וּ${lp(q)} יֵשׁ ${nb(b)} ${X}. כַּמָּה ${X} יֵשׁ ${lp(p)} יוֹתֵר מֵאֲשֶׁר ${lp(q)}?`,d,X,'"כַּמָּה יוֹתֵר?" ← הַגָּדוֹל פָּחוֹת הַקָּטָן',[`${a} − ${b} = ?`]);
     if(t===2)return W(`${p[0]} ${g1('בָּנָה','בָּנְתָה')} מִגְדָּל שֶׁל ${nb(a)} בְּלוֹקִים. ${q[0]} ${g2('בָּנָה','בָּנְתָה')} מִגְדָּל שֶׁל ${nb(b)} בְּלוֹקִים. בְּכַמָּה בְּלוֹקִים הַמִּגְדָּל שֶׁל ${p[0]} גָּבוֹהַּ יוֹתֵר?`,d,'בְּלוֹקִים','הַהֶפְרֵשׁ ← הַגָּדוֹל פָּחוֹת הַקָּטָן',[`${a} − ${b} = ?`]);
-    if(t===3)return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} פָּחוֹת. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,b,X,'"פָּחוֹת" ← חִסּוּר',[`${a} − ${d} = ?`]);
-    return W(`${lp(p)} יֵשׁ ${nb(b)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,a,X,'"יוֹתֵר" ← חִבּוּר',[`${b} + ${d} = ?`]);},
+    if(t===3)return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} פָּחוֹת ${g1('מִמֶּנּוּ','מִמֶּנָּה')}. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,b,X,'"פָּחוֹת" ← חִסּוּר',[`${a} − ${d} = ?`]);
+    return W(`${lp(p)} יֵשׁ ${nb(b)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר ${g1('מִמֶּנּוּ','מִמֶּנָּה')}. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,a,X,'"יוֹתֵר" ← חִבּוּר',[`${b} + ${d} = ?`]);},
   unk:(lo,hi)=>()=>{const n=pick(NAMES),X=pick(ITEMS),g=(m,f)=>n[1]==='m'?m:f;const c=rand(lo,hi),a=rand(Math.max(2,Math.floor(c/4)),c-2),b=c-a;const t=rand(1,4);
     if(t===1)return W(`${lp(n)} הָיוּ ${nb(a)} ${X}. ${g('הוּא קִבֵּל','הִיא קִבְּלָה')} עוֹד כַּמָּה, וְעַכְשָׁו יֵשׁ ${g('לוֹ','לָהּ')} ${nb(c)} ${X}. כַּמָּה ${X} ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,b,X,`כַּמָּה חָסֵר מִ-${nb(a)} עַד ${nb(c)}? ← חִסּוּר`,[`${c} − ${a} = ?`]);
     if(t===2)return W(`${n[0]} ${g('קִבֵּל','קִבְּלָה')} ${nb(b)} ${X} מִסַּבְתָּא, וְעַכְשָׁו יֵשׁ ${g('לוֹ','לָהּ')} ${nb(c)} ${X}. כַּמָּה ${X} הָיוּ ${g('לוֹ','לָהּ')} קֹדֶם?`,a,X,'הוֹלְכִים אָחוֹרָה: מוֹרִידִים אֶת מַה שֶּׁהִתְקַבֵּל',[`${c} − ${b} = ?`]);
@@ -824,17 +825,17 @@ const WP={
     if(t===3){const a=rand(30,90),b=rand(5,a-5),c=rand(3,40);return W(`בַּסִּפְרִיָּה הָיוּ ${nb(a)} סְפָרִים. בַּבֹּקֶר הִשְׁאִילוּ ${nb(b)} סְפָרִים, וּבַצָּהֳרַיִם הֶחֱזִירוּ ${nb(c)} סְפָרִים. כַּמָּה סְפָרִים יֵשׁ עַכְשָׁו בַּסִּפְרִיָּה?`,a-b+c,'סְפָרִים','קֹדֶם מְחַסְּרִים, אַחַר כָּךְ מְחַבְּרִים',[`${a} − ${b} = ${a-b}`,`${a-b} + ${c} = ?`]);}
     if(t===4){const q=rand(2,5),k=rand(3,9),B2=pick([50,100]);const s=q*k;return W(`${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} גְּלִידוֹת, כָּל אַחַת בְּ-${nb(k)} שְׁקָלִים, ${g('וְשִׁלֵּם','וְשִׁלְּמָה')} בִּשְׁטָר שֶׁל ${nb(B2)} שְׁקָלִים. כַּמָּה עֹדֶף ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,B2-s,'שְׁקָלִים','קֹדֶם כַּמָּה עָלָה הַכֹּל, אַחַר כָּךְ הָעֹדֶף',[`${q} × ${k} = ${s}`,`${B2} − ${s} = ?`]);}
     const [p,q]=two();const a=rand(5,40),d=rand(2,20),s=a+d;const both=p[1]==='f'&&q[1]==='f'?'לִשְׁתֵּיהֶן':'לִשְׁנֵיהֶם';
-    return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר. כַּמָּה ${X} יֵשׁ ${both} בְּיַחַד?`,a+s,X,`קֹדֶם: כַּמָּה יֵשׁ ${lp(q)}? אַחַר כָּךְ: בְּיַחַד`,[`${a} + ${d} = ${s}`,`${a} + ${s} = ?`]);}
+    return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר ${p[1]==='m'?'מִמֶּנּוּ':'מִמֶּנָּה'}. כַּמָּה ${X} יֵשׁ ${both} בְּיַחַד?`,a+s,X,`קֹדֶם: כַּמָּה יֵשׁ ${lp(q)}? אַחַר כָּךְ: בְּיַחַד`,[`${a} + ${d} = ${s}`,`${a} + ${s} = ?`]);}
 };
 
 /* ---------- curriculum: worlds → units → 3 levels (learn, game, challenge) + giant ---------- */
 const TB=(k)=>({lbl:'×'+k,name:`לוּחַ הַכֶּפֶל שֶׁל <span class="ltr">${k}</span>`,table:k,gen:mulG([k])});
-const DV=(ks,lbl,id)=>({id,lbl,name:`חִלּוּק בְּ-<span class="ltr">${ks.join(', ')}</span>`,div:ks[0],gen:divG(ks),lesson:`חִלּוּק הוּא הַהֵפֶךְ שֶׁל כֶּפֶל: ${nb(ks[0]+' × 4 = '+ks[0]*4)}, אָז ${nb(ks[0]*4+' : '+ks[0]+' = 4')}.`});
+const DV=(ks,lbl,id)=>({id,lbl,name:ks.length>1?`חִלּוּק בְּ-<span class="ltr">${ks[0]}</span> וּבְ-<span class="ltr">${ks[1]}</span>`:`חִלּוּק בְּ-<span class="ltr">${ks[0]}</span>`,div:ks[0],gen:divG(ks),lesson:`חִלּוּק הוּא הַהֵפֶךְ שֶׁל כֶּפֶל: ${nb(ks[0]+' × 4 = '+ks[0]*4)}, אָז ${nb(ks[0]*4+' : '+ks[0]+' = 4')}.`});
 const WORLDS=[
- {id:'num',name:'עֵמֶק הַמִּסְפָּרִים',say:'עמק המספרים',bg:'valley',color:'#d99a2b',op:'47',icon:()=>SPR.sheep,gd:'turtle',gname:'צְבִיקָה הַצָּב',
+ {id:'num',in:'בְּעֵמֶק הַמִּסְפָּרִים',name:'עֵמֶק הַמִּסְפָּרִים',say:'עמק המספרים',bg:'valley',color:'#d99a2b',op:'47',icon:()=>SPR.sheep,gd:'turtle',gname:'צְבִיקָה הַצָּב',
   intro:['שָׁלוֹם! אֲנִי צְבִיקָה. הַמְּבַלְבֵּל עִרְבֵּב אֶת כָּל הַמִּסְפָּרִים בָּעֵמֶק.','עֲזֹר לִי לְסַדֵּר אוֹתָם: עֲשָׂרוֹת, אֲחָדוֹת, זוּגוֹת וּסְדָרוֹת.'],outro:['הִצְלַחְתָּ! הָעֵמֶק שׁוּב מְסֻדָּר.','אֲנִי בָּא לָגוּר בַּמַּמְלָכָה שֶׁלְּךָ!'],units:[
   {id:'num-pv2',lbl:'47',name:'עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'כָּל מִסְפָּר דּוּ-סִפְרָתִי בָּנוּי מֵעֲשָׂרוֹת וַאֲחָדוֹת: ‎47 = 4 עֲשָׂרוֹת וְ-7 אֲחָדוֹת.',gen:GN.pv2},
-  {id:'num-pv3',lbl:'538',name:'מֵאוֹת, עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'בַּמִּסְפָּר ‎538 יֵשׁ 5 מֵאוֹת, 3 עֲשָׂרוֹת וְ-8 אֲחָדוֹת.',gen:GN.pv3},
+  {id:'num-pv3',lbl:'538',name:'מֵאוֹת, עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'בַּמִּסְפָּר ‎538 יֵשׁ 5 מֵאוֹת, 3 עֲשָׂרוֹת וּ-8 אֲחָדוֹת.',gen:GN.pv3},
   {id:'num-exp',lbl:'500+30+8',name:'פֵּרוּק מִסְפָּרִים',lesson:'מְפָרְקִים מִסְפָּר לְפִי הַסְּפָרוֹת: ‎538 = 500 + 30 + 8.',gen:GN.exp},
   {id:'num-eo',lbl:'2 4 6',name:'זוּגִי וְאִי-זוּגִי',lesson:'זוּגִי = אֶפְשָׁר לְסַדֵּר בְּזוּגוֹת בְּלִי שְׁאֵרִית. מִסְפָּר שֶׁנִּגְמָר בְּ-0, 2, 4, 6, 8 הוּא זוּגִי.',gen:GN.eo},
   {id:'num-cmp1',lbl:'47 > 38',name:'מַשְׁוִים עַד 100',lesson:'מַשְׁוִים קֹדֶם אֶת הָעֲשָׂרוֹת. אִם הֵן שָׁווֹת, מַשְׁוִים אֶת הָאֲחָדוֹת. הַפֶּה שֶׁל הַסִּימָן פָּתוּחַ לַגָּדוֹל.',gen:GN.cmp(100)},
@@ -842,7 +843,7 @@ const WORLDS=[
   {id:'num-seq1',lbl:'5,10,?',name:'סְדָרוֹת',lesson:'בְּסִדְרָה כָּל פַּעַם מוֹסִיפִים אוֹתוֹ מִסְפָּר. מוֹצְאִים אֶת הַקְּפִיצָה!',gen:GN.seq(false)},
   {id:'num-seq2',lbl:'90,80,?',name:'סְדָרוֹת מְאַתְגְּרוֹת',lesson:'יֵשׁ סְדָרוֹת שֶׁעוֹלוֹת וְיֵשׁ סְדָרוֹת שֶׁיּוֹרְדוֹת. בּוֹדְקִים: כַּמָּה בְּכָל קְפִיצָה?',gen:GN.seq(true)},
   {boss:true,id:'num-boss',gen:mix([GN.pv3,GN.exp,GN.eo,GN.cmp(1000),GN.seq(true)])}]},
- {id:'add',name:'יַעַר הַחִבּוּר',say:'יער החיבור',bg:'forest',color:'#4f9a3a',op:'+',icon:()=>SPR.tree,gd:'owl',gname:'חָכָם הַיַּנְשׁוּף',
+ {id:'add',in:'בְּיַעַר הַחִבּוּר',name:'יַעַר הַחִבּוּר',say:'יער החיבור',bg:'forest',color:'#4f9a3a',op:'+',icon:()=>SPR.tree,gd:'owl',gname:'חָכָם הַיַּנְשׁוּף',
   intro:['הוּ-הוּ! אֲנִי חָכָם הַיַּנְשׁוּף. הַמְּבַלְבֵּל גָּנַב אֶת הַפֵּרוֹת מֵהָעֵצִים.','כָּל חִבּוּר נָכוֹן מַחְזִיר פְּרִי לָעֵץ!'],outro:['הַיַּעַר פּוֹרֵחַ שׁוּב! תּוֹדָה, אוֹרֶן!'],units:[
   {id:'add-0',lbl:'4+5',name:'חִבּוּר עַד 10',lesson:'מְחַבְּרִים שְׁתֵּי קְבוּצוֹת וְסוֹפְרִים אֶת כֻּלָּן.',gen:GA.to10},
   {id:'add-1',lbl:'6+6',name:'כְּפוּלִים',lesson:'כָּפוּל זֶה מִסְפָּר וְעוֹד אוֹתוֹ מִסְפָּר. כְּדַאי לִזְכֹּר אוֹתָם בְּעַל פֶּה!',gen:GA.dbl},
@@ -861,12 +862,12 @@ const WORLDS=[
   {id:'add-14',lbl:'300+400',name:'מֵאוֹת',lesson:'3 מֵאוֹת וְעוֹד 4 מֵאוֹת הֵן 7 מֵאוֹת.',gen:GA.hund},
   {id:'add-15',lbl:'245↓138',name:'חִבּוּר בִּמְאֻנָּךְ עַד 1000',lesson:'אוֹתָהּ שִׁיטָה: אֲחָדוֹת, עֲשָׂרוֹת, מֵאוֹת. לֹא שׁוֹכְחִים לְהַעֲבִיר!',gen:GA.col3,col:1},
   {boss:true,id:'add-boss',gen:mix([GA.make10,GA.a22c,GA.plus9,GA.c100,GA.hund,GA.a22c])}]},
- {id:'sub',name:'מְעָרַת הַחִסּוּר',say:'מערת החיסור',bg:'cave',color:'#7a6fa8',op:'−',icon:()=>SPR.crystal,gd:'dwarf',gname:'גִּילִי הַכּוֹרֶה',
+ {id:'sub',in:'בִּמְעָרַת הַחִסּוּר',name:'מְעָרַת הַחִסּוּר',say:'מערת החיסור',bg:'cave',color:'#7a6fa8',op:'−',icon:()=>SPR.crystal,gd:'dwarf',gname:'גִּילִי הַכּוֹרֶה',
   intro:['אֲנִי גִּילִי הַכּוֹרֶה. הַמְּבַלְבֵּל כִּבָּה אֶת כָּל הַפָּנָסִים בַּמְּעָרָה.','כָּל חִסּוּר נָכוֹן מַדְלִיק פָּנָס!'],outro:['הַמְּעָרָה מוּאֶרֶת! אַתָּה כּוֹרֶה אֲמִיתִּי!'],units:[
   {id:'sub-0',lbl:'9−4',name:'חִסּוּר עַד 10',lesson:'מְחַסְּרִים = מוֹרִידִים. סוֹפְרִים כַּמָּה נִשְׁאֲרוּ.',gen:GS.to10},
-  {id:'sub-1',lbl:'17−5',name:'חִסּוּר עַד 20',lesson:'מוֹרִידִים רַק מֵהָאֲחָדוֹת. הָעֶשֶׂר נִשְׁאָר.',gen:GS.nb20},
+  {id:'sub-1',lbl:'17−5',name:'חִסּוּר עַד 20',lesson:'מוֹרִידִים רַק מֵהָאֲחָדוֹת. הָעֶשֶׂרֶת נִשְׁאֶרֶת.',gen:GS.nb20},
   {id:'sub-2',lbl:'13−5',name:'חִסּוּר דֶּרֶךְ 10',lesson:'קֹדֶם יוֹרְדִים עַד 10, וְאַחַר כָּךְ מוֹרִידִים אֶת הַשְּׁאָר.',gen:GS.thru10},
-  {id:'sub-3',lbl:'15−?=8',name:'מִשְׁפַּחַת מִסְפָּרִים',lesson:'חִבּוּר וְחִסּוּר הֵם מִשְׁפָּחָה: ‎8 + 7 = 15, אָז ‎15 − 7 = 8.',gen:GS.s20},
+  {id:'sub-3',lbl:'15−?=8',name:'מִשְׁפַּחַת תַּרְגִּילִים',lesson:'חִבּוּר וְחִסּוּר הֵם מִשְׁפָּחָה: ‎8 + 7 = 15, אָז ‎15 − 7 = 8.',gen:GS.s20},
   {id:'sub-4',lbl:'70−30',name:'חִסּוּר עֲשָׂרוֹת',lesson:'7 עֲשָׂרוֹת פָּחוֹת 3 עֲשָׂרוֹת הֵן 4 עֲשָׂרוֹת.',gen:GS.tens},
   {id:'sub-5',lbl:'48−5',name:'עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'מוֹרִידִים אֲחָדוֹת מֵהָאֲחָדוֹת. הָעֲשָׂרוֹת נִשְׁאָרוֹת.',gen:GS.s21},
   {id:'sub-6',lbl:'76−30',name:'מוֹרִידִים עֲשָׂרוֹת',lesson:'מוֹרִידִים עֲשָׂרוֹת מֵהָעֲשָׂרוֹת. הָאֲחָדוֹת נִשְׁאָרוֹת.',gen:GS.s2t},
@@ -875,33 +876,33 @@ const WORLDS=[
   {id:'sub-9',lbl:'76−34',name:'שְׁנֵי מִסְפָּרִים גְּדוֹלִים',lesson:'עֲשָׂרוֹת מֵעֲשָׂרוֹת, אֲחָדוֹת מֵאֲחָדוֹת.',gen:GS.s22},
   {id:'sub-10',lbl:'52−17',name:'גְּדוֹלִים עִם מַעֲבָר',lesson:'מוֹרִידִים קֹדֶם אֶת הָעֲשָׂרוֹת, וְאַחַר כָּךְ אֶת הָאֲחָדוֹת.',gen:GS.s22b},
   {id:'sub-11',lbl:'100−37',name:'חִסּוּר מִ-100',lesson:'מִ-100 מוֹרִידִים קֹדֶם עֲשָׂרוֹת, וְאַחַר כָּךְ אֲחָדוֹת.',gen:GS.from100},
-  {id:'sub-12',lbl:'52↓17',name:'חִסּוּר בִּמְאֻנָּךְ',lesson:'מַתְחִילִים מֵהָאֲחָדוֹת. אִם הַסִּפְרָה לְמַעְלָה קְטַנָּה מִדַּי, לוֹוִים 10 מֵהָעֲשָׂרוֹת.',gen:GS.col2,col:1},
+  {id:'sub-12',lbl:'52↓17',name:'חִסּוּר בִּמְאֻנָּךְ',lesson:'מַתְחִילִים מֵהָאֲחָדוֹת. אִם הַסִּפְרָה לְמַעְלָה קְטַנָּה מִדַּי, פּוֹרְטִים עֶשֶׂרֶת אַחַת לְ-10 אֲחָדוֹת.',gen:GS.col2,col:1},
   {id:'sub-13',lbl:'700−300',name:'מֵאוֹת',lesson:'7 מֵאוֹת פָּחוֹת 3 מֵאוֹת הֵן 4 מֵאוֹת.',gen:GS.hund},
-  {id:'sub-14',lbl:'523↓186',name:'חִסּוּר בִּמְאֻנָּךְ עַד 1000',lesson:'אוֹתָהּ שִׁיטָה עִם מֵאוֹת. לִפְעָמִים לוֹוִים פַּעֲמַיִם!',gen:GS.col3,col:1},
+  {id:'sub-14',lbl:'523↓186',name:'חִסּוּר בִּמְאֻנָּךְ עַד 1000',lesson:'אוֹתָהּ שִׁיטָה עִם מֵאוֹת. לִפְעָמִים פּוֹרְטִים פַּעֲמַיִם!',gen:GS.col3,col:1},
   {boss:true,id:'sub-boss',gen:mix([GS.thru10,GS.s22b,GS.minus9,GS.from100,GS.hund,GS.s22b])}]},
- {id:'mul',name:'הָרֵי הַכֶּפֶל',say:'הרי הכפל',bg:'mount',color:'#3a8fc4',op:'×',icon:()=>SPR.mount,gd:'eagle',gname:'אַדִּיר הַנֶּשֶׁר',
+ {id:'mul',in:'בְּהָרֵי הַכֶּפֶל',name:'הָרֵי הַכֶּפֶל',say:'הרי הכפל',bg:'mount',color:'#3a8fc4',op:'×',icon:()=>SPR.mount,gd:'eagle',gname:'אַדִּיר הַנֶּשֶׁר',
   intro:['אֲנִי אַדִּיר הַנֶּשֶׁר. הַכְּנָפַיִם שֶׁלִּי נִתְקְעוּ בַּשֶּׁלֶג!','לוּחַ הַכֶּפֶל יַמִּיס אֶת הַשֶּׁלֶג. מַתְחִילִים?'],outro:['אֲנִי שׁוּב עָף! לוּחַ הַכֶּפֶל שֶׁלְּךָ חָזָק כְּמוֹ סֶלַע!'],units:[
   {id:'mul-0',lbl:'3×5',name:'כֶּפֶל = חִבּוּר חוֹזֵר',lesson:'‎3 × 5 זֶה 3 קְבוּצוֹת שֶׁל 5: ‎5 + 5 + 5 = 15.',gen:GM.rep},
   Object.assign(TB(2),{id:'mul-1'}),Object.assign(TB(10),{id:'mul-2'}),Object.assign(TB(5),{id:'mul-3'}),
   {id:'mul-4',lbl:'×1 ×0',name:'כֶּפֶל בְּ-1 וּבְ-0',lesson:'כָּל מִסְפָּר כָּפוּל 1 נִשְׁאָר אוֹתוֹ מִסְפָּר. כָּל מִסְפָּר כָּפוּל 0 הוּא 0.',gen:GM.t01},
   Object.assign(TB(3),{id:'mul-5'}),Object.assign(TB(4),{id:'mul-6'}),Object.assign(TB(6),{id:'mul-7'}),Object.assign(TB(7),{id:'mul-8'}),Object.assign(TB(8),{id:'mul-9'}),Object.assign(TB(9),{id:'mul-10'}),
-  {id:'mul-11',lbl:'×?',name:'כָּל לוּחַ הַכֶּפֶל',lesson:'עַכְשָׁו הַכֹּל מְעֹרְבָּב. אַתָּה יוֹדֵעַ אֶת כֻּלָּם!',gen:mulG([1,2,3,4,5,6,7,8,9,10],.15)},
+  {id:'mul-11',lbl:'×?',name:'כָּל לוּחַ הַכֶּפֶל',lesson:'עַכְשָׁו הַכֹּל מְעֻרְבָּב. אַתָּה יוֹדֵעַ אֶת כֻּלָּם!',gen:mulG([1,2,3,4,5,6,7,8,9,10],.15)},
   {id:'mul-12',lbl:'7×?=56',name:'גּוֹרֵם חָסֵר',lesson:'מַה כָּפוּל 7 נוֹתֵן 56? סוֹפְרִים בִּקְפִיצוֹת שֶׁל 7.',gen:GM.miss},
   {id:'mul-x10',lbl:'34×10',name:'כֶּפֶל פִּי 10 וּפִי 100',lesson:'כּוֹפְלִים בְּ-10 ← מוֹסִיפִים 0 בַּסּוֹף: ‎34 × 10 = 340. כּוֹפְלִים בְּ-100 ← מוֹסִיפִים שְׁנֵי אֲפָסִים.',gen:GM.x10},
   {id:'mul-13',lbl:'3×40',name:'כֶּפֶל בַּעֲשָׂרוֹת',lesson:'‎3 × 4 = 12, אָז ‎3 × 40 = 120.',gen:GM.tens},
   {id:'mul-14',lbl:'13×4',name:'כֶּפֶל מִסְפָּר גָּדוֹל',lesson:'מְפָרְקִים: ‎13 × 4 = 10 × 4 + 3 × 4.',gen:GM.m21},
   {boss:true,id:'mul-boss',gen:mix([mulG([3,4,6,7,8,9],.2,2),mulG([6,7,8,9],.2,2),GM.tens,GM.m21])}]},
- {id:'div',name:'יַם הַחִלּוּק',say:'ים החילוק',bg:'sea',color:'#2f8fb0',op:':',icon:()=>SPR.wave,gd:'whale',gname:'לוּלוּ הַלִּוְיָתָן',
+ {id:'div',in:'בְּיַם הַחִלּוּק',name:'יַם הַחִלּוּק',say:'ים החילוק',bg:'sea',color:'#2f8fb0',op:':',icon:()=>SPR.wave,gd:'whale',gname:'לוּלוּ הַלִּוְיָתָן',
   intro:['אֲנִי לוּלוּ הַלִּוְיָתָן. הַמְּבַלְבֵּל פִּזֵּר אֶת הַדָּגִים לְכָל הַכִּוּוּנִים.','בּוֹא נְחַלֵּק אוֹתָם שָׁוֶה בְּשָׁוֶה בֵּין הַלְּהָקוֹת.'],outro:['כָּל הַדָּגִים בַּבַּיִת! אַתָּה מְחַלֵּק מֻשְׁלָם!'],units:[
-  {id:'div-0',lbl:'12:3',name:'מְחַלְּקִים שָׁוֶה בְּשָׁוֶה',div:3,lesson:'חִלּוּק = כָּל אֶחָד מְקַבֵּל אוֹתוֹ דָּבָר.',gen:GD.share},
+  {id:'div-0',lbl:'12:3',name:'מְחַלְּקִים שָׁוֶה בְּשָׁוֶה',div:3,lesson:'חִלּוּק = כָּל אֶחָד מְקַבֵּל אוֹתָהּ כַּמּוּת.',gen:GD.share},
   DV([2,10],':2 :10','div-1'),DV([5],':5','div-2'),DV([3],':3','div-3'),DV([4],':4','div-4'),DV([6],':6','div-5'),DV([7],':7','div-6'),DV([8],':8','div-7'),DV([9],':9','div-8'),
-  {id:'div-9',lbl:':?',name:'כָּל הַחִלּוּק',lesson:'עַכְשָׁו הַכֹּל מְעֹרְבָּב. חוֹשְׁבִים עַל הַכֶּפֶל!',gen:divG([2,3,4,5,6,7,8,9,10])},
+  {id:'div-9',lbl:':?',name:'כָּל הַחִלּוּק',lesson:'עַכְשָׁו הַכֹּל מְעֻרְבָּב. חוֹשְׁבִים עַל הַכֶּפֶל!',gen:divG([2,3,4,5,6,7,8,9,10])},
   {id:'div-10',lbl:'36:?=4',name:'מְחַלֵּק חָסֵר',lesson:'‎36 : ? = 4 → מְחַפְּשִׂים: אֵיזֶה מִסְפָּר כָּפוּל 4 נוֹתֵן 36?',gen:GD.miss},
-  {id:'div-11',lbl:'17:5',name:'חִלּוּק עִם שְׁאֵרִית',lesson:'לִפְעָמִים נִשְׁאָר עוֹדֵף. ‎17 : 5 = 3, וְנִשְׁאָרִים 2. זוֹ הַשְּׁאֵרִית.',gen:GD.rem},
+  {id:'div-11',lbl:'17:5',name:'חִלּוּק עִם שְׁאֵרִית',lesson:'לִפְעָמִים נִשְׁאָר קְצָת. ‎17 : 5 = 3, וְנִשְׁאָרִים 2. זוֹ הַשְּׁאֵרִית.',gen:GD.rem},
   {id:'div-12',lbl:'48:4',name:'חִלּוּק מִסְפָּר גָּדוֹל',lesson:'מְפָרְקִים: ‎48 = 40 + 8. ‏‎40 : 4 = 10, ‏‎8 : 4 = 2, וּבְיַחַד 12.',gen:GD.d21},
   {id:'div-x10',lbl:'450:10',name:'חִלּוּק בְּ-10',lesson:'מְחַלְּקִים בְּ-10 ← מוֹרִידִים אֶפֶס מֵהַסּוֹף: ‎450 : 10 = 45.',gen:GD.d10},
   {boss:true,id:'div-boss',gen:mix([divG([3,4,6,7,8,9]),GD.miss,GD.rem,GD.d21])}]},
- {id:'word',name:'עִיר הַסִּפּוּרִים',say:'עיר הסיפורים',bg:'city',color:'#d0743c',op:'אב',icon:()=>SPR.book,gd:'prof',gname:'פְּרוֹפֶסוֹר סֵפֶר',
+ {id:'word',in:'בְּעִיר הַסִּפּוּרִים',name:'עִיר הַסִּפּוּרִים',say:'עיר הסיפורים',bg:'city',color:'#d0743c',op:'אב',icon:()=>SPR.book,gd:'prof',gname:'פְּרוֹפֶסוֹר סֵפֶר',
   intro:['אֲנִי פְּרוֹפֶסוֹר סֵפֶר. הַמְּבַלְבֵּל קָרַע אֶת הַסִּפּוּרִים שֶׁל הָעִיר!','קְרָא כָּל סִפּוּר, וּפְתֹר אֶת הַחִידָה שֶׁבּוֹ.'],outro:['הַסִּפּוּרִים חָזְרוּ! וְאַתָּה קוֹרֵא נֶהְדָּר!'],units:[
   {id:'word-0',lbl:'+',name:'סִפּוּרֵי חִבּוּר',lesson:'קוֹרְאִים לְאַט. מִלִּים כְּמוֹ "עוֹד" וּ"בְּיַחַד" אוֹמְרוֹת: חִבּוּר.',gen:WP.join(8,20)},
   {id:'word-1',lbl:'−',name:'סִפּוּרֵי חִסּוּר',lesson:'מִלִּים כְּמוֹ "נָתַן", "אָכַל" וְ"נִשְׁאֲרוּ" אוֹמְרוֹת: חִסּוּר.',gen:WP.take(8,20)},
@@ -912,9 +913,9 @@ const WORLDS=[
   {id:'word-6',lbl:':',name:'סִפּוּרֵי חִלּוּק',lesson:'מְחַלְּקִים שָׁוֶה בְּשָׁוֶה, אוֹ מְסַדְּרִים בִּקְבוּצוֹת: זֶה חִלּוּק.',gen:WP.div},
   {id:'word-7',lbl:'₪',name:'כֶּסֶף וְעֹדֶף',lesson:'עֹדֶף = מַה שֶּׁשִּׁלַּמְתָּ פָּחוֹת הַמְּחִיר.',gen:WP.money},
   {id:'word-8',lbl:'1→2',name:'בְּעָיוֹת דּוּ-שְׁלַבִּיּוֹת',lesson:'פּוֹתְרִים בִּשְׁנֵי שְׁלָבִים: קֹדֶם שְׁאֵלָה אַחַת, וְאַחַר כָּךְ הַשְּׁנִיָּה.',gen:WP.two},
-  {id:'word-9',lbl:'?!',name:'הַכֹּל מְעֹרְבָּב',lesson:'קוֹרְאִים, חוֹשְׁבִים, וּבוֹחֲרִים תַּרְגִּיל.',gen:mix([WP.join(20,99),WP.take(20,99),WP.cmp(20,99),WP.unk(20,99),WP.mul,WP.div,WP.money,WP.two])},
+  {id:'word-9',lbl:'?!',name:'הַכֹּל מְעֻרְבָּב',lesson:'קוֹרְאִים, חוֹשְׁבִים, וּבוֹחֲרִים תַּרְגִּיל.',gen:mix([WP.join(20,99),WP.take(20,99),WP.cmp(20,99),WP.unk(20,99),WP.mul,WP.div,WP.money,WP.two])},
   {boss:true,id:'word-boss',gen:mix([WP.unk(20,99),WP.mul,WP.div,WP.money,WP.two,WP.two]),n:8}]},
- {id:'time',name:'מִגְדַּל הַשָּׁעוֹן',say:'מגדל השעון',bg:'clock',color:'#b8860b',op:'⏲',icon:()=>SPR.bot,gd:'bot',gname:'תִּיק-תַּק',
+ {id:'time',in:'בְּמִגְדַּל הַשָּׁעוֹן',name:'מִגְדַּל הַשָּׁעוֹן',say:'מגדל השעון',bg:'clock',color:'#b8860b',op:'⏲',icon:()=>SPR.bot,gd:'bot',gname:'תִּיק-תַּק',
   intro:['תִּיק-תַּק! הַמְּבַלְבֵּל עָצַר אֶת כָּל הַשְּׁעוֹנִים!','לְמַד לִקְרֹא שָׁעוֹן וּלְחַלֵּק לַחֲלָקִים, וְהַזְּמַן יָזוּז שׁוּב.'],outro:['הַשְּׁעוֹנִים מְתַקְתְּקִים שׁוּב! תּוֹדָה, אוֹרֶן!'],units:[
   {id:'time-h',lbl:'3:00',name:'שָׁעוֹת עֲגֻלּוֹת',lesson:'הַמָּחוֹג הַקָּצָר מַרְאֶה שָׁעוֹת. כְּשֶׁהַמָּחוֹג הָאָרֹךְ עַל 12, זוֹ שָׁעָה עֲגֻלָּה.',gen:GT.h},
   {id:'time-half',lbl:'3:30',name:'חֲצִי שָׁעָה',lesson:'כְּשֶׁהַמָּחוֹג הָאָרֹךְ עַל 6, עָבְרָה חֲצִי שָׁעָה: 30 דַּקּוֹת. הַקָּצָר בָּאֶמְצַע, בֵּין שְׁנֵי מִסְפָּרִים.',gen:GT.half},
@@ -924,7 +925,7 @@ const WORLDS=[
   {id:'time-h2',lbl:'½ 8',name:'חֲצִי שֶׁל מִסְפָּר',lesson:'חֲצִי שֶׁל 8 ← מְחַלְּקִים לִשְׁתֵּי קְבוּצוֹת שָׁווֹת: 4.',gen:GT.half2},
   {id:'time-q2',lbl:'¼ 12',name:'רֶבַע שֶׁל מִסְפָּר',lesson:'רֶבַע שֶׁל 12 ← מְחַלְּקִים לְאַרְבַּע קְבוּצוֹת שָׁווֹת: 3.',gen:GT.q2},
   {boss:true,id:'time-boss',gen:mix([GT.half,GT.q,GT.add,GT.frac,GT.half2,GT.q2])}]},
- {id:'fin',name:'טִירַת הָאַלּוּפִים',say:'טירת האלופים',bg:'final',color:'#8e6fd1',op:'★',icon:()=>SPR.mixer,gd:'mixer',gname:'הַמְּבַלְבֵּל',
+ {id:'fin',in:'בְּטִירַת הָאַלּוּפִים',name:'טִירַת הָאַלּוּפִים',say:'טירת האלופים',bg:'final',color:'#8e6fd1',op:'★',icon:()=>SPR.mixer,gd:'mixer',gname:'הַמְּבַלְבֵּל',
   intro:['אָז הִגַּעְתָּ עַד אֵלַי? בּוֹא נִרְאֶה אִם אַתָּה יוֹדֵעַ הַכֹּל!'],outro:['אוֹי! נִצַּחְתָּ אוֹתִי... אֲנִי מַבְטִיחַ לֹא לְבַלְבֵּל יוֹתֵר.'],units:[
   {boss:true,final:true,id:'fin-boss',gen:mix([GA.a22c,GA.c100,GS.s22b,GS.from100,mulG([3,4,6,7,8,9],.25,2),GM.m21,divG([3,4,6,7,8,9]),GD.rem,WP.two,WP.unk(20,99),GN.cmp(1000),GT.q]),n:15}]}
 ];
@@ -944,7 +945,7 @@ const MAXPTS=ALLLV.length*4;
 const GUARD={turtle:SPR.turtle,owl:SPR.owl,dwarf:SPR.dwarf,eagle:SPR.eagle,whale:SPR.whale,prof:SPR.prof,bot:SPR.bot,mixer:SPR.mixer};
 
 /* ---------- kingdom shop ---------- */
-const SHOP=[['flower','פֶּרַח',5],['tree','עֵץ',10],['flag','דֶּגֶל',8],['lantern','פָּנָס',12],['sheep','כִּבְשָׂה',15],['pond','אֲגַם',25],['hut','בַּיִת',30],['tower','מִגְדָּל',40],['fountain','מִזְרָקָה',50],['windmill','טַחֲנָה',60],['dragon','דְּרָקוֹן',80],['rainbow','קֶשֶׁת',100]];
+const SHOP=[['flower','פֶּרַח',5],['tree','עֵץ',10],['flag','דֶּגֶל',8],['lantern','פָּנָס',12],['sheep','כִּבְשָׂה',15],['pond','אֲגַם',25],['hut','בַּיִת',30],['tower','מִגְדָּל',40],['fountain','מִזְרָקָה',50],['windmill','טַחֲנַת רוּחַ',60],['dragon','דְּרָקוֹן',80],['rainbow','קֶשֶׁת',100]];
 
 /* ---------- storage: browser + private cloud copy ---------- */
 const KEY='oren4-v1';
@@ -1092,7 +1093,7 @@ $('#btnStart').onclick=()=>{audio();musicStart();if(!save.story.intro){story(INT
 
 /* ---------- STORY dialogs ---------- */
 const SPK={mixer:()=>[SPR.mixer,'הַמְּבַלְבֵּל'],pet:()=>[PET().s(),PET().n],nar:()=>[SPR.book,'הַמְּסַפֵּר']};
-const INTRO=[['nar','בְּאֶרֶץ הַבְּלוֹקִים, כָּל הַמִּסְפָּרִים חַיּוּ בְּשָׁלוֹם.'],['mixer','חַ-חַ-חַ! אֲנִי הַמְּבַלְבֵּל! בִּלְבַּלְתִּי אֶת כָּל הַמִּסְפָּרִים!'],['pet','אוֹרֶן! רַק אַתָּה יָכוֹל לְסַדֵּר אֶת הַמִּסְפָּרִים מֵחָדָשׁ.'],['pet','בְּכָל עוֹלָם מְחַכֶּה חָבֵר שֶׁצָּרִיךְ עֶזְרָה. אֲבָל קֹדֶם, בּוֹא נִבְנֶה אֶת הַגִּבּוֹר שֶׁלְּךָ!']];
+const INTRO=[['nar','בְּאֶרֶץ הַבְּלוֹקִים, כָּל הַמִּסְפָּרִים חָיוּ בְּשָׁלוֹם.'],['mixer','חַ-חַ-חַ! אֲנִי הַמְּבַלְבֵּל! בִּלְבַּלְתִּי אֶת כָּל הַמִּסְפָּרִים!'],['pet','אוֹרֶן! רַק אַתָּה יָכוֹל לְסַדֵּר אֶת הַמִּסְפָּרִים מֵחָדָשׁ.'],['pet','בְּכָל עוֹלָם מְחַכֶּה חָבֵר שֶׁצָּרִיךְ עֶזְרָה. אֲבָל קֹדֶם, בּוֹא נִבְנֶה אֶת הַגִּבּוֹר שֶׁלְּךָ!']];
 function story(panels,done){const box=$('#dlg');let i=0;
   const show=()=>{const [who,txt]=panels[i];const [spr,name]=(SPK[who]||(()=>[GUARD[who],(WORLDS.find(w=>w.gd===who)||{}).gname||'']))();
     box.hidden=false;box.className='dlg';box.innerHTML=`<div class="dbox"><div class="who"><div class="sp">${spr}</div><b>${name}</b></div><div class="txt">${txt}</div><div class="ctl"><button class="ibtn" id="dSay" aria-label="הקראה">${ICON.say}</button><button class="bigbtn sm" id="dNext">${ICON.play}<span>${i<panels.length-1?'הַבָּא':'יוֹצְאִים!'}</span></button></div></div>`;
@@ -1125,7 +1126,7 @@ function showMap(greet){
   $('#hudMid').innerHTML=`<div class="starcount">${SPR.star}<span>${totalStars()}</span></div>`;
   const m=$('#sMap');m.innerHTML='';
   const nextW=WORLDS.find(w=>worldOpen(w)&&!freed(w));
-  const msg=greet?(totalStars()?'שָׁלוֹם אוֹרֶן! מַמְשִׁיכִים בַּמַּסָּע?':'בְּחַר עוֹלָם וּבוֹא נַצִּיל אֶת הַחֲבֵרִים!'):nextW?`${nextW.gname} מְחַכֶּה לְךָ בְּ${nextW.name}!`:'הִצַּלְתָּ אֶת כֻּלָּם!';
+  const msg=greet?(totalStars()?'שָׁלוֹם אוֹרֶן! מַמְשִׁיכִים בַּמַּסָּע?':'בְּחַר עוֹלָם וּבוֹא נַצִּיל אֶת הַחֲבֵרִים!'):nextW?`${nextW.gname} מְחַכֶּה לְךָ ${nextW.in}!`:'הִצַּלְתָּ אֶת כֻּלָּם!';
   sayNow=msg;
   m.appendChild(h('div','hello',`<div class="av bob">${AV()}</div><div class="pet bob" style="animation-delay:-1s">${PET().s()}</div><div class="bub">${msg}</div>`));
   const tb=h('div','topbar');
@@ -1275,7 +1276,7 @@ function colBorrow(st,c){st.tops[c]+=10;st.marks[c]=st.tops[c];let j=c+1;while(s
 function colHint(q,st){const c=st.c;
   if(q.op==='+'){const a=st.A[c]|0,b=st.B[c]|0,ci=st.carries[c]|0;if(c>=st.A.length&&c>=st.B.length)return cap('מוֹרִידִים אֶת הַ-1 לְמַטָּה');
     const s=a+b+ci;return steps([`${a} + ${b}${ci?' + 1':''} = ${s}`])+cap(s>=10?`כּוֹתְבִים ${L_(s%10)} וּמַעֲבִירִים 1`:`כּוֹתְבִים ${L_(s)}`);}
-  if(colNeedBorrow(st,c)){const old=st.tops[c];colBorrow(st,c);renderCol(q,st);return cap(`${L_(old)} קָטָן מִ-${L_(st.B[c])} ← לוֹוִים 10`)+steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
+  if(colNeedBorrow(st,c)){const old=st.tops[c];colBorrow(st,c);renderCol(q,st);return cap(`${L_(old)} קָטָן מִ-${L_(st.B[c])} ← פּוֹרְטִים ${c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
   return steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
 function renderCol(q,st){const box=$('#colw');if(!box)return;const W2=st.W;box.style.gridTemplateColumns=`repeat(${W2+1},var(--cw))`;let s='';const cell=(c2,cls='')=>`<div class="cc ${cls}">${c2}</div>`;
   s+=cell('','mk');for(let g=1;g<=W2;g++){const c=W2-g;const m=q.op==='+'?(st.carries[c]?'1':''):(st.marks[c]!=null?st.marks[c]:'');s+=cell(m,'mk'+(q.op==='+'?' cr':''));}
@@ -1325,7 +1326,7 @@ function lesson(lv){const u=lv.u;setScreen('sLearn',u.w.bg,()=>showWorld(u.w));
   let stepI=0;const seq=[];
   if(ex.k==='col'){stage.innerHTML=`<div class="lcap">דֻּגְמָה:</div><div class="colwrap" id="colw"></div><div class="hintbox" id="hint" hidden></div>`;const st=colInit(ex);renderCol(ex,st);
     next.onclick=()=>{if(st.c>=st.R.length)return start();const hb=$('#hint');hb.hidden=false;
-      if(ex.op==='−'&&colNeedBorrow(st,st.c)){const old=st.tops[st.c];colBorrow(st,st.c);hb.innerHTML=cap(`${L_(old)} קָטָן מִ-${L_(st.B[st.c])} ← לוֹוִים 10`)+steps([`${st.tops[st.c]} − ${st.B[st.c]|0} = ${st.R[st.c]}`]);}
+      if(ex.op==='−'&&colNeedBorrow(st,st.c)){const old=st.tops[st.c];colBorrow(st,st.c);hb.innerHTML=cap(`${L_(old)} קָטָן מִ-${L_(st.B[st.c])} ← פּוֹרְטִים ${st.c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[st.c]} − ${st.B[st.c]|0} = ${st.R[st.c]}`]);}
       else hb.innerHTML=colHint(ex,st).replace('<b>?</b>',st.R[st.c]);
       colAdvance(ex,st,st.R[st.c],false);renderCol(ex,st);sfx.pop(st.c);
       if(st.c>=st.R.length){next.querySelector('span').textContent='עַכְשָׁו תּוֹרְךָ!';go.hidden=true;burst(...center($('#colw')),24);}};return;}
@@ -1492,7 +1493,7 @@ function colType(d){const p=play,q=p.qs[p.i],st=p.col;if(st.c>=st.R.length)retur
   const hb=$('#hint');hb.hidden=false;hb.innerHTML=colHint(q,st);
   if(st.ct>=3){p.revealed=true;colAdvance(q,st,st.R[st.c],true);setBubble('הַסִּפְרָה הִיא '+st.typed[st.c-1]);
     setTimeout(()=>{if(play!==p)return;if(st.c>=st.R.length){renderCol(q,st);requeue();questionDone(false);p.i++;if(p.i>=p.qs.length)finishLevel();else showQ();}else colPrep(q,st);},D(900));}
-  else setBubble('כִּמְעַט! תִּסְתַּכֵּל עַל הָרֶמֶז');}
+  else setBubble('כִּמְעַט! הִסְתַּכֵּל עַל הָרֶמֶז');}
 function finishLevel(){const p=play;p.lock=true;const lv=p.lv,u=p.u;
   if(lv.type==='train'){save.trains++;addGems(10);persist();setTimeout(()=>{const ov=$('#ov');ov.hidden=false;
       ov.innerHTML=`<div class="card"><h2>סִיַּמְתָּ אֶת הָאִמּוּן!</h2><div class="gain">+${p.gemsEarned+10} ${SPR.gem}</div><div class="sub">טָעֻיּוֹת שֶׁעוֹד מְחַכּוֹת: <span class="ltr">${save.rq.length}</span></div></div>`;
@@ -1552,7 +1553,7 @@ function kingdom(){setScreen('sKing','meadow',showMap);$('#hudMid').innerHTML=`<
   renderShop();wrap.append(scene,shop);s.appendChild(wrap);}
 
 /* ---------- TEACHER MODE (Oren makes puzzles for the family) ---------- */
-const HEROES=[['אַבָּא','m'],['אִמָּא','f'],['סָבָא','m'],['סָבְתָא','f'],['אוֹרֶן','m']];
+const HEROES=[['אַבָּא','m'],['אִמָּא','f'],['סָבָא','m'],['סַבְתָּא','f'],['אוֹרֶן','m']];
 function storyFor(op,hero,X,a,b){const g=(m,f)=>hero[1]==='m'?m:f;
   if(op==='+')return `${lp(hero)} הָיוּ ${nb(a)} ${X}. ${hero[0]} ${g('קִבֵּל','קִבְּלָה')} עוֹד ${nb(b)} ${X}. כַּמָּה ${X} יֵשׁ ${g('לוֹ','לָהּ')} עַכְשָׁו?`;
   if(op==='−')return `${lp(hero)} הָיוּ ${nb(a)} ${X}. ${g('הוּא נָתַן','הִיא נָתְנָה')} ${nb(b)} ${X} לְחָבֵר. כַּמָּה ${X} נִשְׁאֲרוּ ${g('לוֹ','לָהּ')}?`;
@@ -1576,7 +1577,7 @@ function teacher(tab){setScreen('sTeach','city',showMap);$('#hudMid').innerHTML=
   ['+','−','×',':'].forEach(o=>{const b=h('button','big'+(T.op===o?' sel':''),o);b.onclick=()=>{T.op=o;T.stage='build';sfx.pop(1);teacher('make');};ops.appendChild(b);});st1.appendChild(ops);
   const kind=h('div','optrow');[['תַּרְגִּיל',false],['סִפּוּר',true]].forEach(([n,v])=>{const b=h('button',T.story===v?'sel':'',n);b.onclick=()=>{T.story=v;teacher('make');};kind.appendChild(b);});st1.appendChild(kind);
   wrap.appendChild(st1);
-  if(T.story){const st2=h('div','tstep','<h3>2. מִי בַּסִּפּוּר, וּמָה יֵשׁ לוֹ?</h3>');const hr=h('div','optrow');HEROES.forEach((x,i)=>{const b=h('button',T.hero===i?'sel':'',x[0]);b.onclick=()=>{T.hero=i;teacher('make');};hr.appendChild(b);});
+  if(T.story){const st2=h('div','tstep','<h3>2. מִי בַּסִּפּוּר, וּמָה יֵשׁ?</h3>');const hr=h('div','optrow');HEROES.forEach((x,i)=>{const b=h('button',T.hero===i?'sel':'',x[0]);b.onclick=()=>{T.hero=i;teacher('make');};hr.appendChild(b);});
     const ir=h('div','optrow');ITEMS.forEach((x,i)=>{const b=h('button',T.item===i?'sel':'',x);b.onclick=()=>{T.item=i;teacher('make');};ir.appendChild(b);});st2.append(hr,ir);wrap.appendChild(st2);}
   const st3=h('div','tstep',`<h3>${T.story?'3':'2'}. אֵילוּ מִסְפָּרִים?</h3>`);
   const eq=h('div','eqcard');const boxA=h('span','ans'+(T.f==='a'?' foc':'')+(T.a?'':' empty'),T.a||'?');const boxB=h('span','ans'+(T.f==='b'?' foc':'')+(T.b?'':' empty'),T.b||'?');
