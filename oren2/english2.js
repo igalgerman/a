@@ -22,32 +22,37 @@ const THEMES=[
    ['purple','סָגֹל','#8e44ad'],['pink','וָרֹד','#ff8fc8'],['black','שָׁחֹר','#222222'],['white','לָבָן','#ffffff'],['brown','חוּם','#8b5a2b']]},
  {id:'num1',he:'מִסְפָּרִים 1–10',p:'מספרים 1-10',w:[['one','אַחַת','n:1'],['two','שְׁתַּיִם','n:2'],['three','שָׁלוֹשׁ','n:3'],['four','אַרְבַּע','n:4'],['five','חָמֵשׁ','n:5'],
    ['six','שֵׁשׁ','n:6'],['seven','שֶׁבַע','n:7'],['eight','שְׁמוֹנֶה','n:8'],['nine','תֵּשַׁע','n:9'],['ten','עֶשֶׂר','n:10']]},
- {id:'animals',he:'חַיּוֹת',p:'חיות',w:[['cat','חָתוּל','s:cat'],['dog','כֶּלֶב','s:dog'],['fish','דָּג','s:fish'],['bird','צִפּוֹר','s:bird'],['cow','פָּרָה','🐄'],['horse','סוּס','🐴'],
-   ['sheep','כִּבְשָׂה','s:sheep'],['pig','חֲזִיר','🐷'],['lion','אַרְיֵה','🦁'],['monkey','קוֹף','🐒'],['elephant','פִּיל','🐘'],['frog','צְפַרְדֵּעַ','🐸'],['duck','בַּרְוָז','🦆']]},
+ {id:'animals',he:'חַיּוֹת',p:'חיות',w:[['cat','חָתוּל','s:cat'],['dog','כֶּלֶב','🐶'],['fish','דָּג','s:fish'],['bird','צִפּוֹר','s:bird'],['cow','פָּרָה','🐄'],['horse','סוּס','🐴'],
+   ['sheep','כִּבְשָׂה','s:sheep'],['pig','חֲזִיר','🐷'],['duck','בַּרְוָז','🦆'],['rabbit','אַרְנָב','🐰']]},
  {id:'sports',he:'סְפּוֹרְט',p:'ספורט',w:[['soccer','כַּדּוּרֶגֶל','⚽'],['basketball','כַּדּוּרְסַל','🏀'],['tennis','טֶנִיס','🎾'],['swim','לִשְׂחוֹת','🏊'],['bike','אוֹפַנַּיִם','🚲'],
    ['goal','שַׁעַר','🥅'],['medal','מֶדַלְיָה','🏅'],['trophy','גָּבִיעַ','🏆']]},
  {id:'family',he:'מִשְׁפָּחָה',p:'משפחה',w:[['mom','אִמָּא','👩'],['dad','אַבָּא','👨'],['baby','תִּינוֹק','👶'],['grandma','סַבְתָּא','👵'],['grandpa','סַבָּא','👴'],['boy','יֶלֶד','👦'],
    ['girl','יַלְדָּה','👧'],['family','מִשְׁפָּחָה','👨‍👩‍👧‍👦'],['friends','חֲבֵרִים','🧑‍🤝‍🧑'],['teacher','מוֹרָה','🧑‍🏫']]},
  {id:'food',he:'אֹכֶל',p:'אוכל',w:[['apple','תַּפּוּחַ','s:apple'],['banana','בָּנָנָה','🍌'],['bread','לֶחֶם','🍞'],['milk','חָלָב','🥛'],['water','מַיִם','💧'],['egg','בֵּיצָה','s:egg'],
-   ['cake','עוּגָה','s:cake'],['pizza','פִּיצָה','🍕'],['cheese','גְּבִינָה','🧀'],['ice cream','גְּלִידָה','🍦'],['carrot','גֶּזֶר','🥕'],['grapes','עֲנָבִים','🍇']]},
+   ['cake','עוּגָה','s:cake'],['pizza','פִּיצָה','🍕'],['cheese','גְּבִינָה','🧀'],['ice cream','גְּלִידָה','🍦'],['carrot','גֶּזֶר','🥕'],['grapes','עֲנָבִים','🍇'],
+   ['cookie','עוּגִיָּה','🍪'],['strawberry','תּוּת','🍓']]},
  {id:'body',he:'הַגּוּף',p:'הגוף',w:[['eyes','עֵינַיִם','👀'],['ear','אֹזֶן','👂'],['nose','אַף','👃'],['mouth','פֶּה','👄'],['hand','יָד','✋'],['arm','זְרוֹעַ','💪'],
    ['leg','רֶגֶל','🦵'],['foot','כַּף רֶגֶל','🦶'],['tooth','שֵׁן','🦷'],['tongue','לָשׁוֹן','👅']]},
  {id:'toys',he:'צַעֲצוּעִים',p:'צעצועים',w:[['ball','כַּדּוּר','s:ball'],['teddy bear','דֻּבִּי','🧸'],['car','מְכוֹנִית','s:car'],['boat','סִירָה','s:boat'],['kite','עֲפִיפוֹן','🪁'],
    ['balloon','בָּלוֹן','🎈'],['train','רַכֶּבֶת','🚂'],['book','סֵפֶר','s:bookS'],['drum','תֹּף','🥁'],['robot','רוֹבּוֹט','🤖']]},
  {id:'actions',he:'פְּעֻלּוֹת',p:'פעולות',w:[['run','לָרוּץ','🏃'],['walk','לָלֶכֶת','🚶'],['jump','לִקְפֹּץ','g:jump'],['eat','לֶאֱכֹל','g:eat'],['drink','לִשְׁתּוֹת','🥤'],['sleep','לִישֹׁן','😴'],
-   ['sing','לָשִׁיר','🎤'],['dance','לִרְקֹד','💃'],['read','לִקְרֹא','📖'],['write','לִכְתֹּב','✍️'],['clap','לִמְחֹא כַּפַּיִם','👏'],['laugh','לִצְחֹק','😂']]},
+   ['sing','לָשִׁיר','🎤'],['dance','לִרְקֹד','💃'],['read','לִקְרֹא','📖'],['write','לִכְתֹּב','✍️'],['clap','לִמְחֹא כַּפַּיִם','👏'],['laugh','לִצְחֹק','😂'],
+   ['cry','לִבְכּוֹת','😢'],['climb','לְטַפֵּס','🧗']]},
  {id:'clothes',he:'בְּגָדִים',p:'בגדים',w:[['hat','כּוֹבַע','s:hat'],['shoe','נַעַל','s:shoe'],['shirt','חֻלְצָה','👕'],['pants','מִכְנָסַיִם','👖'],['dress','שִׂמְלָה','👗'],['socks','גַּרְבַּיִם','🧦'],
    ['coat','מְעִיל','🧥'],['glasses','מִשְׁקָפַיִם','👓'],['scarf','צָעִיף','🧣'],['gloves','כְּפָפוֹת','🧤']]},
- {id:'weather',he:'מֶזֶג אֲוִיר',p:'מזג אוויר',w:[['sun','שֶׁמֶשׁ','s:sun'],['rain','גֶּשֶׁם','🌧️'],['cloud','עָנָן','s:cloud'],['snow','שֶׁלֶג','❄️'],['wind','רוּחַ','🌬️'],['rainbow','קֶשֶׁת','s:rainbow'],
-   ['hot','חַם','🥵'],['cold','קַר','🥶'],['moon','יָרֵחַ','s:moon'],['star','כּוֹכָב','s:star']]},
+ {id:'wild',he:'חַיּוֹת בָּר',p:'חיות בר',w:[['lion','אַרְיֵה','🦁'],['tiger','נָמֵר','🐯'],['monkey','קוֹף','🐒'],['bear','דֹּב','🐻'],['elephant','פִּיל','🐘'],
+   ['zebra','זֶבְּרָה','🦓'],['frog','צְפַרְדֵּעַ','🐸'],['turtle','צָב','s:turtle'],['owl','יַנְשׁוּף','s:owl']]},
+ {id:'weather',he:'בַּחוּץ',p:'בחוץ: מזג אוויר וטבע',w:[['sun','שֶׁמֶשׁ','s:sun'],['rain','גֶּשֶׁם','🌧️'],['cloud','עָנָן','s:cloud'],['snow','שֶׁלֶג','❄️'],['wind','רוּחַ','🌬️'],['rainbow','קֶשֶׁת','s:rainbow'],
+   ['hot','חַם','🥵'],['cold','קַר','🥶'],['moon','יָרֵחַ','s:moon'],['star','כּוֹכָב','s:star'],
+   ['tree','עֵץ','s:tree'],['flower','פֶּרַח','s:flower']]},
  {id:'home',he:'הַבַּיִת',p:'הבית',w:[['house','בַּיִת','s:hut'],['door','דֶּלֶת','🚪'],['window','חַלּוֹן','🪟'],['bed','מִטָּה','🛏️'],['chair','כִּסֵּא','🪑'],['cup','כּוֹס','s:cup'],
    ['key','מַפְתֵּחַ','s:key'],['clock','שָׁעוֹן','🕐'],['bath','אַמְבַּטְיָה','🛁'],['TV','טֵלֵוִיזְיָה','📺']]},
  {id:'num2',he:'מִסְפָּרִים 11–20',p:'מספרים 11-20',w:[['eleven','אַחַת עֶשְׂרֵה','n:11'],['twelve','שְׁתֵּים עֶשְׂרֵה','n:12'],['thirteen','שְׁלוֹשׁ עֶשְׂרֵה','n:13'],['fourteen','אַרְבַּע עֶשְׂרֵה','n:14'],
    ['fifteen','חֲמֵשׁ עֶשְׂרֵה','n:15'],['sixteen','שֵׁשׁ עֶשְׂרֵה','n:16'],['seventeen','שְׁבַע עֶשְׂרֵה','n:17'],['eighteen','שְׁמוֹנֶה עֶשְׂרֵה','n:18'],['nineteen','תְּשַׁע עֶשְׂרֵה','n:19'],['twenty','עֶשְׂרִים','n:20']]}];
 /* words used only as letter keywords or in reading */
 const EXTRA={ant:['נְמָלָה','🐜'],igloo:['אִיגְלוּ','g:igloo'],insect:['חֶרֶק','🐞'],juice:['מִיץ','🧃'],leaf:['עָלֶה','s:leaf'],octopus:['תְּמָנוּן','🐙'],olive:['זַיִת','🫒'],
- queen:['מַלְכָּה','👸'],tiger:['נָמֵר','🐯'],umbrella:['מִטְרִיָּה','☂️'],up:['לְמַעְלָה','⬆️'],violin:['כִּנּוֹר','🎻'],volcano:['הַר גַּעַשׁ','🌋'],fox:['שׁוּעָל','🦊'],box:['קֻפְסָה','📦'],
- 'yo-yo':['יוֹ־יוֹ','🪀'],zebra:['זֶבְּרָה','🦓'],zero:['אֶפֶס','n:0'],
+ queen:['מַלְכָּה','👸'],umbrella:['מִטְרִיָּה','☂️'],up:['לְמַעְלָה','⬆️'],violin:['כִּנּוֹר','🎻'],volcano:['הַר גַּעַשׁ','🌋'],fox:['שׁוּעָל','🦊'],box:['קֻפְסָה','📦'],
+ 'yo-yo':['יוֹ־יוֹ','🪀'],zero:['אֶפֶס','n:0'],
  bat:['עֲטַלֵּף','🦇'],rat:['עַכְבְּרוֹשׁ','🐀'],map:['מַפָּה','🗺️'],bag:['תִּיק','🎒'],hen:['תַּרְנְגֹלֶת','🐔'],pen:['עֵט','🖊️'],web:['קוּרֵי עַכָּבִישׁ','🕸️'],
  pin:['נַעַץ','📌'],bin:['פַּח','🗑️'],log:['בּוּל עֵץ','s:log'],pot:['סִיר','🍲'],bus:['אוֹטוֹבּוּס','🚌'],bug:['חֶרֶק','🐛'],hug:['לְחַבֵּק','🫂']};
 const WORD={};
@@ -56,7 +61,7 @@ Object.entries(EXTRA).forEach(([en,[he,pic]])=>{if(!WORD[en])WORD[en]={en,he,pic
 /* options that must never stand side by side (one picture could pass for the other) */
 const CLASH=[['ball','soccer'],['ball','basketball'],['ball','tennis'],['soccer','goal'],['family','mom'],['family','dad'],['family','boy'],['family','girl'],['friends','boy'],['friends','girl'],
  ['hand','clap'],['read','book'],['drink','cup'],['drink','milk'],['drink','water'],['cup','milk'],['sleep','bed'],['eyes','glasses'],['hot','sun'],['cold','snow'],['rain','cloud'],['wind','cloud'],
- ['rain','water'],['swim','water'],['house','door'],['house','window'],['mouth','eat'],['tongue','mouth'],['run','walk'],['hug','friends']];
+ ['rain','water'],['swim','water'],['house','door'],['house','window'],['mouth','eat'],['bird','duck'],['bird','owl'],['tongue','mouth'],['run','walk'],['hug','friends']];
 const clash=(a,b)=>CLASH.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));
 
 /* ---------- level 2: letters. [letter, the Hebrew letter with the same sound (consonants), keywords]
@@ -104,13 +109,13 @@ const pclash=(a,b)=>PCLASH.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));
 const PUNITS=[{id:'p-hi',he:'שָׁלוֹם וּלְהִתְרָאוֹת',p:'ברכות: שלום, להתראות, בוקר טוב, לילה טוב',w:['Hello!','Goodbye!','Good morning!','Good night!']},
  {id:'p-nice',he:'מִלִּים יָפוֹת',p:'נימוס: תודה, בבקשה, סליחה, כן, לא',w:['Thank you!','Please.','Sorry!','Yes.','No.']},
  {id:'p-me',he:'נָעִים לְהַכִּיר',p:'היכרות: איך קוראים לך, מה שלומך',w:['My name is Oren.','What is your name?','How are you?',"I'm fine, thank you."]},
- {id:'p-fun',he:'מָה אֲנִי מַרְגִּישׁ',p:'רגשות ואהבות',w:['I love you, Mom!',"Let's play!",'I like soccer.','Happy birthday!',"I'm hungry."]}];
+ {id:'p-fun',he:'מִשְׁפָּטִים שְׂמֵחִים',p:'משפטים: אהבה, משחק, כדורגל, יום הולדת, רעב',w:['I love you, Mom!',"Let's play!",'I like soccer.','Happy birthday!',"I'm hungry."]}];
 
 /* ---------- level 5: one chant per theme (original lyrics) ---------- */
 const SONGS=[
  {th:'colors',he:'שִׁיר הַצְּבָעִים',l:['Red and yellow, green and blue,','Orange, purple, pink for you!','Black and white and brown, hooray!','I see colors every day!']},
  {th:'num1',he:'שִׁיר הַסְּפִירָה',l:['One, two, three, four, five,','I can jump and I can dive!','Six, seven, eight, nine, ten,','Let\'s count again, my friend!']},
- {th:'animals',he:'שִׁיר הַחַיּוֹת',l:['A cat, a dog, a duck, a frog,','A frog that jumps up on a log!','A lion, a monkey, a cow, a sheep,','And all the animals go to sleep.']},
+ {th:'animals',he:'שִׁיר הַחַיּוֹת',l:['A cat, a dog, a duck, a frog,','A frog that jumps up on a log!','A horse, a rabbit, a cow, a sheep,','And all the animals go to sleep.']},
  {th:'sports',he:'שִׁיר הַסְּפּוֹרְט',l:['Kick the ball into the goal!','Basketball, bounce and roll!','I can swim and ride my bike,','These are sports I really like!']},
  {th:'family',he:'שִׁיר הַמִּשְׁפָּחָה',l:['Mom and Dad and baby too,','Grandma, Grandpa, I love you!','A boy, a girl, my friends and me,','We are a happy family!']},
  {th:'food',he:'שִׁיר הָאֹכֶל',l:['Apple, banana, bread and cheese,','Pizza, pizza! More, please!','Ice cream, carrots, eggs and grapes,','Yummy food in funny shapes!']},
@@ -118,6 +123,7 @@ const SONGS=[
  {th:'toys',he:'שִׁיר הַצַּעֲצוּעִים',l:['A ball, a kite, a car, a train,','I play with them again, again!','A teddy bear, a drum, a book,','Come and play! Come and look!']},
  {th:'actions',he:'שִׁיר "אֲנִי יָכוֹל"',l:['I can walk and I can run,','I can jump, it is so much fun!','I can sing and I can dance,','I can clap, clap, clap my hands!']},
  {th:'clothes',he:'שִׁיר הַבְּגָדִים',l:['A hat on my head, socks on my feet,','A shirt and pants, I look so neat!','A coat and gloves and a scarf for snow,','Now I am ready! Off I go!']},
+ {th:'wild',he:'שִׁיר חַיּוֹת הַבָּר',l:['A lion, a tiger, a monkey, a bear,','Wild animals everywhere!','An elephant, a zebra, a turtle too,','An owl in a tree says hoo, hoo, hoo!']},
  {th:'weather',he:'שִׁיר מֶזֶג הָאֲוִיר',l:['The sun is hot, the snow is cold,','The wind blows hard, so hold, hold, hold!','The rain falls down on me and you,','Then comes a rainbow, red and blue!']},
  {th:'home',he:'שִׁיר הַבַּיִת',l:['This is my house, this is my door,','This is my bed, this is the floor.','This is a chair, a window too,','Come to my house, I will play with you!']},
  {th:'num2',he:'שִׁיר הַמִּסְפָּרִים הַגְּדוֹלִים',l:['Eleven, twelve, thirteen, fourteen,','Fifteen, sixteen, seventeen!','Eighteen, nineteen, here we go,','Twenty! Twenty! Now I know!']}];
@@ -127,8 +133,8 @@ const SONG={};SONGS.forEach(s=>{SONG[s.th]=s;});
 const tag=(p,list)=>list.map(x=>p+x);
 const LEVELS=[
  {id:'eng-voc',teach:1,newG:4,capG:6,units:THEMES.map(t=>({id:'v-'+t.id,he:t.he,p:t.p,items:tag('v:',t.w.map(w=>w[0]))}))},
- {id:'eng-abc',teach:1,newG:2,capG:3,units:LGROUPS.map(g=>({id:'l-'+g.join('').toLowerCase(),he:g.join(' '),p:'האותיות '+g.join(' '),items:g.flatMap(L=>['n:'+L,'c:'+L,'s:'+L])}))},
- {id:'eng-read',teach:1,newG:3,capG:5,units:[...CVC.map(([v,ws])=>({id:'r-'+v,he:'מִלִּים עִם '+v,p:`קריאת מילים קצרות עם ${v} (${ws.slice(0,3).join(', ')}...)`,items:tag('r:',ws)})),
+ {id:'eng-abc',teach:1,newG:2,capG:3,units:LGROUPS.map(g=>({id:'l-'+g.join('').toLowerCase(),he:`אוֹתִיּוֹת <span class="ltr">${g.join(' ')}</span>`,p:'האותיות '+g.join(' '),items:g.flatMap(L=>['n:'+L,'c:'+L,'s:'+L])}))},
+ {id:'eng-read',teach:1,newG:3,capG:5,units:[...CVC.map(([v,ws])=>({id:'r-'+v,he:`מִלִּים עִם <span class="ltr">${v}</span>`,p:`קריאת מילים קצרות עם ${v} (${ws.slice(0,3).join(', ')}...)`,items:tag('r:',ws)})),
    {id:'r-sight',he:'מִלִּים שֶׁרוֹאִים הַרְבֵּה',p:'מילים שכיחות: '+SIGHT.map(s=>s[0]).join(', '),items:tag('w:',SIGHT.map(s=>s[0]))},
    {id:'r-sent',he:'מִשְׁפָּטִים',p:'קריאת משפטים קצרים',items:tag('x:',SENT.map(s=>s[0]))}]},
  {id:'eng-talk',teach:1,newG:2,capG:3,units:PUNITS.map(u=>({id:u.id,he:u.he,p:u.p,items:tag('p:',u.w)}))},
@@ -188,7 +194,9 @@ function plan(save,lv,d){const L=LEVELS[lv];if(d==null)d=day();const E=st(save);
   const rest=shuf(old.filter(k=>!qs.some(q=>q.k===k)));while(qs.length<6&&rest.length)add(rest.pop(),0);
   return {lv,unit:cur,teach:fresh.filter(teaches),qs:spread(shuf(qs))};}
 /* no item twice in a row */
-function spread(a){for(let i=1;i<a.length;i++)if(a[i].k===a[i-1].k){const j=a.findIndex((x,jj)=>jj>i&&x.k!==a[i].k&&(jj+1>=a.length||a[jj+1].k!==a[i].k));if(j>0)[a[i],a[j]]=[a[j],a[i]];}return a;}
+function spread(a){const left=a.slice(),out=[];while(left.length){const last=out.length?out[out.length-1].k:null;
+  const cnt=k=>left.filter(x=>x.k===k).length;const ok=left.filter(x=>x.k!==last);const pool=ok.length?ok:left;const top=Math.max(...pool.map(x=>cnt(x.k)));
+  const c=pool.filter(x=>cnt(x.k)===top);const x=c[Math.floor(rnd()*c.length)];out.push(x);left.splice(left.indexOf(x),1);}return out;}
 
 /* ---------- question generators (pure data; the screen draws them) ----------
    q = {k, lv, type, opts:[...], ans, ...}. option kinds: {t:'pic',w} word picture · {t:'en',v} English text (spoken in turn) · {t:'let',v} a letter · {t:'he',v,emo} Hebrew meaning */
@@ -336,7 +344,7 @@ function qView(q){const w=q.w,qq=x=>`<div class="qq">${x}</div>`;
     case 'hear':return {pr:qq(QQ.hear),play:[['en',w]],ask:QQ.hear,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`};
     case 'say':return {pr:`${pic(w,'big')}${qq(QQ.say)}`,seq:true,ask:QQ.say,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`,after:[['en',w]]};
     case 'name':return {pr:qq(QQ.name),play:[['en',q.L]],ask:QQ.name,explain:letBig(q.L,q.L.toLowerCase())};
-    case 'case':return {pr:`<div class="e2let one">${L_(q.show)}</div>${qq(q.up?QQ.caseUp:QQ.caseLow)}`,play:[['en',q.L]],ask:q.up?QQ.caseUp:QQ.caseLow,explain:letBig(q.L,q.L.toLowerCase())};
+    case 'case':return {pr:`<div class="e2let e2one">${L_(q.show)}</div>${qq(q.up?QQ.caseUp:QQ.caseLow)}`,play:[['en',q.L]],ask:q.up?QQ.caseUp:QQ.caseLow,explain:letBig(q.L,q.L.toLowerCase())};
     case 'sound':return {pr:`${pic(w,'big')}${qq(q.end?QQ.soundEnd:QQ.sound)}`,play:[['en',w]],ask:q.end?QQ.soundEnd:QQ.sound,explain:`${letBig(q.L,q.L.toLowerCase())}<div class="e2ex">${L_(w)} = ${heOf(w)}</div>`,after:[['en',E2.sayIsFor(q.L,w)]]};
     case 'read':return {pr:`${tiles(w)}${qq(QQ.read)}`,hint:w,ask:QQ.read,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`,after:[['en',w]],noAuto:1};
     case 'spell':return {pr:qq(QQ.spell),play:[['en',w]],ask:QQ.spell,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`,cls:'e2tb'};
@@ -366,11 +374,11 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
   const b0={};P.qs.forEach(s=>{if(!(s.k in b0))b0[s.k]=E2.box(save,s.k);});P.teach.forEach(g=>E2.teachCard(g).items.forEach(k=>{b0[k]=0;}));
   const res={};const asked=new Set();
   let i=0,err=0,gems=0,nq=0;O.setScreen('sTal','sea',back);const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq e2');s.appendChild(wrap);
-  const title=()=>`אַנְגְּלִית: ${P.unit?P.unit.he:'חֲזָרָה'}`;
+  const title=()=>P.unit?P.unit.he:'חֲזָרָה';
   let cur=null;
   function render(){const st=steps[i];hush();T.hudT(title(),T.progressBar(i,steps.length));wrap.innerHTML='';
     if(st.t==='teach')return renderTeach(st.c);renderQ(st.s);}
-  function renderTeach(c){const v=teachView(c);E2.touch(save,c.items,d);O.persist();cur={ans:0};
+  function renderTeach(c){const v=teachView(c);window.__e2q=null;E2.touch(save,c.items,d);O.persist();cur={ans:0};
     const card=h('div','prq tqc e2teach',`<div class="e2head">${v.head}</div>${v.body}`);
     const pb=h('button','hintbtn',ICON.say+'<span>שׁוּב</span>');pb.onclick=()=>speakTeach(c,card,v);card.appendChild(pb);wrap.appendChild(card);
     const row=h('div','chs');const go=h('button','chb e2go',v.honor?'🗣️ <span>אָמַרְתִּי!</span>':ICON.play+'<span>הַמְשֵׁךְ</span>');
@@ -379,7 +387,7 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
   async function speakTeach(c,card,v){const tok=++TOK;
     if(v.tiles){const ts=[...card.querySelectorAll('.e2t')];for(const t of ts){if(tok!==TOK)return;ts.forEach(x=>x.classList.remove('on'));t.classList.add('on');await sleep(D(450));}if(tok!==TOK)return;ts.forEach(x=>x.classList.add('on'));}
     en(c.say);await waitSay(c.say,'en',tok);if(tok===TOK)card.querySelectorAll('.e2t').forEach(x=>x.classList.remove('on'));}
-  function renderQ(step){const q=E2.gen(save,step);const v=qView(q);let tries=0,lock=false,hinted=false;cur={ans:q.ans};
+  function renderQ(step){const q=E2.gen(save,step);window.__e2q=q;const v=qView(q);let tries=0,lock=false,hinted=false;cur={ans:q.ans};
     const card=h('div','prq tqc',v.pr);
     const playIt=()=>{if(v.seq)return playSeq();if(v.play)return talk(v.play);};
     if(v.play||v.seq){const pb=h('button','hintbtn',ICON.say+`<span>${v.seq?'שׁוּב':'הַשְׁמַע'}</span>`);pb.onclick=()=>playIt();card.appendChild(pb);}
@@ -396,7 +404,7 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
     if(!v.noAuto)setTimeout(async()=>{if(!card.isConnected)return;if(first&&v.ask){await talk([['he',v.ask]]);if(!card.isConnected)return;}playIt();},D(350));
     else if(first&&v.ask)setTimeout(()=>{if(card.isConnected)talk([['he',v.ask]]);},D(350));
     const settle=r=>{const k=q.k;const p=res[k];res[k]=p==='bad'||r==='bad'?'bad':p==='hint'||r==='hint'?'hint':'ok';E2.mark(save,k,res[k],b0[k]|0,d);O.persist();};
-    const reveal=()=>{if(v.explain){ex.hidden=false;ex.innerHTML=`<div class="cap">${v.explain}</div>`;}
+    const reveal=()=>{if(v.explain){ex.hidden=false;ex.innerHTML=`<div class="cap"><div class="e2ex">${v.explain}</div></div>`;}
       if(v.afterK){const tok=++TOK;karaoke(card.querySelector('.e2sent'),q.s,tok);}else if(v.after)talk(v.after);};
     function pick(k,b){if(lock||b.disabled)return;
       if(k===q.ans){lock=true;hush();b.classList.add('ok');sfx.ok(i);const g=tries||hinted?1:2;gems+=g;O.addGems(g,b);O.floatText(b,'+'+g);
@@ -411,12 +419,8 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
   render();}
 
 /* ---------- songs ---------- */
-function songs(back){hush();const list=E2.openSongs(O.save);if(list.length===1)return sing(list[0],back);
-  O.setScreen('sTal','sea',back);T.hudT('אַנְגְּלִית: שִׁירִים');O.sayNow='בחר שיר';const s=$('#sTal');s.innerHTML='';
-  s.appendChild(h('div','whead',`<span class="gd">🎵</span><h1>בְּחַר שִׁיר</h1>`));const g=h('div','acts');
-  const firstNew=list.find(x=>!(E2.st(O.save).g[x.th]|0));
-  list.forEach(x=>{const n=E2.st(O.save).g[x.th]|0;const c=h('button','actc'+(x===firstNew?' e2new':''),`<span class="ai">${pic(E2.THEMES.find(t=>t.id===x.th).w[0][0])}</span><span class="an">${x.he}</span><span class="st">${n?'🎵'.repeat(Math.min(3,n)):''}</span>`);
-    c.onclick=()=>{sfx.pop(2);sing(x,()=>songs(back));};g.appendChild(c);});s.appendChild(g);}
+/* one action: the song he has sung the least (a newly opened song first) */
+function songs(back){hush();const list=E2.openSongs(O.save);const g=E2.st(O.save).g;const min=Math.min(...list.map(x=>g[x.th]|0));return sing(list.find(x=>(g[x.th]|0)===min),back);}
 function sing(song,back){hush();O.setScreen('sTal','sea',back);T.hudT('אַנְגְּלִית: '+song.he);O.sayNow='הקשב ושיר איתי';const s=$('#sTal');s.innerHTML='';
   const wrap=h('div','tq e2');s.appendChild(wrap);
   const card=h('div','prq tqc e2song',`<div class="e2head">${song.he}</div><div class="qq">הַקְשֵׁב וְשִׁיר אִתִּי</div>${song.l.map(l=>`<div class="e2line">${wordsHTML(l)}</div>`).join('')}`);wrap.appendChild(card);
