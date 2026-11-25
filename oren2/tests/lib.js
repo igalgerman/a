@@ -1,0 +1,29 @@
+// Shared helpers for the Oren game test suites.
+// The page under test is oren2/index.html wrapped in a doctype (tests/.tmp/t.html), built by run.sh.
+const path = require('path'), fs = require('fs');
+const ROOT = path.resolve(__dirname, '..');          // oren2/
+const TMP = path.join(__dirname, '.tmp');
+const PAGE = path.join(TMP, 't.html');
+const SHOTDIR = path.join(TMP, 'shots');
+const wrap = html => '<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>' + html + '</body></html>';
+if (!fs.existsSync(PAGE)) { fs.mkdirSync(TMP, { recursive: true }); fs.writeFileSync(PAGE, wrap(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'))); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// screenshots only when SHOTS=1 (they are slow and only useful for eyeballing)
+function shot(page, opts) {
+  if (!process.env.SHOTS) return Promise.resolve();
+  fs.mkdirSync(SHOTDIR, { recursive: true });
+  return page.screenshot(opts);
+}
+// print PASS/FAIL lines + a RESULT summary line, set exit code
+function finish(name, lines) {
+  const pass = lines.filter(l => /^PASS/.test(l)).length, fail = lines.filter(l => /^FAIL/.test(l)).length;
+  lines.forEach(l => console.log(l));
+  console.log(`RESULT ${name} ${pass} ${fail}`);
+  if (fail || !pass) process.exitCode = 1;
+}
+const variant = process.argv[2] || 'desktop';
+const VIEWPORT = variant === 'phone' ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1366, height: 768 } };
+module.exports = { ROOT, TMP, PAGE, URL: 'file://' + PAGE, SHOTDIR, wrap, sleep, shot, finish, variant, VIEWPORT };
+// the pointing guide (coach marks) can cover dialogs mid-test; switch it off once the page is up
+module.exports.noCoach = async page => { await page.waitForFunction(() => window.TAL && window.TAL.S, null, { timeout: 15000 }); await page.evaluate(() => { window.TAL.S().coach = { home: 99, hub: 99, group: 99, map: 99 }; }); };

@@ -1,0 +1,40 @@
+// Missions control (today + template) and screen-time limits / lock screen.
+const L = require('./lib');
+const {chromium}=require('playwright');const URL=L.URL;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''));
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1366,height:768}});await ctx.addInitScript(()=>{try{localStorage.clear()}catch(e){};window.__fast=true;setInterval(()=>{const c=document.querySelector('#ov:not([hidden]) .pchoice .ucard.par');if(c)c.click();},80);});
+ const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL);await L.noCoach(p);await sleep(500);
+ await p.evaluate(()=>{const O=window.OREN,T=window.TAL;O.save.story.intro=1;T.S().prof={an:'cat',col:'#3a8fc4',love:'art'};O.showMap();});await sleep(300);
+ // create parent
+ await p.click('#sHome .parbtn');await p.fill('#pw1','abcd');await p.fill('#pw2','abcd');await p.keyboard.press('Enter');await sleep(300);
+ // missions tab: today controls
+ await p.evaluate(()=>window.TAL.parentPanel('plan'));await sleep(200);
+ const t0=await p.evaluate(()=>window.TAL.S().daily.t.slice());
+ await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'▲'}).click();await sleep(100);const t1=await p.evaluate(()=>window.TAL.S().daily.t.slice());ok('reorder today',t1[0]===t0[1]&&t1[1]===t0[0],JSON.stringify([t0,t1]));
+ await p.locator('.tdrow').nth(0).locator('.pchip',{hasText:'בוצע'}).click();await sleep(100);ok('mark done',await p.evaluate(()=>window.TAL.S().daily.done[0]===1));
+ await p.locator('.tdrow').nth(2).locator('.pchip',{hasText:'הסר'}).click();await sleep(100);ok('remove step',await p.evaluate(()=>window.TAL.S().daily.t.length===2));
+ await p.locator('#sPar .pchip',{hasText:'חשבון'}).first().click();await sleep(100);ok('add step',await p.evaluate(()=>window.TAL.S().daily.t.length===3));
+ // template with specific activity
+ await p.evaluate(()=>{document.querySelectorAll('#sPar details').forEach(d=>d.open=true);});await sleep(150);
+ await p.evaluate(()=>{const s=document.querySelectorAll('#sPar .psel');s[1].value='act:art-mix';s[1].dispatchEvent(new Event('change'));});await p.locator('#sPar .bigbtn',{hasText:'שמירת התבנית'}).click();await sleep(1100);
+ ok('template saved with specific activity',await p.evaluate(()=>JSON.stringify(window.TAL.S().set.plan).includes('act:art-mix')));
+ const nd=await p.evaluate(()=>{delete window.TAL.S().daily;return window.TAL.dailyEnsure().t;});ok('new day uses template',nd[1]==='art-mix',JSON.stringify(nd));
+ // time tab
+ await p.evaluate(()=>window.TAL.parentPanel('time'));await sleep(200);await p.locator('#sPar .pchip',{hasText:'30'}).first().click();await sleep(100);
+ ok('daily limit set',await p.evaluate(()=>window.TAL.S().set.lim.daily===30));
+ await p.locator('#sPar .pchip',{hasText:'+10'}).click();await sleep(100);ok('today +10',await p.evaluate(()=>window.TAL.S().set.lim.today.min===40));
+ await p.locator('#sPar .pchip',{hasText:'ביטול השינוי'}).click();await sleep(100);
+ await p.locator('#sPar .bigbtn',{hasText:'יציאה'}).click();await sleep(300);
+ ok('home shows time left',(await p.textContent('#sHome .hbub2')).includes('30 דַּקּוֹת'));
+ // warning at 5 minutes left
+ await p.evaluate(()=>{window.__toasts=[];new MutationObserver(m=>m.forEach(r=>r.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('toast'))window.__toasts.push(n.textContent);}))).observe(document.body,{childList:true});const T=window.TAL,O=window.OREN;T.S().time[O.today()]=26*60;});await sleep(5600);ok('5-minute warning toast',await p.evaluate(()=>window.__toasts.some(t=>t.includes('דַּקּוֹת'))));
+ // time up
+ await p.evaluate(()=>{const T=window.TAL,O=window.OREN;T.S().time[O.today()]=31*60;});await sleep(5600);ok('time-up lock shown',await p.locator('.tlock').count()===1);
+ await L.shot(p,{path:L.SHOTDIR+'/timeup.png'});
+ await p.evaluate(()=>{window.OREN.showMap();document.querySelector('#ov').hidden=true;});await sleep(5600);ok('lock persists (kid cannot dismiss)',await p.locator('.tlock').count()===1);
+ await p.locator('.tlock .bigbtn').click();await sleep(150);await p.locator('#pw1').click();await p.keyboard.type('abcd');await p.keyboard.press('Enter');await sleep(200);await p.locator('#ov .bigbtn',{hasText:'+20'}).click();await sleep(300);
+ ok('parent adds time → unlocked',await p.locator('.tlock').count()===0&&await p.evaluate(()=>window.TAL.S().set.lim.today.min===51));
+ await sleep(5600);ok('stays unlocked after adding time',await p.locator('.tlock').count()===0);
+ // bedtime
+ await p.evaluate(()=>{const l=window.TAL.S().set.lim;l.bed=new Date().getHours();l.bedOff=null;});await sleep(5600);ok('bedtime lock',await p.locator('.tlock').count()===1&&(await p.textContent('.tlock')).includes('לָנוּחַ'));
+ ok('no errors',!errs.length,errs.join('|'));await b.close();L.finish('time-missions-'+L.variant,res);})();
