@@ -12,8 +12,9 @@
            SITE=https://... node oren2/cf/tools/pregen.js                                                           */
 const path = require('path'), fs = require('fs'), os = require('os');
 if (process.env.HTTPS_PROXY && !process.env.NODE_USE_ENV_PROXY) {   // Node's fetch reads the proxy only with this flag
-  const r = require('child_process').spawnSync(process.execPath, process.argv.slice(1), { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1' } });
-  process.exit(r.status == null ? 1 : r.status);
+  const c = require('child_process').spawn(process.execPath, process.argv.slice(1), { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1' } });
+  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => c.kill(sig));
+  c.on('exit', code => process.exit(code == null ? 1 : code)); return;
 }
 const ROOT = path.resolve(__dirname, '..', '..');                  // oren2/
 const SITE = (process.env.SITE || 'https://oren-game.pages.dev').replace(/\/$/, '');
@@ -73,7 +74,7 @@ async function collect() {
     const acts = await p.evaluate(() => window.TAL.BUILD.flatMap(b => [['B', b.id], ...b.acts.map(a => ['A', a.id])]));
     for (const [k, id] of acts) {
       if (k === 'B') { log('building ' + id); await ev(`window.TAL.openBuilding(window.TAL.BUILD.find(b=>b.id==='${id}'))`, 250); continue; }
-      for (let rep = 0; rep < 3; rep++) {
+      for (let rep = 0; rep < (vp.isMobile ? 1 : 3); rep++) {
         await ev(`(()=>{document.querySelector('#ov').hidden=true;const a=window.TAL.ACT['${id}'];if(!a.avail||a.avail())a.run(()=>{});})()`, 300);
         for (let k2 = 0; k2 < 40; k2++) {
           await ev(`(()=>{window.__sweep();const q=window.__quiz;if(q&&q.wrap.isConnected){const c=q.wrap.querySelector('.chs');if(c&&c.children[q.ans]){window.__fast=true;c.children[q.ans].click();window.__fast=false;}return;}
@@ -98,7 +99,9 @@ async function collect() {
       return out; }, DATA);
     (await p.evaluate(() => window.__said)).concat(stat).forEach(t => t && SAID.add(t.slice(0, 400).trim()));
     console.log('collected', SAID.size, 'so far (' + (vp.isMobile ? 'phone' : 'desktop') + ')'); await ctx.close(); }
-  await b.close(); const L = [...SAID].filter(Boolean); fs.writeFileSync(LIST, JSON.stringify(L));
+  /* random math questions (new numbers every time) are skipped: made on first use, then cached */
+  const RANDOM = /שווה כמה|כמה שווה|ועוד כמה|כמה כפול|פותרים במאונך|^מה השעה\?|קטן, שווה, גדול$|^\d+ \? \d+|בבוקר, ועוד \d+|(התשובה|זריקה|לשחות)\. \d|חילק \d+|^‎?\d+ : \?/;
+  await b.close(); const L = [...SAID].filter(t => t && !RANDOM.test(t)); fs.writeFileSync(LIST, JSON.stringify(L));
   console.log('sentences', L.length, 'chars', L.reduce((a, t) => a + t.length, 0), '→', LIST); return L;
 }
 
