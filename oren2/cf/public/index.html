@@ -2315,6 +2315,14 @@ button:focus:not(:focus-visible){outline:none}
 .cbn{width:min(560px,94vw,calc(100vh - 300px))}
 /* "Oren the teacher" fits on a laptop screen: keypad in two rows */
 @media (min-width:761px) and (max-height:900px){#sTeach .pad{grid-template-columns:repeat(6,62px);gap:8px}#sTeach .key{height:54px;font-size:27px}}
+/* ===== QA pass ===== */
+/* kingdom shop: item pictures had zero width */
+.shop .opt .si svg{width:34px;height:34px;max-width:none;max-height:none}
+/* multiplication table: readable numbers on a solid card */
+.tgrid{background:rgba(255,255,255,.85);padding:6px;box-shadow:0 5px 0 rgba(0,0,0,.15)}
+.tcell:not(.m){background:#f6f1e4;color:#5a646d}
+@media (max-width:760px){.tgrid{gap:2px;padding:3px}.tcell{font-size:13px}}
+.trw{display:flex;align-items:center;gap:10px;direction:ltr}.tre{font-size:30px}
 
 /* ===== 🕹️ arcade ===== */
 .arc{width:min(980px,100%);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 16px 22px;color:#fff;
@@ -2891,7 +2899,7 @@ function circuit(back){let wire=false,sw=false;O.setScreen('sTal','city',back);T
 /* ice-water-steam */
 function states(back){let temp=1;O.setScreen('sTal','mount',back);T.hudT('קֶרַח, מַיִם וְאֵדִים');const s=$('#sTal');s.innerHTML='';
   const v=h('div','statev');const rng=h('input','');rng.type='range';rng.min=0;rng.max=2;rng.value=1;rng.id='tempR';rng.className='trng';rng.setAttribute('aria-label','חום');
-  const lab=h('div','lcap');const go=h('button','bigbtn',ICON.play+'<span>לַשְּׁאֵלוֹת</span>');s.append(v,rng,lab,go);
+  const lab=h('div','lcap');const go=h('button','bigbtn',ICON.play+'<span>לַשְּׁאֵלוֹת</span>');const rw=h('div','trw');rw.append(h('span','tre','❄️'),rng,h('span','tre','🔥'));s.append(v,rw,lab,go);
   const draw=()=>{temp=+rng.value;v.innerHTML=temp===0?'<div class="ice">🧊</div>':temp===1?'<div class="wat">💧💧💧</div>':'<div class="steam">♨️</div>';lab.innerHTML=['קַר מְאוֹד: הַמַּיִם קוֹפְאִים לְקֶרַח','חַמִּים: מַיִם נוֹזְלִים','חַם מְאוֹד: הַמַּיִם רוֹתְחִים וְהוֹפְכִים לְאֵדִים'][temp];};
   rng.oninput=()=>{draw();sfx.pop(temp+1);};draw();
   go.onclick=()=>{const Q=[['מָה קוֹרֶה לְקֶרַח בַּשֶּׁמֶשׁ?','הוּא נָמֵס לְמַיִם',['הוּא נִהְיֶה אֶבֶן','הוּא נִהְיֶה גָּדוֹל']],['מָה קוֹרֶה לְמַיִם בַּמַּקְפִּיא?','הֵם קוֹפְאִים לְקֶרַח',['הֵם רוֹתְחִים','הֵם נֶעֱלָמִים']],['מָה יוֹצֵא מִקֻּמְקוּם רוֹתֵחַ?','אֵדִים',['קֶרַח','חוֹל']],['קֶרַח, מַיִם וְאֵדִים הֵם...','אוֹתוֹ חֹמֶר',['שְׁלוֹשָׁה דְּבָרִים שׁוֹנִים לְגַמְרֵי','סוּגִים שֶׁל אֶבֶן']]];let k=0;
