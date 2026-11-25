@@ -1,0 +1,53 @@
+/* ===== curriculum gaps: nikud ladder, first sound, spelling, word race, final letters, math visuals ===== */
+.gp-hi{color:#c0392b;background:#ffe9a8;padding:0 2px}
+.gp-ear{font-size:54px;line-height:1}
+.gp-syl{font-size:88px;color:#c0392b}
+.gp-ic{font-family:var(--read);font-size:40px;font-weight:700;color:#c0392b}
+.gp-gd{font-family:var(--read);font-size:44px;font-weight:700;color:#c0392b;line-height:1}
+.gp-intro .gp-new{background:#ffcf4d;font-weight:900;padding:2px 14px;font-size:20px}
+.gp-intro .gp-sign{font-family:var(--read);font-size:96px;font-weight:700;line-height:1.15;color:#c0392b;letter-spacing:12px}
+.gp-exs{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.gp-exs .chb{display:flex;align-items:center;gap:8px}.gp-exs .pic svg{width:40px;height:40px}
+.gp-ladder{display:flex;flex-direction:column-reverse;gap:8px;width:min(460px,100%)}
+.gp-rung{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:10px;padding:8px 14px;background:var(--birch);font-weight:900;box-shadow:inset -4px -4px 0 rgba(0,0,0,.14),inset 4px 4px 0 rgba(255,255,255,.55),0 5px 0 rgba(0,0,0,.22);text-align:right}
+.gp-rung .gp-rs{font-family:var(--read);font-size:40px;color:#c0392b;line-height:1.1}
+.gp-rung .gp-rn{font-family:var(--read);font-size:22px}
+.gp-rung .st{display:flex;gap:2px;direction:ltr}.gp-rung .st svg{width:18px;height:18px}
+.gp-rung.cur{outline:4px solid var(--ok);outline-offset:2px}
+.gp-rung.off{opacity:.5;filter:grayscale(.6)}
+.gp-sp .pic svg{width:72px;height:72px}
+.gp-tiles{flex-wrap:wrap;justify-content:center;max-width:620px}
+.gp-tiles .chb{min-width:70px}
+.gp-done{color:var(--ok-d)}
+.gp-best{font-family:var(--read);font-size:24px;background:#fff3c4;padding:6px 16px}
+.gp-time{width:min(560px,92%);height:16px;background:#e7dcc4;box-shadow:inset 0 0 0 3px #1d2631}
+.gp-time i{display:block;height:100%;width:100%;background:var(--ok);transition:width .2s linear}
+.gp-race{min-width:min(420px,92%)}
+.gp-race .bigw{font-size:84px}
+.gp-cnt{font-size:26px;font-weight:900;color:var(--ok-d)}
+.gp-fin{font-family:var(--read);font-size:20px;background:#fff3c4;padding:4px 12px;text-align:center}
+.gp-fin b{font-size:26px}
+/* math: picture graph, shapes, ruler, scale */
+.pgraph{display:inline-flex;gap:4px;background:#fff;padding:8px;box-shadow:inset 0 0 0 3px #c9b48a}
+.pgraph.rows{flex-direction:column}
+.pgraph.cols{flex-direction:row;align-items:flex-end}
+.pgraph .pgr{display:flex;gap:3px;align-items:center}
+.pgraph.cols .pgr{flex-direction:column-reverse}
+.pgraph .pgl{background:#fff3c4;box-shadow:inset 0 0 0 2px #e3c77a}
+.pgraph.rows .pgl{margin-left:6px}.pgraph.cols .pgl{margin-top:6px}
+.pgraph .pgc{width:30px;height:30px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #e7dcc4}
+.pgraph .pgc svg,.pgraph .pgl svg{width:24px;height:24px}
+.chb.pgo{min-width:84px;height:78px}.chb.pgo svg{width:46px;height:46px}
+.chb.shp{min-width:110px;height:auto;min-height:104px;padding:6px}.chb.shp svg{width:90px;height:90px}
+.prq svg.shp1{width:150px;height:150px}
+.prq svg.ruler{width:min(520px,82vw);height:auto}
+.prq svg.scale{width:min(300px,70vw);height:auto}
+.chb.pen{min-width:200px;height:auto;min-height:60px;padding:6px 10px}.chb.pen svg{width:200px;height:44px}
+.gp-scales{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.gp-scales svg.scale{width:min(240px,42vw)}
+.chb.cube{min-width:90px}.chb.cube svg{width:50px;height:50px}
+@media (max-width:760px){
+  .gp-syl{font-size:66px}.gp-intro .gp-sign{font-size:70px}.gp-race .bigw{font-size:60px}.gp-ear{font-size:40px}
+  .pgraph .pgc{width:24px;height:24px}.pgraph .pgc svg,.pgraph .pgl svg{width:19px;height:19px}
+  .chb.shp{min-width:88px;min-height:86px}.chb.shp svg{width:72px;height:72px}.prq svg.shp1{width:120px;height:120px}
+  .chb.pen{min-width:150px}.chb.pen svg{width:150px;height:34px}
+}
