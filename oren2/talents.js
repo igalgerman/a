@@ -1030,7 +1030,7 @@ function timeTab(box){const l=LIM(),st=SET();const lim=limitToday(),used=usedMin
 /* enforcement on the kid side */
 let warned='',lockEl=null;
 function timeUp(kind){if(lockEl&&lockEl.isConnected)return;O.hush&&O.hush();O.musicStop();const d=T.S().daily;const n=d?d.done.filter(Boolean).length:0;
-  lockEl=h('div','tlock',`<div class="card"><div class="callp">${kind==='bed'?'🌙':'⏰'}</div><h2>${kind==='bed'?'זְמַן לָנוּחַ':'הַזְּמַן שֶׁל הַיּוֹם נִגְמַר'}</h2><div class="sub">כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן!${n?` סִיַּמְתָּ ${n} ${n===1?'מְשִׂימָה':'מְשִׂימוֹת'}.`:''}<br>הַכֹּל שָׁמוּר. נִתְרָאֶה מָחָר 👋</div></div>`);
+  lockEl=h('div','tlock',`<div class="card"><div class="callp">${kind==='bed'?'🌙':'⏰'}</div><h2>${kind==='bed'?'זְמַן לָנוּחַ':'הַזְּמַן שֶׁל הַיּוֹם נִגְמַר'}</h2><div class="sub">כָּל הַכָּבוֹד הַיּוֹם, אוֹרֶן!${n?` סִיַּמְתָּ ${n===1?'מְשִׂימָה אַחַת':`${n} מְשִׂימוֹת`}.`:''}<br>הַכֹּל שָׁמוּר. נִתְרָאֶה מָחָר 👋</div></div>`);
   const row=h('div','btnrow');const pb=h('button','bigbtn plain sm','🔒 <span>הוֹרֶה: עוֹד זְמַן</span>');pb.onclick=()=>login(()=>{const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card"><h2>כמה זמן להוסיף להיום?</h2></div>';const r=h('div','btnrow');
       [[10,'+10 דק׳'],[20,'+20 דק׳'],[30,'+30 דק׳']].forEach(([v,n2])=>{const b=h('button','bigbtn sm','<span>'+n2+'</span>');b.onclick=()=>{const l=LIM();l.today={d:O.today(),min:usedMin()+v};if(kind==='bed')l.bedOff=O.today();O.persist();ov.hidden=true;parentOn=false;lockEl.remove();lockEl=null;document.body.classList.remove('tlocked');if((O.save.snd|0)>=2)O.musicStart();};r.appendChild(b);});
       const c=h('button','bigbtn plain sm','<span>ביטול</span>');c.onclick=()=>{ov.hidden=true;parentOn=false;};r.appendChild(c);ov.firstChild.appendChild(r);});
@@ -1038,7 +1038,7 @@ function timeUp(kind){if(lockEl&&lockEl.isConnected)return;O.hush&&O.hush();O.mu
 setInterval(()=>{if(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidden)return;const l=LIM();const lim=limitToday(),used=usedMin();
   if(l.bed&&new Date().getHours()>=l.bed&&l.bedOff!==O.today()){if($('#sPlay').hidden)timeUp('bed');return;}
   if(!lim)return;const left=lim-used;
-  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ עוֹד ${left} דַּקּוֹת לְסִיּוּם הַיּוֹם`);O.say(`עוד ${left} דקות לסיום היום`);}
+  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ ${left===1?'עוֹד דַּקָּה אַחַת':`עוֹד ${left} דַּקּוֹת`} לְסִיּוּם הַיּוֹם`);O.say(`עוד ${left} דקות לסיום היום`);}
   if(left<=0){if(!$('#sPlay').hidden&&used<lim+3)return;timeUp('time');}},5000);
 /* --- voice --- *//* --- voice --- */
 const SAMPLE='שָׁלוֹם אוֹרֶן! הַיּוֹם נִלְמַד יַחַד. הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא. כַּמָּה זֶה שָׁלוֹשׁ וְעוֹד אַרְבַּע? נָכוֹן, שֶׁבַע!';

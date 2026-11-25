@@ -45,7 +45,7 @@ function countdown(F,go){const c=h('div','cdown');F.field.appendChild(c);let n=3
   else{c.textContent='קָדִימָה!';c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');sfx.ok(2);setTimeout(()=>{c.remove();go();},D(550));}};tick();}
 function finish(id,score,tk,stars,extra){if(cur){cur.stop();cur=null;}T.setKey(null);const a=A();const best=a.best[id]|0;const rec=score>best;if(rec)a.best[id]=score;
   a.tickets=(a.tickets|0)+tk;a.plays=(a.plays|0)+1;T.S().arcT=Date.now();T.record('arc-'+id,stars,{b:score});
-  T.result({title:rec&&best?'שִׂיא חָדָשׁ! 🏆':'כָּל הַכָּבוֹד!',sub:`נִקּוּד: ${score}${extra||''}`,stars,gems:0,extra:`<div class="tkwin">🎟️ +${tk}</div>`,back:()=>openArcade(),again:()=>start(id)});}
+  T.result({title:rec&&best?'שִׂיא חָדָשׁ! 🏆':'כָּל הַכָּבוֹד!',sub:`נְקֻדּוֹת: ${score}${extra||''}`,stars,gems:0,extra:`<div class="tkwin">🎟️ +${tk}</div>`,back:()=>openArcade(),again:()=>start(id)});}
 const lvl=id=>{const b=A().best[id]|0;return b;};
 const COLS=[['#ff4b5c','אֲדֻמִּים'],['#3d8bff','כְּחֻלִּים'],['#ffd23f','צְהֻבִּים'],['#3cd070','יְרֻקִּים']];
 /* ---------- a. balloons ---------- */
@@ -138,7 +138,7 @@ function basket(){const F=frame('basket');const best=lvl('basket');const N=8;let
   const bar=h('div','pbar3',`<i class="zone" style="left:${50-zone/2}%;width:${zone}%"></i><i class="cur"></i>`);const shoot=h('button','bigbtn gold shoot','🏀 <span>זְרֹק!</span>');
   const area=h('div','barea');const msg=h('div','kmsg','');F.field.append(hoop,ball,msg,area);
   const ask=()=>{phase='q';q=qGen(best);area.innerHTML='';ball.className='bball';msg.textContent='';
-    F.rule(`🏀 עֲנֵה נָכוֹן וְתַקְבֵּל זְרִיקָה: <span class="big ltr">${q.txt} = ?</span>`,'ענה נכון ותקבל זריקה. '+sayQ(q.txt));F.time(`🏀 ${k+1}/${N}`);
+    F.rule(`🏀 עֲנֵה נָכוֹן וּתְקַבֵּל זְרִיקָה: <span class="big ltr">${q.txt} = ?</span>`,'ענה נכון ותקבל זריקה. '+sayQ(q.txt));F.time(`🏀 ${k+1}/${N}`);
     area.appendChild(answers(q,(ok,b,row)=>{if(phase!=='q')return;if(ok){b.classList.add('ok');sfx.ok(k);setTimeout(()=>{if(alive)aim();},D(350));}else{b.classList.add('bad');b.disabled=true;sfx.no();phase='x';
       setTimeout(()=>{row.querySelectorAll('.ab').forEach(x=>{if(+x.textContent===q.ans)x.classList.add('ok');});msg.textContent='הַתְּשׁוּבָה: '+q.ans;setTimeout(next,D(1300));},D(300));}}));};
   const aim=()=>{phase='aim';area.innerHTML='';area.append(bar,shoot);F.rule('👆 לְחַץ "זְרֹק!" כְּשֶׁהַפַּס בַּיָּרֹק!','לחץ זרוק כשהפס בירוק');meter=0;dir=1;last=performance.now();T.setKey(e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();throwIt();}});requestAnimationFrame(swing);};
@@ -159,7 +159,7 @@ function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=
   const ask=()=>{q=qGen(best);area.innerHTML='';F.rule(`🏊 עֲנֵה מַהֵר כְּדֵי לִשְׂחוֹת: <span class="big ltr">${q.txt} = ?</span>`,'ענה מהר כדי לשחות. '+sayQ(q.txt));
     area.appendChild(answers(q,(good,b)=>{if(!alive)return;if(good){you++;ok++;F.score(ok);b.classList.add('ok');me.classList.remove('stroke');void me.offsetWidth;me.classList.add('stroke');sfx.pop(4);put();if(you>=N)return end(true);setTimeout(()=>{if(alive)ask();},D(250));}
       else{b.classList.add('bad');b.disabled=true;sfx.no();}}));};
-  const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מַקְדִּים':'🏊 מוֹבִיל!');if(rival>=1)return end(false);requestAnimationFrame(loop);};
+  const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מוֹבִיל':'🏊 מוֹבִיל!');if(rival>=1)return end(false);requestAnimationFrame(loop);};
   function end(win){if(!alive)return;alive=false;won=win;const st=win?(rival<.75?3:2):1;finish('swim',ok,ok+(win?5:0),st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)ok=sc;end(ok>=N);},hit:()=>{const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();},get score(){return ok;}};
   put();ask();countdown(F,()=>{last=performance.now();requestAnimationFrame(loop);});}
