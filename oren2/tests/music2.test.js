@@ -85,6 +85,7 @@ ok('melodies: every bar has 4 beats', E.parseMel && ['2q 1q 0h | 2q 1q 0h', '0q 
   for (let lv = 2; lv <= 5; lv++) {
     await p.evaluate(lv => { document.querySelector('#ov').hidden = true; window.MUSIC2.setLevel('read', lv); window.TAL.ACT['mus2-read'].run(() => {}); }, lv); await L.sleep(150);
     if (lv === 5) await shot('read-bass');
+    if (lv === 4) ok('4 answers are laid out as a balanced group (2x2 on phones)', await p.evaluate(() => { const c = document.querySelector('#sTal .chs'); if (!c || c.children.length !== 4) return true; if (!c.classList.contains('g4')) return false; const tops = [...c.children].map(b => Math.round(b.getBoundingClientRect().top)); const rows = {}; tops.forEach(t => rows[t] = (rows[t] || 0) + 1); return Object.values(rows).every(n => n === 2 || n === 4); }));
     const done = await playThrough('read', 'mus2-read', () => { const q = window.__quiz; if (!q || !q.wrap.isConnected) return; const c = q.wrap.querySelector('.chs'); if (c && c.children[q.ans]) c.children[q.ans].click(); });
     ok(`reading level ${lv} plays through`, done);
   }

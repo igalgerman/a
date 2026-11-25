@@ -103,7 +103,7 @@ const KIND={
   choice(q,wrap,done){let tries=0,lock=false;const card=h('div','prq tqc',q.pr);
     if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמַע'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
     wrap.appendChild(card);O.sayNow=q.say||T.plainHe(q.pr);if(T.rdQ&&!q.play)T.rdQ(q,card);
-    const row=h('div','chs');q.opts.forEach((op,k)=>{const b=h('button','chb tx '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
+    const row=h('div','chs'+(q.opts.length===4?' g4':''));q.opts.forEach((op,k)=>{const b=h('button','chb tx '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     if(q.play&&q.auto)setTimeout(()=>{if(card.isConnected)q.play();},D(400));
     function pickA(k,b){if(lock||b.disabled)return;
       if(k===q.ans){if(T.rdA&&!q.play)T.rdA(q,tries,b);lock=true;b.classList.add('ok');sfx.ok(tries);if(q.after)q.after();done(tries,!tries,b);return;}

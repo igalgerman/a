@@ -62,6 +62,8 @@ E.PUZ.forEach((f, i) => {
   for (let k = 0; k < 6; k++) {
     await open('chess-moves'); await L.sleep(150);
     if (k === 0 || k === 4) await shot('demo-' + k);
+    if (k === 0) ok('demo: one green "▶ הַמְשֵׁךְ"', await p.evaluate(() => { const b = document.querySelectorAll('#sTal .bigbtn'); return b.length === 1 && b[0].textContent.includes('הַמְשֵׁךְ'); }));
+    if (k === 0) ok('one instruction line per card (no second line)', await p.evaluate(() => !document.querySelector('#sTal .czsub')));
     const u = await p.evaluate(() => document.querySelector('#sTal .czhead b').textContent);
     await p.evaluate(() => window.CHESS.solve()); await L.sleep(150);   // "let's try"
     // the squares marked as targets are exactly the engine's legal destinations, and a wrong tap is refused
@@ -125,6 +127,9 @@ E.PUZ.forEach((f, i) => {
   // ---- 6. game vs the gentle bot ----
   ok('game opens when all pieces are learned', (await acts()).includes('chess-play'));
   await open('chess-play'); await L.sleep(200); await shot('game-start');
+  ok('game: one instruction line + a big arrow hint for the first move; no a–h/1–8 labels', await p.evaluate(() => document.querySelectorAll('#sTal .czarrow').length === 1 && document.querySelectorAll('#sTal .czq,#sTal .czsub').length === 0 && !document.querySelector('#sTal .rk,#sTal .fl') && !/[a-h][1-8]|\b[1-8]\b/.test(document.querySelector('#sTal .czb').textContent)));
+  await p.evaluate(() => { const C = window.CHESS, E = C.ENG; C.cur.play(E.legal(C.cur.pos).find(m => E.sqName(m.f) === 'e2' && E.sqName(m.t) === 'e4')); });
+  ok('game: the arrow goes away after the first move', await p.evaluate(() => !document.querySelector('#sTal .czarrow')));
   const g = await p.evaluate(async () => {
     const C = window.CHESS, E = C.ENG; const sleep = ms => new Promise(r => setTimeout(r, ms));
     let moves = 0, illegal = 0;

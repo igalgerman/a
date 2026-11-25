@@ -90,7 +90,7 @@ function boardEl(onTap){const el=h('div','czb');for(let row=0;row<8;row++)for(le
 /* mk: {dots:Set, caps:Set, good:Set, sel, chk, last:[from,to], hint} */
 function paint(el,b,mk={}){el.querySelectorAll('.cq').forEach(c=>{const s=+c.dataset.s,pc=b[s];
   c.className='cq '+(c.classList.contains('dk')?'dk':'lt')+(mk.sel===s?' sel':'')+(mk.chk===s?' chk':'')+(mk.last&&mk.last.includes(s)?' last':'')+(mk.good&&mk.good.has(s)?' good':'')+(mk.hint===s?' hint':'');
-  c.innerHTML=(pc?piece(pc):'')+((mk.dots&&mk.dots.has(s))?`<i class="${pc?'ring':'dot'}"></i>`:'')+((s&7)===0?`<b class="rk">${(s>>3)+1}</b>`:'')+((s>>3)===0?`<b class="fl">${FILES[s&7]}</b>`:'');});}
+  c.innerHTML=(pc?piece(pc):'')+((mk.dots&&mk.dots.has(s))?`<i class="${pc?'ring':'dot'}"></i>`:'');});}
 const flashSq=(el,s,cls='bad')=>{const c=el.querySelector(`.cq[data-s="${s}"]`);if(!c)return;c.classList.remove(cls);void c.offsetWidth;c.classList.add(cls);setTimeout(()=>c.classList.remove(cls),D(600));};
 const say=t=>{O.sayNow=T.spk?T.spk(t):t;};
 
@@ -130,7 +130,7 @@ function nameTask(u){const opts=shuffle([u,...shuffle(ORDER.filter(x=>x!==u)).sl
   return choiceTask(`<div class="czbig">${piece(Math.random()<.5?u:u.toLowerCase())}</div><div class="qq">אֵיזֶה כְּלִי זֶה?</div>`,opts.map(x=>NM[x][0]),opts.indexOf(u));}
 function findTask(pc){return (wrap,done)=>{const u=pc.toUpperCase(),c=side(pc),[ind,def,fem]=NM[u];const uniq=u==='K'||u==='Q';
   const txt=uniq?`אֵיפֹה ${def} ${COL[c][1][fem]}? גַּע ${fem?'בָּהּ':'בּוֹ'}.`:`אֵיפֹה יֵשׁ ${ind} ${COL[c][0][fem]}? גַּע בּוֹ.`;
-  prompt(wrap,txt,c==='w'?'הַלְּבָנִים לְמַטָּה, קָרוֹב אֵלֶיךָ.':'');const b=fromFEN(START).b;let tries=0,lock=false;
+  prompt(wrap,txt);const b=fromFEN(START).b;let tries=0,lock=false;
   const el=boardEl((s)=>{if(lock)return;if(b[s]===pc){lock=true;paint(el,b,{good:new Set([s])});sfx.ok(tries);done(tries,el.querySelector(`[data-s="${s}"]`));return;}
     tries++;sfx.no();flashSq(el,s);if(tries>=3){lock=true;paint(el,b,{good:new Set(b.map((x,k)=>x===pc?k:-1).filter(k=>k>=0))});done(2,null);}});
   paint(el,b);wrap.appendChild(el);return {solve:()=>el.querySelector(`[data-s="${b.indexOf(pc)}"]`).click()};};}
@@ -151,7 +151,7 @@ function moveBoard(u,k){const b=empty();const W=u;let s;
       if(u==='P'&&Math.random()<.5){const fr=at(s&7,(s>>3)+1);if(fr>=0&&!b[fr]&&k===3)b[fr]='p';}}}
   return {b,s};}
 function moveTask(u,k){return (wrap,done)=>{let su=moveBoard(u,k);while(!reach(su.b,su.s).size)su=moveBoard(u,k);const {b,s}=su;const tgt=reach(b,s);const [ind,def,fem]=NM[u];
-  prompt(wrap,`לְאָן ${def} ${fem?'יְכוֹלָה':'יָכוֹל'} לָלֶכֶת? גַּע בְּכָל הַמִּשְׁבָּצוֹת.`,k===2?'הַכֵּלִים שֶׁלְּךָ חוֹסְמִים אֶת הַדֶּרֶךְ.':k===3&&u!=='K'?'אֶת הַכֵּלִים הַשְּׁחֹרִים אֶפְשָׁר לֶאֱכֹל!':'');
+  prompt(wrap,`לְאָן ${def} ${fem?'יְכוֹלָה':'יָכוֹל'} לָלֶכֶת? גַּע בְּכָל הַמִּשְׁבָּצוֹת.`);
   const got=new Set();let errs=0,lock=false;const msg=note(wrap);
   const el=boardEl(t=>{if(lock||t===s||got.has(t))return;if(tgt.has(t)){got.add(t);sfx.pop(2);paint(el,b,{sel:s,dots:got});if(got.size===tgt.size){lock=true;msg.textContent='מָצָאתָ אֶת כֻּלָּן!';sfx.ok(errs);done(errs>3?2:errs>1?1:0,el);}return;}
     errs++;sfx.no();flashSq(el,t);if(errs>=5){lock=true;paint(el,b,{sel:s,dots:tgt});msg.textContent='הִנֵּה כָּל הַמִּשְׁבָּצוֹת.';done(2,null);}});
@@ -159,7 +159,7 @@ function moveTask(u,k){return (wrap,done)=>{let su=moveBoard(u,k);while(!reach(s
 function demo(u,back,go){O.setScreen('sTal','valley',back);T.hudT(NM[u][0]);const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq cz');s.appendChild(wrap);
   const b=empty();const sq=u==='P'?sqOf('d2'):sqOf('d4');b[sq]=u;const card=h('div','prq tqc czq',`<div class="czhead">${piece(u)}<b>${NM[u][1]}</b></div><div class="qq">${RULE[u]}</div>`);wrap.appendChild(card);
   const el=boardEl(null);el.classList.add('sm');paint(el,b,{sel:sq,dots:reach(b,sq)});wrap.appendChild(el);say(RULE[u]);O.say(T.spk?T.spk(RULE[u]):RULE[u]);
-  const bt=h('button','bigbtn',ICON.play+'<span>בּוֹא נְנַסֶּה!</span>');bt.onclick=()=>{sfx.pop(2);go();};wrap.appendChild(bt);CUR={solve:()=>bt.click()};}
+  const bt=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');bt.onclick=()=>{sfx.pop(2);go();};wrap.appendChild(bt);CUR={solve:()=>bt.click()};}
 function runMoves(back){const cz=ST();const k=Math.min(cz.mv,ORDER.length-1);const u=ORDER[k];
   demo(u,back,()=>lesson('chess-moves',`אֵיךְ ${NM[u][1]} ${NM[u][2]?'זָזָה':'זָז'}`,[0,1,2,3].map(j=>moveTask(u,j)),back,{done:`עַכְשָׁו אַתָּה מַכִּיר אֶת ${NM[u][1]}!`,again:()=>runMoves(back),
     onEnd:st=>{if(st>=2&&cz.mv===k&&k<ORDER.length){cz.mv=k+1;O.persist();const nx=ORDER[k+1];return nx?`בַּפַּעַם הַבָּאָה: ${NM[nx][1]}`:'לָמַדְתָּ אֶת כָּל הַכֵּלִים!';}return '';}}));}
@@ -196,11 +196,11 @@ function checkSetup(want){for(let t=0;t<800;t++){const b=empty();const K=freeSq(
     if(want==='esc'&&(!chk||legal(p).length<2))continue;if(want==='no'&&!legal(p).length)continue;return {p,K,a,as};}return null;}
 function isCheckTask(){return (wrap,done)=>{const yes=Math.random()<.5;const {p,as}=checkSetup(yes?'yes':'no');const el=boardEl(null);paint(el,p.b);
   const [ind,def,fem]=NM[p.b[as].toUpperCase()];
-  const t=choiceTask(`<div class="qq">הַאִם הַמֶּלֶךְ הַלָּבָן בְּשַׁח?</div><div class="czsub">שַׁח זֶה כְּשֶׁתּוֹקְפִים אֶת הַמֶּלֶךְ.</div>`,['כֵּן','לֹא'],yes?0:1,card=>{
+  const t=choiceTask(`<div class="qq">הַאִם הַמֶּלֶךְ הַלָּבָן בְּשַׁח?</div>`,['כֵּן','לֹא'],yes?0:1,card=>{
     card.insertAdjacentHTML('beforeend',`<div class="czsub">${yes?`כֵּן! ${def} ${COL.b[1][fem]} ${fem?'תּוֹקֶפֶת':'תּוֹקֵף'} אֶת הַמֶּלֶךְ.`:'לֹא, אַף כְּלִי לֹא תּוֹקֵף אֶת הַמֶּלֶךְ.'}</div>`);
     paint(el,p.b,{chk:yes?kingSq(p.b,'w'):null,sel:yes?as:null});})(wrap,done);wrap.insertBefore(el,wrap.querySelector('.chs'));t.pos=p;return t;};}
 function escapeTask(withHelp){return (wrap,done)=>{let su=null;for(let t=0;t<50&&!su;t++){su=checkSetup('esc');if(su&&withHelp){const b=su.p.b;const r=freeSq(b,x=>{const bb=b.slice();bb[x]='R';return legal(posOf(bb,'w'),x).some(m=>m.t===su.as)&&near(x,su.K)>1;});if(r==null){su=null;continue;}b[r]='R';}}
-  let p=su.p;prompt(wrap,'הַמֶּלֶךְ שֶׁלְּךָ בְּשַׁח! הַצֵּל אוֹתוֹ.',withHelp?'גַּע בִּכְלִי, וְאַחַר כָּךְ בַּמִּשְׁבֶּצֶת.':'גַּע בַּמִּשְׁבֶּצֶת שֶׁהַמֶּלֶךְ יֵלֵךְ אֵלֶיהָ.');const msg=note(wrap);let errs=0,lock=false;
+  let p=su.p;prompt(wrap,'הַמֶּלֶךְ שֶׁלְּךָ בְּשַׁח! הַצֵּל אוֹתוֹ.');const msg=note(wrap);let errs=0,lock=false;
   const el=boardEl(null);const mv=mover(el,()=>p,{dots:false,locked:()=>lock,onMove:(m,pseudoOk,from)=>{
     if(m){lock=true;p=make(p,m);paint(el,p.b,{last:[m.f,m.t]});msg.textContent='הַמֶּלֶךְ בָּטוּחַ!';sfx.ok(errs);done(errs>2?2:errs,el);return;}
     errs++;sfx.no();msg.textContent=pseudoOk?'עֲדַיִן שַׁח! נַסֵּה מִשְׁבֶּצֶת אַחֶרֶת.':'הַכְּלִי לֹא זָז כָּכָה.';if(!withHelp)mv.select(su.K);else mv.draw();
@@ -210,7 +210,7 @@ function escapeTask(withHelp){return (wrap,done)=>{let su=null;for(let t=0;t<50&
 function runCheck(back){lesson('chess-check','שַׁח!',[isCheckTask(),isCheckTask(),isCheckTask(),escapeTask(0),escapeTask(0),escapeTask(0),escapeTask(1),escapeTask(1)],back,{done:'שׁוֹמֵר הַמֶּלֶךְ!',again:()=>runCheck(back)});}
 
 /* ---------- 5. mate in one (hand-made puzzles) ---------- */
-function mateTask(fen){return (wrap,done)=>{let p=fromFEN(fen);const sol=mates(p);prompt(wrap,'תֵּן מָט בְּמַהֲלָךְ אֶחָד!','גַּע בִּכְלִי, וְאַחַר כָּךְ בַּמִּשְׁבֶּצֶת.');const msg=note(wrap);let errs=0,lock=false;
+function mateTask(fen){return (wrap,done)=>{let p=fromFEN(fen);const sol=mates(p);prompt(wrap,'תֵּן מָט בְּמַהֲלָךְ אֶחָד!');const msg=note(wrap);let errs=0,lock=false;
   const el=boardEl(null);const mv=mover(el,()=>p,{dots:true,locked:()=>lock,onMove:(m,pseudoOk)=>{
     if(m&&status(make(p,m))==='mate'){lock=true;p=make(p,m);paint(el,p.b,{last:[m.f,m.t],chk:kingSq(p.b,'b')});msg.textContent='מָט! כָּל הַכָּבוֹד!';sfx.ok(errs);done(errs>2?2:errs,el);return;}
     errs++;sfx.no();msg.textContent=m&&status(make(p,m))==='check'?'זֶה שַׁח, אֲבָל לֹא מָט. נַסֵּה שׁוּב.':m?'זֶה לֹא מָט. נַסֵּה שׁוּב.':'הַכְּלִי לֹא זָז כָּכָה.';
@@ -222,16 +222,19 @@ function runMate(back){const cz=ST();const lv=cz.mate===2?2:1;const set=lv===1?P
 /* ---------- 6. a small game against a very gentle computer ---------- */
 function botMove(p){const ms=legal(p);const caps=ms.filter(m=>m.cap);const pool=caps.length?caps:ms;const m=pick(pool);return m.pr?Object.assign({},m,{pr:m.pc==='p'?'q':'Q'}):m;}
 function runGame(back){O.setScreen('sTal','valley',back);T.hudT('מְשַׂחֲקִים!');const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq cz');s.appendChild(wrap);
-  let p=fromFEN(START),last=null,lock=false,over=false;const msg=h('div','lcap czmsg','אַתָּה הַלָּבָן. גַּע בִּכְלִי, וְאַחַר כָּךְ בַּמִּשְׁבֶּצֶת.');say(msg.textContent);
-  const el=boardEl(null);wrap.append(msg,el);
+  let p=fromFEN(START),last=null,lock=false,over=false;const msg=h('div','lcap czmsg','אַתָּה הַלָּבָן. גַּע בִּכְלִי, וְאַחַר כָּךְ בַּמִּשְׁבֶּצֶת.');say(msg.textContent);O.say(T.spk?T.spk(msg.textContent):msg.textContent);
+  const el=boardEl(null);wrap.append(msg,el);const arrow=hintArrow(el,sqOf('e2'),sqOf('e4'));
   const end=res=>{over=true;lock=true;CUR=null;const st=res==='win'?3:res==='draw'?2:1;const g=res==='win'?10:3;O.addGems(g);T.record('chess-play',st);
     setTimeout(()=>T.result({title:res==='win'?'מָט! נִצַּחְתָּ!':res==='draw'?'תֵּיקוּ!':'הַמַּחְשֵׁב נִצֵּחַ הַפַּעַם.',sub:res==='lose'?'נְשַׂחֵק שׁוּב?':'',stars:st,gems:g,back,again:()=>runGame(back)}),D(900));};
   const after=()=>{const st=status(p);if(st==='mate')return end(p.t==='b'?'win':'lose'),true;if(st==='stale'||(p.ply|0)>=200||onlyKings(p.b))return end('draw'),true;return false;};
   const mv=mover(el,()=>p,{dots:true,locked:()=>lock||p.t!=='w',last:()=>last,onMove:(m)=>{if(!m){sfx.no();mv.draw();return;}
-    p=make(p,m);last=[m.f,m.t];sfx.pop(m.cap?4:2);mv.draw();if(after())return;lock=true;msg.textContent='הַמַּחְשֵׁב חוֹשֵׁב…';
+    p=make(p,m);last=[m.f,m.t];arrow.remove();sfx.pop(m.cap?4:2);mv.draw();if(after())return;lock=true;msg.textContent='הַמַּחְשֵׁב חוֹשֵׁב…';
     setTimeout(()=>{if(!el.isConnected||over)return;const b=botMove(p);p=make(p,b);last=[b.f,b.t];sfx.pop(b.cap?1:0);lock=false;mv.draw();if(after())return;msg.textContent=inCheck(p)?'שַׁח! הַצֵּל אֶת הַמֶּלֶךְ.':'תּוֹרְךָ.';},D(700));}});
   mv.draw();
   CUR={get pos(){return p;},play:m=>{el.querySelector(`[data-s="${m.f}"]`).click();el.querySelector(`[data-s="${m.t}"]`).click();},end};}
+/* a big arrow over the board (first-move hint); squares in board % coordinates */
+function hintArrow(el,a,b){const c=s=>[(s&7)*12.5+6.25,(7-(s>>3))*12.5+6.25];const [x1,y1]=c(a),[x2,y2]=c(b);
+  const g=h('div','czarrow',`<svg viewBox="0 0 100 100" aria-hidden="true"><defs><marker id="czah" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto"><path d="M0 0 L4 2 L0 4 Z" fill="#2f9e44"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2+4}" stroke="#2f9e44" stroke-width="4.5" stroke-linecap="round" marker-end="url(#czah)" opacity=".85"/></svg>`);el.appendChild(g);return g;}
 const onlyKings=b=>b.every(x=>!x||x==='K'||x==='k');
 
 /* ---------- registration + parent info ---------- */

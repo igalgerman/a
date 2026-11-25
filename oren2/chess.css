@@ -1,11 +1,9 @@
 /* ===== CHESS CLUB (chess.js) ===== */
 .cz{gap:12px}
-.czb{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);flex:none;width:min(92vw,calc(100vh - 290px),520px);min-width:260px;aspect-ratio:1;direction:ltr;border:6px solid #6b4f3a;box-shadow:0 8px 0 rgba(0,0,0,.3);background:#6b4f3a;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.czb{position:relative;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);flex:none;width:min(92vw,calc(100vh - 290px),520px);min-width:260px;aspect-ratio:1;direction:ltr;border:6px solid #6b4f3a;box-shadow:0 8px 0 rgba(0,0,0,.3);background:#6b4f3a;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .czb .cq{position:relative;display:grid;place-items:center;cursor:pointer;min-width:0;min-height:0}
 .czb .cq.lt{background:#f3e2c0}.czb .cq.dk{background:#c08a55}
 .czb .cq .czp{width:86%;height:86%;pointer-events:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
-.czb .cq .rk,.czb .cq .fl{position:absolute;font:800 10px/1 system-ui,sans-serif;opacity:.55;pointer-events:none;color:#3b2a1c}
-.czb .cq .rk{top:2px;left:3px}.czb .cq .fl{bottom:2px;right:3px}
 .czb .cq .dot{position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(40,120,60,.75);pointer-events:none}
 .czb .cq .ring{position:absolute;inset:4%;border-radius:50%;box-shadow:inset 0 0 0 5px rgba(40,120,60,.8);pointer-events:none}
 .czb .cq.sel{background:#f6d860}.czb .cq.last{box-shadow:inset 0 0 0 100px rgba(255,214,0,.28)}
@@ -25,3 +23,5 @@
 .actc .ai .czp{width:54px;height:54px}
 @media (max-width:760px){.cz .czsub{font-size:16px}.czbig .czp{width:90px;height:90px}.czhead .czp{width:48px;height:48px}.czhead b{font-size:24px}.czb{border-width:4px}}
 @media (prefers-reduced-motion:reduce){.czb .cq.hint,.czb .cq.bad{animation:none}}
+.czb .czarrow{position:absolute;inset:0;pointer-events:none;z-index:3;animation:czh2 1.2s ease-in-out infinite}.czb .czarrow svg{width:100%;height:100%;display:block}
+@keyframes czh2{50%{opacity:.55}}
