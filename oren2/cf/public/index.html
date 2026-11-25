@@ -1179,13 +1179,24 @@ function fullSpell(str){const t=String(str).replace(/<[^>]+>/g,' ');const NIK=/[
 window.__fullSpell=fullSpell;
 const withNikud=s=>String(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
 function browserSay(t,lang){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(lang==='en'?plain(t):fullSpell(t));u.lang=lang==='en'?'en-US':'he-IL';const v=lang==='en'?enVoice:heVoice;if(v)u.voice=v;u.rate=(lang==='en'?.85:.92)*(VP().rate||1);u.pitch=1.05;u.onstart=()=>duck(true);u.onend=u.onerror=()=>duck(false);speechSynthesis.speak(u);}
+/* Google voice on the family website: same voice on every device, each sentence made once and cached by the server */
+const GV={ok:false,audio:null};
+(async()=>{if(!/^https?:$/.test(location.protocol)||/claude\.ai|claudeusercontent/.test(location.host)||window.__noFamily)return;
+  try{const r=await fetch('/api/tts/status',{cache:'no-store'});GV.ok=r.ok;}catch(e){}})();
+window.__gv=GV;
+const useGoogle=lang=>lang==='he'&&GV.ok&&VP().eng!=='browser'&&VP().eng!=='claude';
+function googleSay(t){try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}
+  const url='/api/tts?t='+encodeURIComponent(fullSpell(t).slice(0,400))+'&v='+encodeURIComponent(VP().gv||'he-IL-Wavenet-B')+'&r='+(VP().rate||1);
+  const a=new Audio(url);GV.audio=a;a.onplay=()=>duck(true);a.onended=()=>{duck(false);if(GV.audio===a)GV.audio=null;};
+  a.onerror=()=>{duck(false);if(GV.audio===a){GV.audio=null;browserSay(t,'he');}};a.play().catch(()=>{if(GV.audio===a){GV.audio=null;browserSay(t,'he');}});}
 function say(t,lang){if(!t||window.__fast)return;lang=lang||'he';
+  if(useGoogle(lang)){googleSay(t);return;}
   if(useClaude(lang)){try{speechSynthesis.cancel();}catch(e){}const txt=(lang==='he'?withNikud(t):plain(t)).slice(0,1900);
     TTS.ns.speak(txt,{language:lang,rate:Math.max(.7,Math.min(1.3,(VP().rate||1)*(lang==='en'?.9:.95)))}).catch(e=>{const c=e&&(e.code||e.reason);if(c==='not_granted'||c==='unavailable'){TTS.blocked=true;return;}if(c==='stopped')return;browserSay(t,lang);});return;}
   browserSay(t,lang);}
 window.__tts=TTS;
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,1500);}else $('#voiceNote').hidden=false;
-const hush=()=>{try{speechSynthesis.cancel();}catch(e){}if(TTS.ns&&!TTS.blocked)TTS.ns.stop().catch(()=>{});};
+const hush=()=>{try{speechSynthesis.cancel();}catch(e){}try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}if(TTS.ns&&!TTS.blocked)TTS.ns.stop().catch(()=>{});};
 
 /* ---------- animated pixel background: cached static layer + live elements ---------- */
 const bg=$('#bg');let bx=bg.getContext('2d');let BW=192,BH=108,bgW='meadow',bgTimer=0,bgCache={key:'',cv:null};
@@ -3508,19 +3519,19 @@ setInterval(()=>{if(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidd
   if(left<=0){if(!$('#sPlay').hidden&&used<lim+3)return;timeUp('time');}},5000);
 /* --- voice --- *//* --- voice --- */
 const SAMPLE='שָׁלוֹם אוֹרֶן! הַיּוֹם נִלְמַד יַחַד. הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא. כַּמָּה זֶה שָׁלוֹשׁ וְעוֹד אַרְבַּע? נָכוֹן, שֶׁבַע!';
-function voiceCands(){const tts=window.__tts||{};const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];const c=[];if(tts.ns&&!tts.blocked)c.push({eng:'claude',name:'',lbl:'קול Claude'});vs.forEach(v=>c.push({eng:'browser',name:v.name,lbl:v.name.replace(/Microsoft |Google /g,'').replace(/ Online \(Natural\).*/,' (טבעי)')}));return c;}
+function voiceCands(){const tts=window.__tts||{};const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];const c=[];const gv=window.__gv||{};if(gv.ok)[['B','גבר 1'],['D','גבר 2'],['A','אישה 1'],['C','אישה 2']].forEach(([k,n])=>c.push({eng:'google',name:'he-IL-Wavenet-'+k,gv:'he-IL-Wavenet-'+k,lbl:'Google — '+n}));if(tts.ns&&!tts.blocked)c.push({eng:'claude',name:'',lbl:'קול Claude'});vs.forEach(v=>c.push({eng:'browser',name:v.name,lbl:v.name.replace(/Microsoft |Google /g,'').replace(/ Online \(Natural\).*/,' (טבעי)')}));return c;}
 function voiceCheck(box){const st=SET();const vp=Object.assign({eng:'auto',name:'',rate:1},st.voice||{});const c=voiceCands();
-  const cur=vp.eng==='auto'?'אוטומטי':(c.find(x=>x.eng===vp.eng&&(x.eng==='claude'||x.name===vp.name))||{lbl:vp.name||vp.eng}).lbl;
+  const cur=vp.eng==='auto'?'אוטומטי':(c.find(x=>x.eng===vp.eng&&(x.eng==='claude'||(x.eng==='google'?x.gv===vp.gv:x.name===vp.name)))||{lbl:vp.name||vp.eng}).lbl;
   const vc=sec(box,'בדיקת קול — דקה אחת',`<div class="pnote">לחצו "השמיעו דוגמה". אם הקול נשמע טוב — "אוקי, הקול טוב" וסיימתם. אם לא — "קול אחר" עובר לקול הבא ומשמיע שוב.</div><div class="vnow">קול נוכחי: <b>${cur}</b>${st.voiceOk?' · <span class="pst ok">אושר ✓</span>':''}</div><div class="vsample">${SAMPLE}</div>`);
   const r=h('div','btnrow');const pl=h('button','bigbtn','🔊 <span>השמיעו דוגמה</span>');pl.onclick=()=>O.say(SAMPLE);
   const okb=h('button','bigbtn sm','👍 <span>אוקי, הקול טוב</span>');okb.onclick=()=>{st.voiceOk={t:Date.now(),v:Object.assign({},st.voice||{})};O.persist();sfx.win();panel('voice');};
-  const nx=h('button','bigbtn plain sm','👎 <span>קול אחר</span>');nx.disabled=c.length<2&&vp.eng!=='auto';nx.onclick=()=>{if(!c.length){O.floatText(nx,'אין קולות נוספים בדפדפן הזה');return;}let i=c.findIndex(x=>x.eng===vp.eng&&(x.eng==='claude'||x.name===vp.name));const n=c[(i+1)%c.length];O.setVoicePref({eng:n.eng,name:n.name});delete st.voiceOk;O.persist();panel('voice');setTimeout(()=>O.say(SAMPLE),300);};
+  const nx=h('button','bigbtn plain sm','👎 <span>קול אחר</span>');nx.disabled=c.length<2&&vp.eng!=='auto';nx.onclick=()=>{if(!c.length){O.floatText(nx,'אין קולות נוספים בדפדפן הזה');return;}let i=c.findIndex(x=>x.eng===vp.eng&&(x.eng==='claude'||(x.eng==='google'?x.gv===vp.gv:x.name===vp.name)));const n=c[(i+1)%c.length];O.setVoicePref({eng:n.eng,name:n.eng==='google'?'':n.name,gv:n.gv||undefined});delete st.voiceOk;O.persist();panel('voice');setTimeout(()=>O.say(SAMPLE),300);};
   r.append(pl,okb,nx);vc.appendChild(r);
   if(!c.length)vc.appendChild(h('div','pnote','⚠️ בדפדפן הזה אין קול עברי. הכי מומלץ לפתוח את המשחק ב-Edge במחשב (שם יש קולות עבריים טבעיים בחינם).'));}
 function voiceTab(box){voiceCheck(box);const tts=window.__tts||{};const vp=Object.assign({eng:'auto',name:'',rate:1},(T.S().set.voice)||{});
   const vs=('speechSynthesis' in window)?speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang)):[];
   const vsx=sec(box,'הקול של המשחק',`<div class="pnote">כל הקולות כאן חינמיים, בלי הקלטות. <b>אוטומטי</b> בוחר את הכי טוב שיש: הקול של Claude אם הוא מדבר עברית בדפדפן הזה, ואחרת הקול העברי הכי טבעי שיש בדפדפן.</div>
-    <div class="pnote">מצב נוכחי: קול Claude — ${tts.ns?(tts.he?'זמין, כולל עברית ✓':'זמין, אבל לא אישר עברית (יוקרא באנגלית בלבד)'):'לא זמין בתצוגה הזו'} · קולות עבריים בדפדפן: ${vs.length?vs.map(v=>v.name.replace(/Microsoft |Online \(Natural\) - /g,'')).join(', '):'אין'}</div>`);
+    <div class="pnote">קול Google (אותו קול בכל המכשירים): ${(window.__gv||{}).ok?'פעיל ✓':'לא פעיל עדיין (צריך מפתח ב-Cloudflare)'}<br>מצב נוכחי: קול Claude — ${tts.ns?(tts.he?'זמין, כולל עברית ✓':'זמין, אבל לא אישר עברית (יוקרא באנגלית בלבד)'):'לא זמין בתצוגה הזו'} · קולות עבריים בדפדפן: ${vs.length?vs.map(v=>v.name.replace(/Microsoft |Online \(Natural\) - /g,'')).join(', '):'אין'}</div>`);
   const er=h('div','popt','<span>מנוע:</span>');[['auto','אוטומטי (מומלץ)'],['claude','קול Claude'],['browser','קול הדפדפן']].forEach(([k,n])=>{const b=h('button','pchip'+(vp.eng===k?' on':''),n);if(k==='claude'&&!tts.ns)b.disabled=true;b.onclick=()=>{O.setVoicePref({eng:k});panel('voice');};er.appendChild(b);});vsx.appendChild(er);
   if(vs.length&&vp.eng!=='claude'){const br=h('div','popt','<span>קול דפדפן:</span>');[['','הכי טוב שיש'],...vs.map(v=>[v.name,v.name.replace(/Microsoft |Google /g,'').replace(/ Online \(Natural\).*/,' (טבעי)')])].forEach(([k,n])=>{const b=h('button','pchip'+(vp.name===k?' on':''),n);b.onclick=()=>{O.setVoicePref({name:k});panel('voice');};br.appendChild(b);});vsx.appendChild(br);}
   const rr=h('div','popt','<span>מהירות:</span>');[[.8,'לאט'],[.9,'קצת לאט'],[1,'רגיל'],[1.1,'קצת מהר']].forEach(([v,n])=>{const b=h('button','pchip'+(Math.abs((vp.rate||1)-v)<.01?' on':''),n);b.onclick=()=>{O.setVoicePref({rate:v});panel('voice');};rr.appendChild(b);});vsx.appendChild(rr);
