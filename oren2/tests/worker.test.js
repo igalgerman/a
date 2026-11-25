@@ -84,6 +84,73 @@ const path = require('path');
   ok('daily budget (300) respected', calls.length - c0 === 2 && q.doneToday === 300 && q.left === 4, JSON.stringify(q));
   now += 31000; c0 = calls.length; await fc('/'); ok('over budget: nothing more today', calls.length === c0);
   Date.now = realNow; env.SAVES.put = put0;
+  // pronunciation dictionary: POST /api/tts/fix merges words, re-makes the sentence under its ORIGINAL key; synth applies whole words only
+  const S1 = 'יש עשרות, אחדות, ועשרות.'; const u1 = '/api/tts?t=' + encodeURIComponent(S1) + '&v=he-IL-Chirp3-HD-Kore&r=0.9';
+  await f(u1); ok('before the fix the plain text goes to Google', calls.at(-1).input.text === S1);
+  puts = 0; env.SAVES.put = async (k, v, o) => { puts++; return put0(k, v, o); };
+  const fx = await (await f('/api/tts/fix', { method: 'POST', body: JSON.stringify({ t: S1, words: { 'עשרות': 'עֲשָׂרוֹת', 'אחדות': 'אֲחָדוֹת' } }) })).json();
+  const want = 'יש עֲשָׂרוֹת, אֲחָדוֹת, ועשרות.';
+  ok('fix: dictionary applied to whole words only (ועשרות untouched)', fx.ok && fx.sent === want && calls.at(-1).input.text === want, JSON.stringify(fx));
+  ok('fix: 2 KV writes (dictionary + audio)', puts === 2, 'puts ' + puts);
+  const c1 = calls.length; const a4 = await f(u1);
+  ok('fix: game URL now plays the fixed audio from cache', calls.length === c1 && Buffer.from(await a4.arrayBuffer()).toString() === 'MP3' + want);
+  puts = 0; await f('/api/tts/fix', { method: 'POST', body: JSON.stringify({ t: S1, words: { 'עשרות': 'עֲשָׂרוֹת' } }) });
+  ok('fix: same words again does not rewrite the dictionary', puts === 1, 'puts ' + puts);
+  await f('/api/tts?t=' + encodeURIComponent('כמה עשרות?') + '&r=0.9');
+  ok('new sentences get the dictionary', calls.at(-1).input.text === 'כמה עֲשָׂרוֹת?');
+  await f('/api/tts?t=' + encodeURIComponent('three עשרות') + '&v=en-US-Chirp3-HD-Kore&r=0.85');
+  ok('English voices are left alone', calls.at(-1).input.text === 'three עשרות');
+  const lo = await (await f('/api/tts/fix', { method: 'POST', body: JSON.stringify({ t: 'ספר לי על הספר', only: { 'ספר': 'סַפֵּר' } }) })).json();
+  ok('fix: "only" applies to this sentence, not stored', lo.sent === 'סַפֵּר לי על הספר' && !('ספר' in (await (await f('/api/tts/fix')).json())));
+  await f('/api/tts/fix', { method: 'POST', body: JSON.stringify({ t: S1, words: { 'אחדות': null } }) });
+  const dict = await (await f('/api/tts/fix')).json();
+  ok('fix: null removes a word; GET gives the dictionary', JSON.stringify(dict) === JSON.stringify({ 'עשרות': 'עֲשָׂרוֹת' }) && calls.at(-1).input.text === 'יש עֲשָׂרוֹת, אחדות, ועשרות.');
+  const bad = async body => (await f('/api/tts/fix', { method: 'POST', body: JSON.stringify(body) })).status;
+  ok('fix rejects bad input', await bad({ t: '', words: {} }) === 400 && await bad({ t: 'x', words: { 'a b': 'x' } }) === 400 && await bad({ t: 'x', words: { 'שלום': '<b>' } }) === 400 && await bad({ t: 'x', v: 'evil' }) === 400 && (await f('/api/tts/fix', { method: 'DELETE' })).status === 405);
+  // emoji and pictographs are never read aloud (he and en); the cache key stays the client's text
+  const E1 = '🗝️ חבר נתקע במערה. כל משימה פותחת מנעול אחד! ⭐ 1️⃣ ✓'; await f('/api/tts?t=' + encodeURIComponent(E1) + '&r=0.9');
+  ok('emoji stripped before Google (keycap digit kept)', calls.at(-1).input.text === 'חבר נתקע במערה. כל משימה פותחת מנעול אחד! אחת', calls.at(-1).input.text);
+  await f('/api/tts?t=' + encodeURIComponent('🍎 apple 👍🏽') + '&v=en-US-Chirp3-HD-Kore&r=0.85'); ok('emoji stripped in English too', calls.at(-1).input.text === 'apple');
+  const c3 = calls.length; ok('emoji sentence cached under the original text', (await f('/api/tts?t=' + encodeURIComponent(E1) + '&r=0.9')).status === 200 && calls.length === c3);
+  // numbers in Hebrew words (gender agreement with the noun after them, counting form otherwise)
+  const NUM = [
+    ['47 הוא 4 עשרות ו-7 אחדות.', 'ארבעים ושבע הוא ארבע עֲשָׂרוֹת ושבע אחדות.'],
+    ['3 עשרות ו- 9 אחדות הן המספר:', 'שלוש עֲשָׂרוֹת ותשע אחדות הן המספר:'],
+    ['במספר ‎538 יש 5 מאות', 'במספר חמש מאות שלושים ושמונה יש חמש מאות'],
+    ['ישבו 11 נוסעים', 'ישבו אחד עשר נוסעים'], ['עלו עוד 4 נוסעים', 'עלו עוד ארבעה נוסעים'], ['יש 2 תפוחים', 'יש שני תפוחים'],
+    ['עוד 2 דקות', 'עוד שתי דקות'], ['יש 12 עמודים', 'יש שנים עשר עמודים'], ['יש 12 מדבקות', 'יש שתים עשרה מדבקות'],
+    ['10 צעצועים', 'עשרה צעצועים'], ['10 אצבעות', 'עשר אצבעות'], ['3 דברים', 'שלושה דברים'], ['3 שעות', 'שלוש שעות'],
+    ['81 ילדים', 'שמונים ואחד ילדים'], ['21 עוגיות', 'עשרים ואחת עוגיות'], ['22 כדורים', 'עשרים ושניים כדורים'], ['22 גולות', 'עשרים ושתיים גולות'],
+    ['ב- 47 שקלים', 'בארבעים ושבעה שקלים'], ['ל- 4 מכוניות', 'לארבע מכוניות'], ['ל- 6 ילדים', 'לשישה ילדים'], ['ב- 2 שבועות', 'בשני שבועות'],
+    ['7 ימים', 'שבעה ימים'], ['15 דקות', 'חמש עשרה דקות'], ['45 דקות', 'ארבעים וחמש דקות'], ['19 תפוחים', 'תשעה עשר תפוחים'],
+    ['8 + 7 = 15', 'שמונה ועוד שבע שווה חמש עשרה'], ['15 − 7 = 8', 'חמש עשרה פחות שבע שווה שמונה'], ['15 - 7', 'חמש עשרה פחות שבע'],
+    ['3 × 5', 'שלוש כפול חמש'], ['17 : 5 = 3', 'שבע עשרה חלקי חמש שווה שלוש'], ['40 ÷ 4', 'ארבעים חלקי ארבע'], ['3+4=7', 'שלוש ועוד ארבע שווה שבע'],
+    ['כמה זה 3 ועוד 4?', 'כמה זה שלוש ועוד ארבע?'], ['השעה 3', 'השעה שלוש'], ['1:30', 'אחת וחצי'], ['10:00', 'עשר'], ['12:30', 'שתים עשרה וחצי'],
+    ['3:15', 'שלוש ורבע'], ['7:45', 'שבע וארבעים וחמש'], ['ל-10', 'לעשר'], ['מ-100', 'ממאה'], ['ב-0', 'באפס'],
+    ['0', 'אפס'], ['1', 'אחת'], ['2', 'שתיים'], ['20', 'עשרים'], ['100', 'מאה'], ['101', 'מאה ואחת'], ['110', 'מאה ועשר'],
+    ['111', 'מאה ואחת עשרה'], ['120', 'מאה ועשרים'], ['123', 'מאה עשרים ושלוש'], ['200', 'מאתיים'], ['340', 'שלוש מאות וארבעים'],
+    ['999', 'תשע מאות תשעים ותשע'], ['1000', 'אלף'], ['1,000', 'אלף'], ['2000', 'אלפיים'], ['3000', 'שלושת אלפים'], ['1001', 'אלף ואחת'],
+    ['1250', 'אלף מאתיים וחמישים'], ['12000', 'שנים עשר אלף'], ['4.5', 'ארבע נקודה חמש'],
+    ['2 4 6 8 ?', 'שתיים, ארבע, שש, שמונה ?'], ['10, 81, 74', 'עשר, שמונים ואחת, שבעים וארבע'],
+    ['הכו רק כשהתשובה היא 6', 'הכו רק כשהתשובה היא שש'], ['13 × 4 = 10 × 4 + 3 × 4', 'שלוש עשרה כפול ארבע שווה עשר כפול ארבע ועוד שלוש כפול ארבע'],
+    ['מחפשים 2 מספרים', 'מחפשים שני מספרים'], ['2 חלקים', 'שני חלקים'], ['12 עפרונות', 'שנים עשר עפרונות'], ['במספר 89 ?', 'במספר שמונים ותשע ?'],
+    ['A1 ו3ד', 'A1 ו3ד'], ['דו-ספרתי', 'דו-ספרתי'],
+  ];
+  for (const [inp, out] of NUM) { await f('/api/tts?t=' + encodeURIComponent('מספר: ' + inp) + '&r=0.9'); const got = calls.at(-1).input.text.replace(/^מספר: /, '');
+    ok('number: ' + inp, got === out, got); }
+  await f('/api/tts?t=' + encodeURIComponent('3 apples') + '&v=en-US-Chirp3-HD-Kore&r=0.85'); ok('numbers left alone in English', calls.at(-1).input.text === '3 apples');
+  // /api/tts/try: made fresh with the dictionary, never stored
+  const k0 = kv.size, c2 = calls.length; const tr = await f('/api/tts/try?t=' + encodeURIComponent('יש עשרות'));
+  ok('try: fresh audio with the dictionary, no KV write', tr.status === 200 && calls.length === c2 + 1 && calls.at(-1).input.text === 'יש עֲשָׂרוֹת' && kv.size === k0);
+  // the parent's listening page: choices queue, votes, marks in batches
+  const lp = await f('/api/tts/listen'); const lh = await lp.text();
+  ok('listen page served', lp.status === 200 && /text\/html/.test(lp.headers.get('content-type')) && lh.includes('/api/tts/listen/data') && lh.includes('חצי') && lh.includes('הערה'));
+  await f('/api/tts/listen/q', { method: 'POST', body: JSON.stringify({ choose: [{ w: 'אחדות', s: '4 עשרות ו-7 אחדות', vars: ['אחדות', 'אחאדות'] }], sample: [{ t: 'שלום', v: 'he-IL-Chirp3-HD-Kore', r: 0.9 }] }) });
+  ok('vote stored; bad vote rejected', (await f('/api/tts/listen/vote', { method: 'POST', body: JSON.stringify({ w: 'אחדות', v: 'אחאדות', half: ['אחדות'], note: 'כמעט' }) })).status === 200 && (await f('/api/tts/listen/vote', { method: 'POST', body: JSON.stringify({ w: 'x', v: '<b>' }) })).status === 400);
+  await f('/api/tts/listen/marks', { method: 'POST', body: JSON.stringify([{ t: 'שלום', ok: false, w: ['שלום'], note: 'הטעמה' }, { t: 'כן', ok: true }]) });
+  const ld = await (await f('/api/tts/listen/data?marks')).json();
+  ok('listen data: queue, votes, marks', ld.choose[0].w === 'אחדות' && ld.sample.length === 1 && ld.votes['אחדות'].v === 'אחאדות' && ld.votes['אחדות'].half[0] === 'אחדות' && ld.votes['אחדות'].note === 'כמעט' && ld.marks.length === 2 && ld.marks[0].w[0] === 'שלום' && ld.marks[0].note === 'הטעמה' && !ld.marks[0].ok && ld.marks[1].ok === true && !!ld.sid);
+  env.SAVES.put = put0;
   globalThis.fetch = realFetch;
   // offline mode: /sw.js served, registered by the website page; in the service worker /api/save is never cached
   const sw = await f('/sw.js'); const swt = await sw.text();
