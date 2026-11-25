@@ -8,7 +8,7 @@
 - When unsure whether something is needed — ask, or leave it out.
 
 ## Language
-- Talk to the user in Hebrew.
+- Talk to the user in English.
 - Kid-facing text in Hebrew with correct nikud; parent-facing text can be without nikud.
 
 ## Content

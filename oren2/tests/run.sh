@@ -5,6 +5,7 @@ cd "$(dirname "$0")/.."                       # oren2/
 T0=$(date +%s)
 python3 build_talents.py >/dev/null || { echo "build failed"; exit 1; }
 python3 cf/tools/make_worker.py >/dev/null || { echo "worker bundle failed"; exit 1; }
+export NODE_OPTIONS="--require ./tests/mute.js ${NODE_OPTIONS:-}"
 rm -rf tests/.tmp && mkdir -p tests/.tmp/logs
 node -e "const L=require('./tests/lib.js');" || exit 1          # writes tests/.tmp/t.html
 SUITES=(math-logic edge-cases regressions activities reading "parent desktop" "parent phone" time-missions "day-path desktop" "day-path phone" "sandbox-voice desktop" "sandbox-voice phone" entry "arcade desktop" "arcade phone" family-sync worker voice-stop "health desktop" "health phone" "timelimit desktop" "timelimit phone" "qa-fix desktop" "qa-fix phone" "auto-read desktop" "friend desktop" "friend phone" spell)
