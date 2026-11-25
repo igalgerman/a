@@ -457,6 +457,7 @@ svg.px{shape-rendering:crispEdges;display:block}
   .optrow button{font-size:17px}.optrow button.big{font-size:26px}
   .final{padding:16px 20px 12px}.final .rl{font-size:20px}.final .cs svg{width:200px}
 }
+@media (max-width:400px){.kgrid{grid-template-columns:repeat(12,24px);grid-template-rows:repeat(4,24px);background:repeating-linear-gradient(90deg,#7cc35f 0 24px,#74b957 24px 48px)}.kcell{width:24px;height:24px}.kcell svg{max-width:20px;max-height:20px}.kscene{padding:6px}}
 @media (max-width:440px){.worlds{grid-template-columns:repeat(2,minmax(120px,1fr))}.eqcard{font-size:32px}.pad{grid-template-columns:repeat(4,1fr)}.colwrap{--cw:38px}.shop{grid-template-columns:repeat(3,80px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -967,11 +968,11 @@ function mergeIn(o){if(!o||typeof o!=='object')return;
   for(const k of ['ans','ok','trains'])save[k]=Math.max(save[k]|0,o[k]|0);
   for(const [k,v] of Object.entries(o.sp||{}))save.sp[k]=Math.max(save.sp[k]|0,v|0);
   for(const k of Object.keys(o.owned||{}))save.owned[k]=1;
-  if((o.t|0)>(save.t|0)){for(const k of ['gems','av','k','tc','made'])if(o[k]!=null)save[k]=o[k];save.t=o.t;}}
+  if((+o.t||0)>(+save.t||0)){for(const k of ['gems','av','k','tc','made'])if(o[k]!=null)save[k]=o[k];save.t=o.t;}}
 function persist(){save.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}cloudSave();}
 function cloudSave(){if(!cloud.ref)return;cloud.dirty=true;clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,1500);}
 async function cloudFlush(){if(!cloud.ref||cloud.busy||!cloud.dirty)return;cloud.busy=true;cloud.dirty=false;
-  try{const body=JSON.parse(JSON.stringify(save));delete body.music;await cloud.ref.set(body);}catch(e){if(e&&e.code==='invalid_argument')cloud.ref=null;}
+  try{const body=JSON.parse(JSON.stringify(save));delete body.music;if(JSON.stringify(body).length>200000){save.rq=save.rq.slice(-15);body.rq=save.rq;}await cloud.ref.set(body);}catch(e){if(e&&e.code==='invalid_argument'){if(!cloud.retried&&save.rq.length>10){cloud.retried=1;save.rq=save.rq.slice(-10);cloud.dirty=true;}else cloud.ref=null;}}
   cloud.busy=false;if(cloud.dirty)cloudSave();updateSaveNote();}
 async function cloudInit(){
   try{for(let i=0;i<40&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
@@ -979,7 +980,7 @@ async function cloudInit(){
     const id=await user.id();if(!id)return;const base='data/users/'+id+'/';const ref=db.doc(base+'progress4');
     const snap=await ref.get();if(snap.exists)mergeIn(snap.data());else{const old=await db.doc(base+'progress').get();if(old.exists)migrateOld(old.data());}
     cloud.ref=ref;try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}cloud.dirty=true;cloudFlush();
-    updateGems();if(!$('#sMap').hidden)showMap();else if(!$('#sWorld').hidden&&curWorld)showWorld(curWorld);
+    updateGems();if($('#dlg').hidden){if(!$('#sMap').hidden)showMap();else if(!$('#sWorld').hidden&&curWorld)showWorld(curWorld);}
   }catch(e){}finally{updateSaveNote();}
 }
 function updateSaveNote(){const el=$('#saveNote');if(!el)return;el.innerHTML=cloud.ref?`${ICON.cloud}<span>נִשְׁמָר בַּחֶשְׁבּוֹן</span>`:`${ICON.disk}<span>נִשְׁמָר בַּמַּחְשֵׁב הַזֶּה</span>`;}
@@ -1373,7 +1374,7 @@ function startLevel(lv){hush();const u=lv.u;
   playLevel(lv);}
 function openLesson(lv){hush();const u=lv.u;if(u.table)return learnMul(lv);if(u.div)return learnDiv(lv);if(u.lesson)return lesson(lv);}
 const PRAISE=['כָּל הַכָּבוֹד!','מְצֻיָּן!','נָכוֹן!','יוֹפִי!','אַלּוּף!','בְּדִיּוּק!','וָאוּ!','גָּאוֹן!'];
-function trainingSet(){const done=ALLU.filter(u=>!u.boss&&stars(u.id+'-0'));const qs=[];const used=new Set();
+function trainingSet(){const done=ALLU.filter(u=>!u.boss&&stars(u.id+'-0'));const qs=[];const used=new Set();save.rq=save.rq.filter(x=>x&&x.q&&x.q.k);
   for(const x of save.rq.slice(0,6)){qs.push(Object.assign({fromRq:1},x.q));used.add(qkey(x.q));}
   let t=0;while(qs.length<12&&t++<300){const u=t%3===0?pick(done.slice(-4)):pick(done);const q=u.gen(5);const k=qkey(q);if(used.has(k))continue;used.add(k);qs.push(q);}return shuffle(qs);}
 function startTraining(){const u={id:'train',name:'אִמּוּן יוֹמִי',w:{id:'train',bg:'meadow',name:'אִמּוּן יוֹמִי'}};playLevel({id:'train',type:'train',u,w:u.w,n:12},trainingSet());}
@@ -1424,7 +1425,12 @@ function renderBoxes(){const p=play;p.boxes.forEach((b,i)=>{if(b.done)return;b.e
 function press(k){const p=play;if(!p||p.lock)return;
   const kb=document.querySelector(`.key[data-k="${k}"]`);if(kb){kb.classList.add('press');setTimeout(()=>kb.classList.remove('press'),120);}
   const q=p.qs[p.i];
-  if(p.choice){if(/^[1-9]$/.test(k)){const i=+k-1;const b=p.choice.row.children[i];if(b&&!b.disabled)choose(i,b);}return;}
+  if(p.choice){const ch=p.choice;const numeric=ch.opts.every(o=>/^\d+$/.test(String(o)));
+    if(!numeric){if(/^[1-9]$/.test(k)){const i=+k-1;const b=ch.row.children[i];if(b&&!b.disabled)choose(i,b);}return;}
+    if(/^\d$/.test(k)){ch.buf=((ch.buf||'')+k).slice(-4);sfx.key();setBubble('<span class="ltr">'+ch.buf+'</span> ← Enter');return;}
+    if(k==='del'){ch.buf=(ch.buf||'').slice(0,-1);return;}
+    if(k==='go'&&ch.buf){const i=ch.opts.findIndex(o=>String(o)===ch.buf);ch.buf='';if(i>=0){const b=ch.row.children[i];if(b&&!b.disabled)choose(i,b);}else{setBubble('בְּחַר אַחַת מֵהַתְּשׁוּבוֹת');sfx.no();}}
+    return;}
   if(q.k==='col'){if(/^\d$/.test(k))colType(+k);return;}
   const b=p.boxes[p.bi];if(!b)return;
   if(k==='del'){b.val=b.val.slice(0,-1);sfx.key();renderBoxes();return;}
@@ -1439,7 +1445,9 @@ function showHint(manual){const p=play;if(!p||p.lock||p.mode==='speed')return;co
   if(p.hint>=2)$('#hintBtn').hidden=true;setBubble('הִנֵּה רֶמֶז');}
 function praise(text){const qa=$('#qa');const pr=h('div','praise',text);qa.appendChild(pr);setTimeout(()=>pr.remove(),1000);}
 function recordDay(){const d=today();if(!save.days.includes(d))save.days.push(d);}
-function addRq(q){if(q.k==='ch'&&/<svg/.test(q.pr))return;const k=qkey(q);if(save.rq.some(x=>qkey(x.q)===k))return;const c=Object.assign({},q);delete c.fromRq;save.rq.push({q:c,u:play.u.id});save.rq=save.rq.slice(-60);}
+function addRq(q){if(!q||!q.k)return;if(q.k==='ch'&&/<svg/.test(q.pr))return;const k=qkey(q);if(save.rq.some(x=>qkey(x.q)===k))return;const c=Object.assign({},q);delete c.fromRq;
+  for(const f of ['h1','h2'])if(typeof c[f]==='string')c[f]=c[f].replace(/<div class="(share|bt|tf|pairs|btwrap)">[\s\S]*$/,'').replace(/<svg[\s\S]*?<\/svg>/g,'');
+  if(JSON.stringify(c).length>3000)return;save.rq.push({q:c,u:play.u.id});save.rq=save.rq.slice(-60);}
 function removeRq(q){const k=qkey(q);save.rq=save.rq.filter(x=>qkey(x.q)!==k);}
 function questionDone(ok){const p=play,q=p.qs[p.i];save.ans++;if(ok&&p.tries===0&&p.hint===0)save.ok++;recordDay();
   if(p.mode!=='speed'){if(p.tries>0||p.revealed)addRq(q);else if(q.fromRq)removeRq(q);}persist();}
@@ -1454,7 +1462,7 @@ function onCorrect(){const p=play,q=p.qs[p.i];p.lock=true;p.streak++;
   const c=$('#pet');if(c){c.classList.remove('hop','tilt');void c.offsetWidth;c.classList.add('hop');}
   if(p.mode==='boss'){p.hp--;const g=$('#giant');g.classList.remove('hit','laugh');void g.offsetWidth;g.classList.add('hit');sfx.hit();const hp=$('#hp').children;for(let k=0;k<hp.length;k++)hp[k].classList.toggle('gone',k>=p.hp);burst(...center(g),16,1,['#8d939a','#6b7178','#6aa84f']);}
   else if(['mine','run','build'].includes(p.mode))sceneAdvance();
-  const g=p.tries===0&&p.hint===0?2:1;p.gemsEarned+=g;addGems(g,$('#qa'));
+  let g=p.tries===0&&p.hint===0?2:1;if(p.mode==='speed')g=p.gemsEarned<20?1:0;p.gemsEarned+=g;if(g)addGems(g,$('#qa'));
   questionDone(true);
   if(p.mode==='speed'){p.score++;speedHud();p.i++;setTimeout(()=>{if(play!==p)return;nextSpeedQ();},D(450));return;}
   p.i++;hudPlay();
@@ -1463,7 +1471,7 @@ function onWrong(el){const p=play;p.tries++;p.errors++;p.streak=0;hudPlay();sfx.
   if(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
   const c=$('#pet');if(c){c.classList.remove('hop','tilt');void c.offsetWidth;c.classList.add('tilt');}
   const g=$('#giant');if(g){g.classList.remove('hit','laugh');void g.offsetWidth;g.classList.add('laugh');}}
-function requeue(){const p=play,q=p.qs[p.i];if(!p.requeued.has(p.i)){p.qs.push(Object.assign({},q));p.requeued.add(p.qs.length-1);if(p.mode==='boss'){p.hp++;$('#hp').insertAdjacentHTML('beforeend','<i></i>');}}}
+function requeue(){const p=play,q=p.qs[p.i];if(!q||!q.k)return;if(!p.requeued.has(p.i)){p.qs.push(Object.assign({},q));p.requeued.add(p.qs.length-1);}}
 function revealAndNext(showFn){const p=play,q=p.qs[p.i];p.lock=true;p.revealed=true;
   setTimeout(()=>{if(play!==p)return;showFn();
     if(p.mode==='speed'){questionDone(false);p.i++;setTimeout(()=>{if(play!==p)return;nextSpeedQ();},D(900));return;}
@@ -1491,19 +1499,19 @@ function colType(d){const p=play,q=p.qs[p.i],st=p.col;if(st.c>=st.R.length)retur
   st.ct++;st.anyWrong=true;p.tries=Math.max(p.tries,1);onWrong(cb);
   if(cb){cb.className='cb bad';cb.textContent=d;setTimeout(()=>{if(play===p&&p.col===st)renderCol(q,st);},D(500));}
   const hb=$('#hint');hb.hidden=false;hb.innerHTML=colHint(q,st);
-  if(st.ct>=3){p.revealed=true;colAdvance(q,st,st.R[st.c],true);setBubble('הַסִּפְרָה הִיא '+st.typed[st.c-1]);
-    setTimeout(()=>{if(play!==p)return;if(st.c>=st.R.length){renderCol(q,st);requeue();questionDone(false);p.i++;if(p.i>=p.qs.length)finishLevel();else showQ();}else colPrep(q,st);},D(900));}
+  if(st.ct>=3){p.revealed=true;p.lock=true;colAdvance(q,st,st.R[st.c],true);setBubble('הַסִּפְרָה הִיא '+st.typed[st.c-1]);renderCol(q,st);
+    setTimeout(()=>{if(play!==p||p.qs[p.i]!==q||p.col!==st)return;if(st.c>=st.R.length){requeue();questionDone(false);p.i++;if(p.i>=p.qs.length)finishLevel();else showQ();}else{p.lock=false;colPrep(q,st);}},D(900));}
   else setBubble('כִּמְעַט! הִסְתַּכֵּל עַל הָרֶמֶז');}
-function finishLevel(){const p=play;p.lock=true;const lv=p.lv,u=p.u;
-  if(lv.type==='train'){save.trains++;addGems(10);persist();setTimeout(()=>{const ov=$('#ov');ov.hidden=false;
+function finishLevel(){const p=play;if(!p||p.finished)return;p.finished=true;p.lock=true;const lv=p.lv,u=p.u;
+  if(lv.type==='train'){save.trains++;addGems(10);persist();setTimeout(()=>{if(play!==p)return;const ov=$('#ov');ov.hidden=false;
       ov.innerHTML=`<div class="card"><h2>סִיַּמְתָּ אֶת הָאִמּוּן!</h2><div class="gain">+${p.gemsEarned+10} ${SPR.gem}</div><div class="sub">טָעֻיּוֹת שֶׁעוֹד מְחַכּוֹת: <span class="ltr">${save.rq.length}</span></div></div>`;
       const row=h('div','btnrow');const a=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד אִמּוּן</span>');a.onclick=startTraining;const m=h('button','bigbtn',ICON.homeW+'<span>לַמַּפָּה</span>');m.onclick=()=>showMap();row.append(a,m);ov.firstChild.appendChild(row);sfx.win();rain();},D(300));return;}
-  const miss=p.errors+p.hints;const lim=p.qs.length<=6?[0,2]:[1,4];const st=miss<=lim[0]?3:miss<=lim[1]?2:1;
+  const miss=p.errors+p.hints;const lim=p.N<=6?[0,2]:[1,4];const st=miss<=lim[0]?3:miss<=lim[1]?2:1;
   const before=pts();const first=!stars(lv.id);if(st>stars(lv.id)){save.s[lv.id]=st;}const after=pts();
   const bonus=5+st*3+(lv.type==='boss'?20:0);addGems(bonus);persist();
   const r0=revealedFor(before),r1=revealedFor(after);
   if(lv.type==='boss'){const g=$('#giant');if(g)g.classList.add('down');}
-  setTimeout(()=>{const ov=$('#ov');ov.hidden=false;
+  setTimeout(()=>{if(play!==p)return;const ov=$('#ov');ov.hidden=false;
     const title=u.final?'נִצַּחְתָּ אֶת הַמְּבַלְבֵּל!':lv.type==='boss'?'נִצַּחְתָּ אֶת הָעֲנָק!':'כָּל הַכָּבוֹד!';
     ov.innerHTML=`<div class="card"><h2>${title}</h2>${lv.type==='boss'?'':`<div class="sub">${u.name} · ${({learn:'לִמּוּד',game:'מִשְׂחָק',chal:'אֶתְגָּר'})[lv.type]}</div>`}<div class="stars">${[0,1,2].map(k=>`<span style="animation-delay:${.3+k*.35}s">${k<st?SPR.star:SPR.starOff}</span>`).join('')}</div><div class="gain">+${p.gemsEarned+bonus} ${SPR.gem}</div><div class="cs">${castle(r1,r0)}</div></div>`;
     const card=ov.firstChild;const row=h('div','btnrow');
@@ -1541,9 +1549,9 @@ function kingdom(){setScreen('sKing','meadow',showMap);$('#hudMid').innerHTML=`<
   scene.innerHTML=`<div class="ktop"><div class="fr">${fr}</div><div class="cs">${castle(revealedFor(pts()))}</div><div class="fr"><span class="bob">${AV()}</span>${PET().s()}</div></div>`;
   const grid=h('div','kgrid');
   for(let y=0;y<4;y++)for(let x=0;x<12;x++){const key=x+','+y;const c=h('button','kcell');c.setAttribute('aria-label','משבצת');const it=save.k[key];if(it&&SPR[it])c.innerHTML=SPR[it];
-    c.onclick=()=>{if(kSel==='erase'){if(save.k[key]){const pr=(SHOP.find(i=>i[0]===save.k[key])||[0,0,0])[2];delete save.k[key];save.gems+=pr;updateGems(true);sfx.pop(1);persist();c.innerHTML='';}return;}
+    c.onclick=()=>{if(kSel==='erase'){if(save.k[key]){const pr=(SHOP.find(i=>i[0]===save.k[key])||[0,0,0])[2];delete save.k[key];save.gems+=pr;updateGems(true);sfx.pop(1);persist();c.innerHTML='';renderShop();}return;}
       if(save.k[key])return;const item=SHOP.find(i=>i[0]===kSel);if(!item)return;if((save.gems|0)<item[2]){c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');sfx.no();say('חסרים יהלומים. אפשר להרוויח עוד בשלבים!');return;}
-      save.gems-=item[2];save.k[key]=item[0];c.innerHTML=SPR[item[0]];c.classList.remove('new');void c.offsetWidth;c.classList.add('new');sfx.build();updateGems(true);persist();burst(...center(c),12);};
+      save.gems-=item[2];save.k[key]=item[0];c.innerHTML=SPR[item[0]];c.classList.remove('new');void c.offsetWidth;c.classList.add('new');sfx.build();updateGems(true);persist();burst(...center(c),12);renderShop();};
     grid.appendChild(c);}
   scene.appendChild(grid);
   const shop=h('div','shop','<h3>הַחֲנוּת</h3>');
