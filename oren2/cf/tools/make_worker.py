@@ -101,16 +101,16 @@ async function synth(env,voice,rate,text){const r=await fetch('https://texttospe
    body:JSON.stringify({input:{text},voice:{languageCode:voice.slice(0,5),name:voice},audioConfig:{audioEncoding:'MP3',speakingRate:rate}})});
  if(!r.ok)return {length:0,status:r.status};
  const s=atob((await r.json()).audioContent);const bin=new Uint8Array(s.length);for(let i=0;i<s.length;i++)bin[i]=s.charCodeAt(i);return bin;}
-/* Create game sentences in advance (game voice only): POST {texts:[...]} up to 15; cached ones are skipped,
+/* Create game sentences in advance: POST {texts:[...]} up to 15, each a text (game voice) or {t,v,r} (e.g. the English voice); cached ones are skipped,
    one KV write per new sentence and the month counter written once per call. */
 async function pregen(req,env){if(req.method!=='POST')return new Response('{"error":"method"}',{status:405,headers:JH});
- let L;try{L=(await req.json()).texts;if(!Array.isArray(L)||L.length>15||L.some(t=>typeof t!=='string'))throw 0;}catch(e){return new Response('{"error":"bad request"}',{status:400,headers:JH});}
+ let L;try{L=(await req.json()).texts;if(!Array.isArray(L)||L.length>15||L.some(t=>typeof t!=='string'&&!(t&&typeof t==='object'&&typeof t.t==='string')))throw 0;}catch(e){return new Response('{"error":"bad request"}',{status:400,headers:JH});}
  const month=monthKey();let used=+(await env.SAVES.get(month))||0;const u0=used;const out=[];
- for(const t of L){const text=t.slice(0,400).trim();if(!text){out.push('empty');continue;}
-  const key=await ttsKey(GAME_VOICE,GAME_RATE,text);
+ for(const x of L){const c=qClean(x);if(c==null){out.push(typeof x==='string'||!x.t.trim()?'empty':'bad voice');continue;}const i=qItem(c),text=i[0],voice=i[1],rate=+i[2];
+  const key=await ttsKey(voice,rate,text);
   if(await env.SAVES.get(key,'arrayBuffer')){out.push('hit');continue;}
   if(used+text.length>TTS_CAP){out.push('cap');continue;}
-  const bin=await synth(env,GAME_VOICE,GAME_RATE,text);if(!bin.length){out.push('google '+bin.status);continue;}
+  const bin=await synth(env,voice,rate,text);if(!bin.length){out.push('google '+bin.status);continue;}
   await env.SAVES.put(key,bin);used+=text.length;out.push('new');}
  if(used!==u0)await env.SAVES.put(month,String(used),{expirationTtl:60*60*24*62});
  return new Response(JSON.stringify({ok:true,res:out,used,cap:TTS_CAP}),{headers:JH});}
@@ -151,13 +151,13 @@ async function qRun(env){if(!env.GOOGLE_TTS_KEY)return;const now=Date.now();if(n
  if(!done.size)return;
  const s2=await qLoad(env);/* read again so sentences queued meanwhile are kept */
  s2.q=s2.q.filter(x=>!done.has(qId(x)));s2.at=now;s2.day=s.day;s2.n=s.n;await env.SAVES.put('ttsq',JSON.stringify(s2));}
-/* the list of all game sentences (pregen.js POSTs it; one KV write), for "download all voices to this device" */
-const ttsUrl=t=>'/api/tts?t='+encodeURIComponent(t)+'&v='+GAME_VOICE+'&r='+GAME_RATE;
+/* the list of all game sentences (pregen.js POSTs it, texts or {t,v,r}; one KV write), for "download all voices to this device" */
+const ttsUrl=x=>{const i=qItem(x);return '/api/tts?t='+encodeURIComponent(i[0])+'&v='+i[1]+'&r='+i[2];};
 async function list(req,env){
  if(req.method==='GET'){let L=[];try{L=JSON.parse(await env.SAVES.get('ttsall'))||[];}catch(e){}return J({urls:L.map(ttsUrl)});}
  if(req.method!=='POST')return J({error:'method'},405);
- let L;try{L=await req.json();if(!Array.isArray(L)||L.length>QMAX||L.some(t=>typeof t!=='string'))throw 0;}catch(e){return J({error:'bad request'},400);}
- L=[...new Set(L.map(t=>t.slice(0,400).trim()).filter(Boolean))];await env.SAVES.put('ttsall',JSON.stringify(L));return J({ok:true,n:L.length});}
+ let L;try{L=await req.json();if(!Array.isArray(L)||L.length>QMAX)throw 0;}catch(e){return J({error:'bad request'},400);}
+ const seen=new Set();L=L.map(qClean).filter(c=>c!=null&&!seen.has(qId(c))&&seen.add(qId(c)));await env.SAVES.put('ttsall',JSON.stringify(L));return J({ok:true,n:L.length});}
 export default{async fetch(req,env,ctx){const u=new URL(req.url);const p=u.pathname;
  if(ctx&&ctx.waitUntil&&(p==='/'||p==='/index.html'||p.startsWith('/api/save/')))ctx.waitUntil(qRun(env).catch(()=>{}));
  if(p==='/sw.js')return new Response(SW,{headers:{'content-type':'text/javascript; charset=utf-8','cache-control':'no-cache'}});
