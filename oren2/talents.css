@@ -320,3 +320,53 @@ body.tlocked #ov{position:fixed;z-index:100}
 body.pplay #screens{padding-bottom:52px}
 .vnow{font-size:15px;margin:6px 0}.vsample{font-family:var(--read);font-size:22px;background:#f6f2e8;padding:8px 12px;line-height:1.6}
 .famlink{direction:ltr;font-family:monospace;font-size:13px;background:#f6f2e8;padding:8px;word-break:break-all;user-select:all;margin:6px 0}
+/* clear "who is playing" entry */
+.whoin{display:flex;flex-direction:column;align-items:center;gap:12px}
+.whot{font-weight:900;font-size:34px;color:#fff;text-shadow:3px 3px 0 var(--ink),-1px -1px 0 var(--ink),1px -1px 0 var(--ink),-1px 1px 0 var(--ink)}
+.users .ucard,.pchoice .ucard{width:210px;min-height:190px;justify-content:center;transform:none;opacity:1}
+.ucard.par{background:#3a8fc4;color:#fff;box-shadow:inset -6px -6px 0 #24467a,inset 6px 6px 0 rgba(255,255,255,.3),0 7px 0 rgba(0,0,0,.3)}.ucard.par small{color:#e3f1fb}
+.ucard .ua{font-size:64px;line-height:80px}.ucard .ua svg{width:80px;height:80px}.ucard b{font-size:34px}
+.pchoice{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+#sStart #voiceNote{display:none!important}
+#sStart .scene{transform:scale(.8);margin:-20px 0}
+@media (max-width:760px){.users .ucard,.pchoice .ucard{width:150px;min-height:160px}.ucard b{font-size:26px}.whot{font-size:28px}#sStart .scene{transform:scale(.7);margin:-40px 0}}
+.pdet{width:min(900px,100%);box-sizing:border-box;background:rgba(255,255,255,.94);box-shadow:0 5px 0 rgba(0,0,0,.15)}
+.pdet>summary{cursor:pointer;padding:14px 18px;font-weight:900;font-size:18px;list-style-position:inside}
+.pdet[open]>summary{border-bottom:2px solid #eee}.pdin{display:flex;flex-direction:column;gap:12px;padding:10px;align-items:center}.pdin .psec{box-shadow:none;background:#fbfaf6}
+.edgehint{font-size:15px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.85);padding:6px 12px;text-decoration:none;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.kmine{display:flex;gap:10px;justify-content:center;margin-bottom:8px}.kmine .ti{font-size:28px;line-height:1}.kmine .ti svg{width:34px;height:34px}
+#sHome .parbtn{opacity:.45;font-size:11px}
+/* ===== parent area: same game look, just uncluttered ===== */
+#sPar .ptabs{display:flex;flex-wrap:nowrap;gap:6px;background:rgba(255,255,255,.55);padding:5px;width:min(620px,100%);box-sizing:border-box;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+#sPar .ptab{display:block;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;background:transparent;box-shadow:none;font-size:16px;font-weight:900;padding:10px 4px}
+#sPar .ptab.on{background:var(--birch);box-shadow:inset -3px -3px 0 rgba(0,0,0,.12),0 3px 0 rgba(0,0,0,.2)}
+#sPar .pdet>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:18px;padding:16px 18px}
+#sPar .pdet>summary::-webkit-details-marker{display:none}
+#sPar .pdet>summary::after{content:"◀";font-size:14px;color:var(--ink-soft);transition:transform .2s}
+#sPar .pdet[open]>summary::after{transform:rotate(-90deg)}
+@media (max-width:760px){#sPar .ptab{font-size:14px;padding:9px 2px}}
+/* kid: make the one main action obvious */
+#sHome .bigbtn.huge{animation:breathe 2.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.05);filter:brightness(1.08)}}
+@media (prefers-reduced-motion:reduce){#sHome .bigbtn.huge{animation:none}}
+#sPar .ptabs{flex-wrap:nowrap}#sPar .ptab{display:block;width:auto;min-width:0;height:auto;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:760px){#sPar .ptab{font-size:14px;padding:8px 2px}}
+/* ===== city: four big doors ===== */
+.gdoors{display:grid;grid-template-columns:repeat(2,minmax(200px,330px));gap:18px;justify-content:center;width:100%}
+.gdoor{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 14px 16px;min-height:200px;justify-content:center;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--gc) 30%,#fffaf0) 0%,#fffaf0 70%);border-top:12px solid var(--gc);
+  box-shadow:inset -6px -6px 0 rgba(0,0,0,.12),inset 6px 6px 0 rgba(255,255,255,.6),0 8px 0 rgba(0,0,0,.25);transition:transform .15s}
+.gdoor .gem2{font-size:54px;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.15))}
+.gdoor .gicons{display:flex;gap:6px}.gdoor .gicons i svg{width:30px;height:30px}.gdoor .gicons i>span{font-size:24px}
+.gdoor b{font-size:26px;font-weight:900}
+.gdoor .bar{width:70%;height:10px;background:rgba(0,0,0,.1);display:block}.gdoor .bar i{display:block;height:100%;background:var(--gc)}
+.gdoor.fav{box-shadow:inset -6px -6px 0 rgba(0,0,0,.12),inset 6px 6px 0 rgba(255,255,255,.6),0 0 0 4px #ff7eb6,0 8px 0 4px rgba(0,0,0,.25)}
+@media (hover:hover){.gdoor:hover{transform:translateY(-3px)}}.gdoor:active{transform:translateY(3px)}
+.hub.gsub{grid-template-columns:repeat(2,minmax(160px,240px));justify-content:center}.hub.gsub .bld{min-height:170px}
+/* home: compact path */
+.tpath .tstep2{width:auto;min-width:86px;padding:8px 10px 6px;background:transparent;box-shadow:none}
+.tpath .tstep2 .ti2{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--birch);box-shadow:inset 0 -5px 0 var(--sc),0 4px 0 rgba(0,0,0,.2)}
+.tpath .tstep2.done .ti2{background:#d9f2d0}.tpath .tstep2.cur{transform:none;animation:none;box-shadow:none}.tpath .tstep2.cur .ti2{box-shadow:inset 0 -5px 0 var(--sc),0 0 0 4px var(--gold),0 4px 0 4px rgba(0,0,0,.2)}
+.tpath .tstep2 .tn{top:-6px;inset-inline-start:2px;width:24px;height:24px;font-size:13px}
+.tpath .tstep2 .tl{font-size:13px;max-width:110px}
+@media (max-width:760px){.gdoors{grid-template-columns:1fr 1fr;gap:12px}.gdoor{min-height:160px;padding:14px 8px}.gdoor .gem2{font-size:42px}.gdoor b{font-size:19px}.hub.gsub{grid-template-columns:1fr 1fr}.tpath .tstep2 .ti2{width:52px;height:52px}.tpath .tstep2{min-width:70px}}

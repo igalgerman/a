@@ -98,18 +98,26 @@ function building(b){BUILD.push(b);b.acts.forEach(a=>{ACT[a.id]=a;a.b=b;});}
 const bState=b=>window.TAL_bState?window.TAL_bState(b):(S().set.hide[b.id]?'off':'on');
 const actOff=id=>!!(S().set.offA||{})[id];
 function actStars(id){return (S().tl[id]||{}).s|0;}
-const GROUPS=[['📖 קוֹרְאִים וְכוֹתְבִים',['read','write','stories','eng']],['🔬 חוֹקְרִים וְחוֹשְׁבִים',['lab','world','think','code']],['🎨 יוֹצְרִים',['art','music','type']],['🍃 נִרְגָּעִים',['mind']]];
+const GROUPS=[{id:'readg',n:'קוֹרְאִים וְכוֹתְבִים',e:'📖',c:'#c0392b',ids:['read','write','stories','eng']},{id:'explore',n:'חוֹקְרִים וְחוֹשְׁבִים',e:'🔬',c:'#3cb371',ids:['lab','world','think','code']},{id:'create',n:'יוֹצְרִים',e:'🎨',c:'#ff7eb6',ids:['art','music','type']},{id:'calm',n:'נִרְגָּעִים',e:'🍃',c:'#7cc3a0',ids:['mind']}];
+const groupOf=b=>GROUPS.find(g=>g.ids.includes(b.id))||GROUPS[GROUPS.length-1];
+const visB=g=>g.ids.map(id=>BUILD.find(b=>b.id===id)).filter(b=>b&&bState(b)!=='off');
+const bStars=b=>[b.acts.reduce((a,x)=>a+actStars(x.id),0),b.acts.length*3];
+function bldCard(b,back){const bs=bState(b);const [got,max]=bStars(b);
+  const c=h('button','wcard2 bld',`<span class="ico">${b.icon()}</span><span class="nm">${b.name}</span><span class="bar"><i style="width:${got/max*100}%"></i></span><span class="cnt">${SPR.star}${got}/${max}</span>`);c.style.setProperty('--lc',b.color);
+  if(bs!=='on'){c.classList.add('lockb');c.querySelector('.cnt').innerHTML='🔒 '+bs.lock;c.onclick=()=>{sfx.no();window.TAL_locked&&window.TAL_locked(b);};}else c.onclick=()=>{sfx.pop(2);openBuilding(b);};return c;}
+/* level 1: four big doors */
 function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);hudT('עִיר הַכִּשְׁרוֹנוֹת',`<div class="starcount">${SPR.star}<span>${Object.values(S().tl).reduce((a,c)=>a+(c.s|0),0)}</span></div>`);
-  O.sayNow='עיר הכשרונות. בחר בניין.';const s=$('#sTal');s.innerHTML='';
+  O.sayNow='עיר הכשרונות. במה נשחק?';const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd bob">${X.portal}</span><h1>עִיר הַכִּשְׁרוֹנוֹת</h1>`));
-  const grids={};const gwrap=h('div','hubgroups');GROUPS.forEach(([n,ids])=>{const g=h('div','hgrp',`<div class="hgt">${n}</div>`);const gr=h('div','hub');g.appendChild(gr);ids.forEach(id=>grids[id]=gr);gwrap.appendChild(g);});
-  const other=GROUPS[GROUPS.length-1];
-  BUILD.filter(b=>bState(b)!=='off').forEach(b=>{const grid=grids[b.id]||gwrap.lastChild.querySelector('.hub');const bs=bState(b);const got=b.acts.reduce((a,x)=>a+actStars(x.id),0),max=b.acts.length*3;
-    const c=h('button','wcard2 bld',`<span class="ico">${b.icon()}</span><span class="nm">${b.name}</span><span class="bar"><i style="width:${got/max*100}%"></i></span><span class="cnt">${SPR.star}${got}/${max}</span>`);c.style.setProperty('--lc',b.color);
-    if(bs!=='on'){c.classList.add('lockb');c.querySelector('.cnt').innerHTML='🔒 '+bs.lock;c.onclick=()=>{sfx.no();window.TAL_locked&&window.TAL_locked(b);};}else c.onclick=()=>openBuilding(b);
-    grid.appendChild(c);});
-  gwrap.querySelectorAll('.hgrp').forEach(g=>{if(!g.querySelector('.bld'))g.remove();});s.appendChild(gwrap);O.emit('hub',s);}
-function openBuilding(b){KEY=null;O.setScreen('sTal',b.bg,openHub);hudT(b.name);O.sayNow=plainHe(b.name);const s=$('#sTal');s.innerHTML='';
+  const g4=h('div','gdoors');
+  GROUPS.forEach(g=>{const bs=visB(g);if(!bs.length)return;const got=bs.reduce((a,b)=>a+bStars(b)[0],0),max=bs.reduce((a,b)=>a+bStars(b)[1],0);const anyNew=bs.some(b=>bState(b)==='on');
+    const c=h('button','gdoor'+(anyNew?'':' lockb'),`<span class="gem2">${g.e}</span><span class="gicons">${bs.map(b=>`<i>${b.icon()}</i>`).join('')}</span><b>${g.n}</b><span class="bar"><i style="width:${max?got/max*100:0}%"></i></span>`);
+    c.style.setProperty('--gc',g.c);c.onclick=()=>{sfx.pop(3);const on=bs.filter(b=>bState(b)==='on');if(bs.length===1&&on.length===1)openBuilding(bs[0]);else openGroup(g);};g4.appendChild(c);});
+  s.appendChild(g4);O.emit('hub',s);}
+/* level 2: just the buildings of one door */
+function openGroup(g){KEY=null;O.setScreen('sTal','valley',openHub);hudT(g.n);O.sayNow=plainHe(g.n);const s=$('#sTal');s.innerHTML='';
+  s.appendChild(h('div','whead',`<span class="gd">${g.e}</span><h1>${g.n}</h1>`));const grid=h('div','hub gsub');visB(g).forEach(b=>grid.appendChild(bldCard(b)));s.appendChild(grid);O.emit('group',s,g);}
+function openBuilding(b){KEY=null;const gg=groupOf(b);O.setScreen('sTal',b.bg,visB(gg).length>1?()=>openGroup(gg):openHub);hudT(b.name);O.sayNow=plainHe(b.name);const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd">${b.icon()}</span><h1>${b.name}</h1>`));if(b.blurb)s.appendChild(h('div','lsent',b.blurb));
   const grid=h('div','acts');
   b.acts.forEach(a=>{if(a.avail&&!a.avail())return;if(actOff(a.id))return;const st=actStars(a.id);const c=h('button','actc',`<span class="ai">${a.icon()}</span><span class="an">${a.name}</span><span class="st">${[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join('')}</span>`);
@@ -138,8 +146,8 @@ function dailyCard(){const d=dailyEnsure();const card=h('div','daily');
   return card;}
 
 /* ---------- map integration ---------- */
-O.on('map',m=>{const rs=m.querySelector('.reset');if(rs)rs.remove();if(window.TAL_noHome)return;m.querySelectorAll('.topbar .tool').forEach(t=>{if(/הַמַּמְלָכָה|הַגִּבּוֹר שֶׁלִּי/.test(t.textContent))t.remove();});});
-O.on('kingdomScene',sc=>{const s=S();if(s.kpic!=null&&s.art[s.kpic]){const f=h('div','kpic',artSVG(s.art[s.kpic]));sc.querySelector('.ktop').appendChild(f);}});
+O.on('map',m=>{const rs=m.querySelector('.reset');if(rs)rs.remove();if(window.TAL_noHome)return;m.querySelectorAll('.hello,.statline').forEach(e=>e.remove());m.querySelectorAll('.topbar .tool').forEach(t=>{if(/הַמַּמְלָכָה|הַגִּבּוֹר שֶׁלִּי/.test(t.textContent))t.remove();});});
+O.on('kingdomScene',sc=>{if(!window.TAL_noHome&&!sc.querySelector('.kmine')){const r=h('div','kmine');const a=h('button','tool',`<span class="ti">${O.AV()}</span><span>הַגִּבּוֹר שֶׁלִּי</span>`);a.onclick=()=>O.studio(false);const b=h('button','tool',`<span class="ti">🏅</span><span>הַתַּגִּים שֶׁלִּי</span>`);b.onclick=()=>T.badges(O.kingdom);r.append(a,b);sc.prepend(r);}const s=S();if(s.kpic!=null&&s.art[s.kpic]){const f=h('div','kpic',artSVG(s.art[s.kpic]));sc.querySelector('.ktop').appendChild(f);}});
 
 /* ---------- time tracking & break reminder ---------- */
 let lastAct=Date.now(),session=0,snooze=0;
@@ -152,7 +160,7 @@ function breakTime(){const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class=
   const b=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד קְצָת</span>');b.onclick=()=>{ov.hidden=true;snooze+=600;};row.append(a,b);ov.firstChild.appendChild(row);sfx.star(0);}
 
 /* exports for other chunks */
-window.TAL={bState,dailyPool,dailyCard,S,X,ALLSPR,FACES,quiz,result,record,finishAct,building,ACT,BUILD,openHub,openBuilding,hudT,progressBar,starsHTML,plainHe,L_,nb,dailyEnsure,setKey:f=>{KEY=f;},get key(){return KEY;},breakTime,artSVG:(...a)=>artSVG(...a)};
+window.TAL={openGroup,GROUPS,bState,dailyPool,dailyCard,S,X,ALLSPR,FACES,quiz,result,record,finishAct,building,ACT,BUILD,openHub,openBuilding,hudT,progressBar,starsHTML,plainHe,L_,nb,dailyEnsure,setKey:f=>{KEY=f;},get key(){return KEY;},breakTime,artSVG:(...a)=>artSVG(...a)};
 function artSVG(str){return window.TAL_artSVG?window.TAL_artSVG(str):'';}
 function parentGate(){window.TAL_parentGate&&window.TAL_parentGate();}
 })();
@@ -806,7 +814,7 @@ function forgot(then){const ov=$('#ov');ov.innerHTML=`<div class="card plog"><h2
   const row=h('div','btnrow');const no=h('button','bigbtn plain sm','<span>ביטול</span>');no.onclick=()=>{ov.hidden=true;};const ok=h('button','bigbtn sm','<span>המשך</span>');row.append(no,ok);ov.firstChild.appendChild(row);
   const q=$('#fq');setTimeout(()=>q.focus(),60);const go=()=>{if(q.value.trim()==='888'){delete RSET().pw;O.persist();login(then);}else{$('#pgErr').textContent='לא נכון';sfx.no();}};ok.onclick=go;q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};}
 const asParent=fn=>()=>parentOn?fn():login(fn);
-window.TAL_parentGate=()=>login(()=>panel('sum'));
+window.TAL_parentGate=()=>login(()=>parentChoice());
 /* ---------- permissions ---------- */
 let permP=null;
 function getPerm(){if(!permP)permP=(async()=>{for(let i=0;i<30&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));try{return window.claude&&window.claude.use?await window.claude.use('permissions'):null;}catch(e){return null;}})();return permP;}
@@ -862,11 +870,12 @@ function suggestion(){const s=T.S(),pr=prof()||{};const on=BUILD.filter(b=>T.bSt
   if(fresh)return {t:`עוֹד לֹא נִסִּיתָ אֶת "${fresh.name}". בּוֹא נְנַסֶּה!`,a:fresh};
   return {t:'אַתָּה כְּבָר מַכִּיר אֶת כָּל הָעִיר! אֵיזֶה אַלּוּף!'};}
 O.on('hub',s=>{const pr=prof();if(!pr){setTimeout(()=>profile(T.openHub),0);return;}
-  s.querySelectorAll('.bld').forEach(c=>{const b=BUILD.find(x=>x.name===c.querySelector('.nm').textContent);if(b&&b.id===pr.love){c.classList.add('fav');c.appendChild(h('span','favh','❤️'));}});
+  const fg=T.GROUPS.findIndex(g=>g.ids.includes(pr.love));const gd=s.querySelectorAll('.gdoor');T.GROUPS.forEach((g,i)=>{});s.querySelectorAll('.gdoor').forEach(c=>{if(c.querySelector('b').textContent===(T.GROUPS[fg]||{}).n){c.classList.add('fav');c.appendChild(h('span','favh','❤️'));}});
   const sg=suggestion();const head=h('div','hhead');head.style.setProperty('--fc',pr.col||'#4fae4f');
   head.innerHTML=`<span class="hpet bob">${ALLSPR(pr.an)}</span><div class="hbub"><b>${hello()}, אוֹרֶן!</b><span>${sg.t}</span></div>`;
   const hb=head.querySelector('.hbub');if(sg.a||sg.b){const go=h('button','bigbtn sm',ICON.play+'<span>בּוֹא!</span>');go.onclick=()=>sg.a?sg.a.run(T.openHub):T.openBuilding(sg.b);hb.appendChild(go);}
   const wh=s.querySelector('.whead');wh.after(head);O.sayNow=plain(hello()+' אורן. '+sg.t);});
+O.on('group',s=>{const pr=prof();if(!pr)return;s.querySelectorAll('.bld').forEach(c=>{const b=BUILD.find(x=>x.name===c.querySelector('.nm').textContent);if(b&&b.id===pr.love){c.classList.add('fav');c.appendChild(h('span','favh','❤️'));}});});
 /* remember the last activity */
 Object.values(ACT).forEach(a=>{const r=a.run;a.run=back=>{const s=T.S();s.last={id:a.id,d:O.today()};return r(back);};});
 /* ---------- badges ---------- */
@@ -912,19 +921,38 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 /* ---------- start screen: choose user ---------- */
 (()=>{const sb=$('#btnStart');if(!sb)return;const u=h('div','users');
   sb.className='ucard kid';sb.innerHTML=`<span class="ua bob">${O.AV()}</span><b>אוֹרֶן</b><small>יוֹצְאִים לַדֶּרֶךְ!</small>`;
-  const pb=h('button','ucard par',`<span class="ua">🔒</span><b>הורה</b><small>${SET().pw?'כניסה עם סיסמה':'יצירת משתמש הורה'}</small>`);pb.onclick=()=>{O.audio&&O.audio();login(()=>panel('sum'));};
-  sb.before(u);u.append(sb,pb);})();
+  const pb=h('button','ucard par',`<span class="ua">👤</span><b>הוֹרֶה</b><small>${RSET().pw?'כניסה עם סיסמה':'יצירת משתמש הורה'}</small>`);pb.onclick=()=>{O.audio&&O.audio();login(parentChoice);};
+  const wrap=h('div','whoin','<div class="whot">מִי נִכְנָס?</div>');sb.before(wrap);wrap.appendChild(u);u.append(sb,pb);})();
+/* Windows + Chrome (not Edge) on the website: one gentle link to open the same game in Edge, with the family code so progress follows */
+(()=>{const ua=navigator.userAgent;if(!/Windows/.test(ua)||/Edg\//.test(ua)||!/Chrome\//.test(ua)||!/^https?:$/.test(location.protocol)||/claude\.ai|claudeusercontent/.test(location.host)||window.claude)return;
+  const w=$('.whoin');if(!w)return;const a=h('a','edgehint','💡 בְּ-Edge הַקּוֹל בְּעִבְרִית יוֹתֵר טוֹב — לִפְתֹּחַ שָׁם');a.href='#';
+  a.onclick=e=>{e.preventDefault();const f=O.family;location.href='microsoft-edge:'+location.origin+location.pathname+(f?'#f='+f:'');};w.appendChild(a);})();
+function parentChoice(){const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card plog"><h2>שלום! מה תרצו לעשות?</h2></div>';const r=h('div','pchoice');
+  const a=h('button','ucard par',`<span class="ua">📊</span><b>לוח הורים</b><small>התקדמות, משימות, זמן והגדרות</small>`);a.onclick=()=>{ov.hidden=true;panel('sum');};
+  const b=h('button','ucard kid',`<span class="ua">🎮</span><b>לשחק כהורה</b><small>הכל פתוח, לא משפיע על אורן</small>`);b.onclick=()=>{ov.hidden=true;enterTry();O.showMap();};
+  r.append(a,b);ov.firstChild.appendChild(r);}
 /* ======================= PARENT PANEL ======================= */
 const BAR=(v,max,col)=>`<span class="pbar"><i style="width:${max?Math.min(100,v/max*100):0}%;background:${col||'#4fae4f'}"></i></span>`;
 const fmtMin=sec=>{const m=Math.round(sec/60);return m<60?m+' דק׳':(m/60).toFixed(1)+' שע׳';};
 function lastDays(n){const out=[];const d=new Date();for(let i=n-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);const k=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([k,x]);}return out;}
-const TABS=[['sum','📊 סיכום'],['try','🎮 נסו בעצמכם'],['plan','📅 משימות'],['time','⏱️ זמן'],['voice','🔊 קול'],['perm','🎤 הרשאות'],['parts','🧩 חלקי המערכת'],['prog','⏭️ התקדמות ואיפוס'],['msg','💌 הודעה לאורן'],['set','⚙️ הגדרות']];
-let curTab='sum';
+/* three simple tabs; everything else lives in closed sections under "settings" */
+const TABS=[['sum','📊 סיכום'],['day','📅 היום של אורן'],['more','⚙️ הגדרות']];
+const MORE=[['voice','🔊 קול — בדיקה ובחירה'],['try','🎮 לשחק כהורה (ניסיון)'],['msg','💌 הודעה לאורן'],['parts','🧩 להפעיל / לכבות חלקים'],['prog','⏭️ דילוג, איפוס ויהלומים'],['perm','🎤 הרשאות'],['set','🔑 סיסמה, מכשירים וגיבוי']];
+const GROUP={plan:'day',time:'day',voice:'more',try:'more',msg:'more',parts:'more',prog:'more',perm:'more',set:'more'};
+const FN={sum:sumTab,try:tryTab,plan:planTab,time:timeTab,voice:voiceTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab};
+let curTab='sum',openSec=null;
 const exitParent=()=>{parentOn=false;O.showMap();};T.exitParent=exitParent;
-function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(dl&&!dl.hidden)dl.hidden=true;if(!parentOn)return login(()=>panel(tab));curTab=tab||curTab;O.setScreen('sPar','valley',exitParent);O.hud('<div class="chip">לוח הורים</div>');const s=$('#sPar');s.innerHTML='';
-  s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>panel(id);tb.appendChild(b);});s.appendChild(tb);
-  const body=h('div','pbody');s.appendChild(body);({sum:sumTab,try:tryTab,plan:planTab,time:timeTab,voice:voiceTab,perm:permTab,parts:partsTab,prog:progTab,msg:msgTab,set:setTab}[curTab])(body);
-  const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;}
+function panel(tab){if(O.isParentPlay)O.parentPlay(false);const dl=$('#dlg');if(dl&&!dl.hidden)dl.hidden=true;if(!parentOn)return login(()=>panel(tab));
+  if(tab&&GROUP[tab]){openSec=tab;curTab=GROUP[tab];}else if(tab){curTab=tab;if(tab!=='more')openSec=null;}
+  const sy=$('#screens').scrollTop;O.setScreen('sPar','valley',exitParent);O.hud('<div class="chip">לוח הורים</div>');const s=$('#sPar');s.innerHTML='';
+  s.appendChild(h('div','whead',`<h1>לוח הורים</h1>`));const tb=h('div','ptabs');TABS.forEach(([id,n])=>{const b=h('button','ptab'+(id===curTab?' on':''),n);b.onclick=()=>{openSec=null;panel(id);};tb.appendChild(b);});s.appendChild(tb);
+  const body=h('div','pbody');s.appendChild(body);
+  if(curTab==='sum')sumTab(body);
+  else if(curTab==='day'){timeTab(body);planTab(body);}
+  else MORE.forEach(([id,n])=>{const d=document.createElement('details');d.className='pdet';const sm=document.createElement('summary');sm.textContent=n;d.appendChild(sm);const inner=h('div','pdin');d.appendChild(inner);let done=false;
+    const fill=()=>{if(done)return;done=true;FN[id](inner);};d.addEventListener('toggle',()=>{if(d.open){openSec=id;fill();}});if(openSec===id){d.open=true;fill();}body.appendChild(d);});
+  const out=h('div','btnrow');const bb=h('button','bigbtn plain sm',ICON.home+'<span>יציאה מלוח ההורים</span>');bb.onclick=exitParent;out.appendChild(bb);s.appendChild(out);window.__par=curTab;
+  if(GROUP[tab]&&openSec)setTimeout(()=>{const o=s.querySelector('details[open]');if(o&&tab===openSec&&curTab==='more')o.scrollIntoView({block:'start'});else $('#screens').scrollTop=sy;},0);}
 T.parentPanel=t=>{parentOn=true;panel(t);};
 const sec=(box,t,html)=>{const d=h('section','psec',`<h3>${t}</h3>`);if(html)d.insertAdjacentHTML('beforeend',html);box.appendChild(d);return d;};
 /* --- summary --- */
@@ -939,6 +967,7 @@ function sumTab(box){const s0=T.S(),sv=O.save;
     <div><b>${talSt}</b><span>כוכבים בעיר הכשרונות</span></div><div><b>${Object.keys(s0.bdg||{}).length}/${BADGES.length}</b><span>תגים</span></div></div>`);
   const days=lastDays(14);const mx=Math.max(600,...days.map(([k])=>s0.time[k]|0));
   sec(box,'זמן משחק — 14 ימים אחרונים',`<div class="pchart">${days.map(([k,x])=>{const v=s0.time[k]|0;return `<div class="pcol" title="${k}: ${fmtMin(v)}"><span class="pv">${v?Math.round(v/60):''}</span><i style="height:${v/mx*100}%"></i><small>${'אבגדהוש'[x.getDay()]}</small></div>`;}).join('')}</div><div class="pnote">בדקות, היום מימין. נספר רק זמן פעיל.</div>`);
+  const det=document.createElement('details');det.className='pdet';det.innerHTML='<summary>📈 פירוט מלא (עולמות, נושאים, בניינים, רגשות)</summary>';const dbox=h('div','pdin');det.appendChild(dbox);box.appendChild(det);box=dbox;
   sec(box,'התקדמות בעולמות המסע',O.WORLDS.map(w=>{const got=w.levels.reduce((a,l)=>a+O.stars(l.id),0),max=w.levels.length*3;return `<div class="prow"><span class="pn">${w.name}${SET().offW[w.id]?' <small>(כבוי)</small>':''}</span>${BAR(got,max,w.color)}<span class="pc">${got}/${max}</span></div>`;}).join(''));
   const st=sv.st||{};const units=O.ALLU.filter(u=>!u.boss&&st[u.id]&&st[u.id].a>=4).map(u=>({u,r:st[u.id].o/st[u.id].a}));
   const weak=[...units].sort((a,b)=>a.r-b.r).slice(0,5),strong=[...units].sort((a,b)=>b.r-a.r).slice(0,3);
@@ -964,6 +993,7 @@ function planTab(box){const st=SET();let plan=(st.plan&&st.plan.slice())||['math
     if(d.t.length>1)ch('✕ הסר',()=>{d.t.splice(i,1);d.done.splice(i,1);});ts.appendChild(r);});
   if(d.t.length<5){const ar=h('div','popt','<span>הוספת משימה להיום:</span>');[['math','🧮 חשבון'],['any','🎲 אקראית']].forEach(([k,n])=>{const b=h('button','pchip',n);b.onclick=()=>{let id='math';if(k==='any'){const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;id=O.pick(pool);}d.t.push(id);d.done.push(0);d.claimed=0;O.persist();panel('plan');};ar.appendChild(b);});ts.appendChild(ar);}
   /* the template for every day */
+  const tdet=document.createElement('details');tdet.className='pdet';tdet.innerHTML='<summary>🗓️ התבנית לכל יום (לא חובה)</summary>';const tin=h('div','pdin');tdet.appendChild(tin);if(openSec==='plan-t')tdet.open=true;tdet.addEventListener('toggle',()=>{if(tdet.open)openSec='plan-t';});box.appendChild(tdet);box=tin;
   const ps=sec(box,'התבנית לכל יום',`<div class="pnote">מכאן נבנה השביל של כל יום חדש. לכל צעד: חשבון, פעילות לבחירת המשחק, בניין מסוים או פעילות מסוימת. בסוף השביל אורן מקבל 15 יהלומים ואז זמן חופשי.</div>`);
   const rows=h('div','');ps.appendChild(rows);
   const opts=[['math','🧮 חשבון'],['any','🎲 לבחירת המשחק'],...BUILD.filter(b=>!st.hide[b.id]).map(b=>[b.id,'🏠 '+plain(b.name)+' (פעילות כלשהי)']),...BUILD.filter(b=>!st.hide[b.id]).flatMap(b=>b.acts.filter(a=>!st.offA[a.id]).map(a=>['act:'+a.id,'· '+plain(b.name)+' — '+plain(a.name)]))];
@@ -1125,7 +1155,7 @@ function home(){const S0=T.S();
     d.t.forEach((id,i)=>{const inf=stepInfo(id);if(i)path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
       const b=h('button','tstep2'+(d.done[i]?' done':i===nx?' cur':''),`<span class="tn">${d.done[i]?'✓':i+1}</span><span class="ti2">${inf.ic}</span><span class="tl">${inf.n}</span>`);b.style.setProperty('--sc',inf.c);
       b.onclick=()=>{sfx.pop(2);runStep(i);};
-      if(id!=='math'&&!d.done[i]&&!d.sw){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');sw.onclick=e=>{e.stopPropagation();const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;d.t[i]=O.pick(pool);d.sw=1;O.persist();sfx.whoosh&&sfx.whoosh();home();};b.appendChild(sw);}
+      if(false){const sw=h('span','dsw','🔄');sw.title='הַחְלֵף';sw.setAttribute('role','button');sw.setAttribute('aria-label','להחליף משימה');sw.onclick=e=>{e.stopPropagation();const pool=T.dailyPool().filter(x=>!d.t.includes(x));if(!pool.length)return;d.t[i]=O.pick(pool);d.sw=1;O.persist();sfx.whoosh&&sfx.whoosh();home();};b.appendChild(sw);}
       path.appendChild(b);});
     card.appendChild(path);const row=h('div','btnrow');
     if(nx>=0){const go=h('button','bigbtn huge',ICON.play+`<span>מַמְשִׁיכִים: ${stepInfo(d.t[nx]).n}</span>`);go.onclick=()=>{sfx.pop(3);runStep(nx);};row.appendChild(go);}
@@ -1142,8 +1172,6 @@ function home(){const S0=T.S();
     const b=h('button','door '+k,`<span class="dico">${ic}</span><b>${n}</b><small>${sb}</small>${p!=null?`<span class="bar"><i style="width:${p}%"></i></span>`:`<span class="dg">${SPR.gem}<b>${O.save.gems|0}</b></span>`}`);b.style.setProperty('--dc',c);b.onclick=()=>{sfx.pop(2);fn();};doors.appendChild(b);});
   s.appendChild(doors);
   /* small corner of "me" */
-  const me=h('div','merow');[[O.AV(),'הַגִּבּוֹר שֶׁלִּי',()=>O.studio(false)],['🏅','הַתַּגִּים שֶׁלִּי',()=>T.badges(O.showMap)],[pr.an?ALLSPR(pr.an):'🪪','הַכַּרְטִיס שֶׁלִּי',()=>T.profile(O.showMap)]].forEach(([ic,n,fn])=>{const b=h('button','tool',`<span class="ti">${ic}</span><span>${n}</span>`);b.onclick=fn;me.appendChild(b);});
-  s.appendChild(me);
   const pb=h('button','parbtn','🔒 כניסת הורים');pb.onclick=()=>window.TAL_parentGate();s.appendChild(pb);
   T.checkMsg&&T.checkMsg();}
 window.TAL_home=home;T.home=home;
