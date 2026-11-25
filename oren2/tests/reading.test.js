@@ -36,10 +36,10 @@ const STUB = () => {
   ok('🔊 on quiz question and sentence', await p.evaluate(() => !!document.querySelector('.tqc .qq .rdb') && !!document.querySelector('.tqc .sent .rdb')));
   ok('try-to-read cue at level 1', await p.locator('.rdcue').count() === 1);
   // 2. pressing 🔊 speaks the vocalized text (as full spelling) and lights the words in order, then clears
-  const words = await p.evaluate(() => [...document.querySelectorAll('.tqc .qq .rw')].map(w => w.textContent).join(' '));
   await p.evaluate(() => { window.__hl = []; window.__spoken = []; document.querySelector('.tqc .qq .rdb').click(); });
   await p.waitForFunction(() => window.__spoken.length >= 1);
   const sent = await p.evaluate(() => window.__spoken[0]);
+  const words = await p.evaluate(() => [...document.querySelectorAll('.tqc .qq .rw')].map(w => w.textContent).join(' '));
   const expect = await p.evaluate(w => window.__fullSpell(w), words);
   ok('speaks the question text (full spelling of the vocalized words)', sent === expect, JSON.stringify([sent, expect]));
   await p.waitForFunction(() => !document.querySelector('.reading'), null, { timeout: 5000 });
