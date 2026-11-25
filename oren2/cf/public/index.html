@@ -50,7 +50,7 @@ svg.px{shape-rendering:crispEdges;display:block}
 .gemc{display:flex;align-items:center;gap:6px;font-weight:900;font-size:21px;background:rgba(255,255,255,.92);padding:4px 12px;box-shadow:0 4px 0 rgba(0,0,0,.18);direction:ltr}
 .gemc svg{width:24px}
 .gemc.bump{animation:pop .35s}
-.progress{display:flex;gap:4px;direction:ltr;flex-wrap:wrap;max-width:360px}
+.progress{display:flex;gap:4px;direction:rtl;flex-wrap:wrap;max-width:360px}
 .pb{width:18px;height:18px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 3px rgba(0,0,0,.15)}
 .pb.on{background:var(--grass);box-shadow:inset 0 5px 0 var(--grass-l),inset -3px -3px 0 rgba(0,0,0,.2)}
 .pb.cur{background:#fff;box-shadow:inset 0 0 0 3px var(--gold)}
@@ -612,7 +612,7 @@ const ICON={
   say:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
   music:'<svg viewBox="0 0 24 24" fill="#23303b" aria-hidden="true"><path d="M9 4v11.3A3.5 3.5 0 1 0 11 18V8h7V4H9z"/></svg>',
   musicOff:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v11.3A3.5 3.5 0 1 0 11 18V8h7V4H9z" fill="#23303b" opacity=".45"/><path d="M4 4l16 16" stroke="#e4572e" stroke-width="3" stroke-linecap="round"/></svg>',
-  play:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 4v16L4 12z"/></svg>',
   mute:'<svg viewBox="0 0 24 24" fill="none" stroke="#23303b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#23303b"/><path d="M16 9l5 6M21 9l-5 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9.5 18 20 6"/></svg>',
   del:'<svg viewBox="0 0 24 24" fill="none" stroke="#23303b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5h12v14H8l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/></svg>',
@@ -700,12 +700,12 @@ const GN={
     if(v==='t')return W(`כַּמָּה עֲשָׂרוֹת יֵשׁ בַּמִּסְפָּר ${nb(n)}?`,t,'עֲשָׂרוֹת',`כָּל מַקֵּל = 10. סוֹפְרִים מַקְלוֹת.${baseTen(n,'#e8873a')}`,[`${t*10} + ${u} = ${n}`,`${t*10} : 10 = ?`],1);
     return W(`כַּמָּה אֲחָדוֹת יֵשׁ בַּמִּסְפָּר ${nb(n)}?`,u,'אֲחָדוֹת',`הָאֲחָדוֹת הֵן הַקֻּבִּיּוֹת הַבּוֹדְדוֹת${baseTen(n,'#e8873a')}`,[`${n} − ${t*10} = ?`],1);},
   pv3:()=>{const v=pick(['h','t','u','c']);
-    if(v==='c'){const a=rand(2,9),b=rand(2,9),c=rand(2,9),n=a*100+b*10+c;return W(`${nb(a)} מֵאוֹת, ${nb(b)} עֲשָׂרוֹת ${vav(c)}-${nb(c)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`מֵאָה = לוּחַ, עֶשֶׂר = מַקֵּל, אֶחָד = קֻבִּיָּה`,[`${a} × 100 = ${a*100}`,`${b} × 10 = ${b*10}`,`${a*100} + ${b*10} + ${c} = ?`],1);}
+    if(v==='c'){const a=rand(2,9),b=rand(2,9),c=rand(2,9),n=a*100+b*10+c;return W(`${nb(a)} מֵאוֹת, ${nb(b)} עֲשָׂרוֹת ${vav(c)}-${nb(c)} אֲחָדוֹת הֵן הַמִּסְפָּר:`,n,'',`מֵאָה = לוּחַ, עֶשֶׂר = מַקֵּל, אַחַת = קֻבִּיָּה`,[`${a} × 100 = ${a*100}`,`${b} × 10 = ${b*10}`,`${a*100} + ${b*10} + ${c} = ?`],1);}
     const n=rand(101,999),a=n/100|0,b=(n%100)/10|0,c=n%10;const nm={h:'הַמֵּאוֹת',t:'הָעֲשָׂרוֹת',u:'הָאֲחָדוֹת'}[v];const ans={h:a,t:b,u:c}[v];
     return W(`בַּמִּסְפָּר ${nb(n)}, מַהִי סִפְרַת ${nm}?`,ans,'',`מְפָרְקִים: ${L_(a*100+' + '+b*10+' + '+c)}${ptab([n])}`,[`${a*100} + ${b*10} + ${c} = ${n}`],1);},
   exp:()=>{const a=rand(1,9),b=rand(1,9),c=rand(1,9),n=a*100+b*10+c;const v=rand(1,3);
     if(v===1)return {k:'add3',a:a*100,b:b*10,c,res:n,ans:n};
-    if(v===2)return EQ([n,'=',a*100,'+','?','+',c],b*10,`מַה חָסֵר? סִפְרַת הָעֲשָׂרוֹת הִיא ${L_(b)}${ptab([n])}`,[`${n} − ${a*100} − ${c} = ?`]);
+    if(v===2)return EQ([n,'=',a*100,'+','?','+',c],b*10,`מֶה חָסֵר? סִפְרַת הָעֲשָׂרוֹת הִיא ${L_(b)}${ptab([n])}`,[`${n} − ${a*100} − ${c} = ?`]);
     const t=rand(2,9),u=rand(1,9);return EQ([t*10+u,'=','?','+',u],t*10,`מַה הַמִּסְפָּר בְּלִי הָאֲחָדוֹת?${baseTen(t*10+u,'#e8873a')}`,[`${t*10+u} − ${u} = ?`]);},
   eo:()=>{if(mm(.25)){const n=rand(10,98);const ev=n%2===0;return W(`מַהוּ הַמִּסְפָּר ${ev?'הַזּוּגִי':'הָאִי-זוּגִי'} הַבָּא אַחֲרֵי ${nb(n)}?`,n+2,'',`${ev?'זוּגִי':'אִי-זוּגִי'} ← מְדַלְּגִים ${L_(2)}: ${L_(n+' → '+(n+1)+' → ?')}`,[`${n} + 2 = ?`],1);}
     const n=mm(.5)?rand(2,20):rand(21,999);const odd=n%2;
@@ -748,7 +748,7 @@ const GT={
   add:()=>{const hr=rand(1,12),k=rand(1,4),half=mm(.3)?30:0;const right=tstr(h12(hr+k),half);const opts=new Set([right]);
     for(const c of shuffle([tstr(h12(hr+k+1),half),tstr(h12(hr+k-1),half),tstr(h12(hr-k),half),tstr(hr,half)]))if(opts.size<4)opts.add(c);
     while(opts.size<4)opts.add(tstr(rand(1,12),half));const o=shuffle([...opts]);
-    return Object.assign(CH(`<div class="qq">זֹאת הַשָּׁעָה עַכְשָׁו. מָה תִּהְיֶה הַשָּׁעָה בְּעוֹד ${k===1?'שָׁעָה':nb(k)+' שָׁעוֹת'}?</div>${clockSVG(hr,half)}`,o,o.indexOf(right),'קֹדֶם קוֹרְאִים אֶת הַשָּׁעָה עַכְשָׁו',`עַכְשָׁו ${L_(tstr(hr,half))}. סוֹפְרִים ${L_(k)} קָדִימָה עִם הַמָּחוֹג הַקָּצָר`,true),{chk:{t:'add',h:hr,m:half,k}});},
+    return Object.assign(CH(`<div class="qq">זֹאת הַשָּׁעָה עַכְשָׁו. מַה תִּהְיֶה הַשָּׁעָה בְּעוֹד ${k===1?'שָׁעָה':nb(k)+' שָׁעוֹת'}?</div>${clockSVG(hr,half)}`,o,o.indexOf(right),'קֹדֶם קוֹרְאִים אֶת הַשָּׁעָה עַכְשָׁו',`עַכְשָׁו ${L_(tstr(hr,half))}. סוֹפְרִים ${L_(k)} קָדִימָה עִם הַמָּחוֹג הַקָּצָר`,true),{chk:{t:'add',h:hr,m:half,k}});},
   frac:()=>{const parts=pick([2,3,4]);const shape=pick(['circle','bar']);
     return Object.assign(CH(`<div class="qq">אֵיזֶה חֵלֶק צָבוּעַ?</div>${fracSVG(parts,shape)}`,['חֲצִי','שְׁלִישׁ','רֶבַע'],parts-2,'סוֹפְרִים: לְכַמָּה חֲלָקִים שָׁוִים חִלְּקוּ?',`${L_(2)} חֲלָקִים ← חֲצִי · ${L_(3)} ← שְׁלִישׁ · ${L_(4)} ← רֶבַע`,false,'tx'),{chk:{t:'frac',parts}});},
   half2:()=>{const n=2*rand(2,mm(.5)?10:25);return W(`חֲצִי שֶׁל ${nb(n)} הוּא:`,n/2,'',`מְחַלְּקִים לִשְׁתֵּי קְבוּצוֹת שָׁווֹת${n<=20?share(2,n/2):''}`,[`${n} : 2 = ?`],1);},
@@ -834,42 +834,42 @@ const WP={
     if(t===3)return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} פָּחוֹת ${g1('מִמֶּנּוּ','מִמֶּנָּה')}. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,b,X,'"פָּחוֹת" ← חִסּוּר',[`${a} − ${d} = ?`]);
     return W(`${lp(p)} יֵשׁ ${nb(b)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר ${g1('מִמֶּנּוּ','מִמֶּנָּה')}. כַּמָּה ${X} יֵשׁ ${lp(q)}?`,a,X,'"יוֹתֵר" ← חִבּוּר',[`${b} + ${d} = ?`]);},
   unk:(lo,hi)=>()=>{const n=pick(NAMES),X=pick(ITEMS),g=(m,f)=>n[1]==='m'?m:f;const c=rand(lo,hi),a=rand(Math.max(2,Math.floor(c/4)),c-2),b=c-a;const t=rand(1,4);
-    if(t===1)return W(`${lp(n)} הָיוּ ${nb(a)} ${X}. ${g('הוּא קִבֵּל','הִיא קִבְּלָה')} עוֹד כַּמָּה, וְעַכְשָׁו יֵשׁ ${g('לוֹ','לָהּ')} ${nb(c)} ${X}. כַּמָּה ${X} ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,b,X,`כַּמָּה חָסֵר מִ-${nb(a)} עַד ${nb(c)}? ← חִסּוּר`,[`${c} − ${a} = ?`]);
+    if(t===1)return W(`${lp(n)} הָיוּ ${nb(a)} ${X}. ${g('הוּא קִבֵּל','הִיא קִבְּלָה')} עוֹד כַּמָּה, וְעַכְשָׁו יֵשׁ ${g('לוֹ','לָהּ')} ${nb(c)} ${X}. כַּמָּה ${X} ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,b,X,`כַּמָּה חָסֵר מ-${nb(a)} עַד ${nb(c)}? ← חִסּוּר`,[`${c} − ${a} = ?`]);
     if(t===2)return W(`${n[0]} ${g('קִבֵּל','קִבְּלָה')} ${nb(b)} ${X} מִסַּבְתָּא, וְעַכְשָׁו יֵשׁ ${g('לוֹ','לָהּ')} ${nb(c)} ${X}. כַּמָּה ${X} הָיוּ ${g('לוֹ','לָהּ')} קֹדֶם?`,a,X,'הוֹלְכִים אָחוֹרָה: מוֹרִידִים אֶת מַה שֶּׁהִתְקַבֵּל',[`${c} − ${b} = ?`]);
     if(t===3)return W(`${n[0]} ${g('נָתַן','נָתְנָה')} ${nb(b)} ${X} לְחָבֵר, וְנִשְׁאֲרוּ ${g('לוֹ','לָהּ')} ${nb(a)} ${X}. כַּמָּה ${X} הָיוּ ${g('לוֹ','לָהּ')} בַּהַתְחָלָה?`,c,X,'הוֹלְכִים אָחוֹרָה: מַחְזִירִים אֶת מַה שֶּׁנִּתַּן ← חִבּוּר',[`${a} + ${b} = ?`]);
     return W(`בָּאוֹטוֹבּוּס יָשְׁבוּ כַּמָּה נוֹסְעִים. בַּתַּחֲנָה עָלוּ ${nb(b)} נוֹסְעִים, וְעַכְשָׁו יֵשׁ ${nb(c)} נוֹסְעִים. כַּמָּה נוֹסְעִים יָשְׁבוּ בַּהַתְחָלָה?`,a,'נוֹסְעִים','הוֹלְכִים אָחוֹרָה: מוֹרִידִים אֶת מִי שֶׁעָלָה',[`${c} − ${b} = ?`]);},
   mul:()=>{const n=pick(NAMES),g=(m,f)=>n[1]==='m'?m:f;const t=rand(1,5);
     if(t===1){const X=pick(['עוּגִיּוֹת','סֻכָּרִיּוֹת','מַדְבֵּקוֹת','כַּדּוּרִים']),k=rand(2,10),q=rand(2,9);return W(`בְּכָל קֻפְסָה יֵשׁ ${nb(k)} ${X}. ${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} קֻפְסָאוֹת. כַּמָּה ${X} יֵשׁ ${g('לוֹ','לָהּ')} בְּסַךְ הַכֹּל?`,q*k,X,'קְבוּצוֹת שָׁווֹת ← כֶּפֶל',[`${q} × ${k} = ?`]);}
-    if(t===2){const A=pick([['כֶּלֶב','כְּלָבִים',4,'רַגְלַיִם'],['חִפּוּשִׁית','חִפּוּשִׁיּוֹת',6,'רַגְלַיִם'],['עַכָּבִישׁ','עַכָּבִישִׁים',8,'רַגְלַיִם'],['תַּרְנְגֹלֶת','תַּרְנְגוֹלוֹת',2,'רַגְלַיִם'],['מְכוֹנִית','מְכוֹנִיּוֹת',4,'גַּלְגַּלִּים']]),q=rand(2,9);return W(`לְכָל ${A[0]} יֵשׁ ${nb(A[2])} ${A[3]}. כַּמָּה ${A[3]} יֵשׁ לְ-${nb(q)} ${A[1]}?`,q*A[2],A[3],`${nb(q)} פְּעָמִים ${nb(A[2])} ← כֶּפֶל`,[`${q} × ${A[2]} = ?`]);}
+    if(t===2){const A=pick([['כֶּלֶב','כְּלָבִים',4,'רַגְלַיִם'],['חִפּוּשִׁית','חִפּוּשִׁיּוֹת',6,'רַגְלַיִם'],['עַכָּבִישׁ','עַכָּבִישִׁים',8,'רַגְלַיִם'],['תַּרְנְגֹלֶת','תַּרְנְגוֹלוֹת',2,'רַגְלַיִם'],['מְכוֹנִית','מְכוֹנִיּוֹת',4,'גַּלְגַּלִּים']]),q=rand(2,9);return W(`לְכָל ${A[0]} יֵשׁ ${nb(A[2])} ${A[3]}. כַּמָּה ${A[3]} יֵשׁ ל-${nb(q)} ${A[1]}?`,q*A[2],A[3],`${nb(q)} פְּעָמִים ${nb(A[2])} ← כֶּפֶל`,[`${q} × ${A[2]} = ?`]);}
     if(t===3){const k=rand(3,10),q=rand(2,9);return W(`בָּאוּלָם יֵשׁ ${nb(q)} שׁוּרוֹת שֶׁל כִּסְאוֹת. בְּכָל שׁוּרָה יֵשׁ ${nb(k)} כִּסְאוֹת. כַּמָּה כִּסְאוֹת יֵשׁ בָּאוּלָם?`,q*k,'כִּסְאוֹת','שׁוּרוֹת שָׁווֹת ← כֶּפֶל',[`${q} × ${k} = ?`]);}
-    if(t===4){const q=rand(2,9);return W(`בְּשָׁבוּעַ יֵשׁ ${nb(7)} יָמִים. כַּמָּה יָמִים יֵשׁ בְּ-${nb(q)} שָׁבוּעוֹת?`,q*7,'יָמִים','כָּל שָׁבוּעַ 7 יָמִים ← כֶּפֶל',[`${q} × 7 = ?`]);}
-    const q=rand(2,9);return W(`לְכָל יֶלֶד יֵשׁ ${nb(10)} אֶצְבָּעוֹת בַּיָּדַיִם. כַּמָּה אֶצְבָּעוֹת יֵשׁ לְ-${nb(q)} יְלָדִים?`,q*10,'אֶצְבָּעוֹת','קְבוּצוֹת שֶׁל 10 ← כֶּפֶל',[`${q} × 10 = ?`]);},
+    if(t===4){const q=rand(2,9);return W(`בְּשָׁבוּעַ יֵשׁ ${nb(7)} יָמִים. כַּמָּה יָמִים יֵשׁ ב-${nb(q)} שָׁבוּעוֹת?`,q*7,'יָמִים','כָּל שָׁבוּעַ 7 יָמִים ← כֶּפֶל',[`${q} × 7 = ?`]);}
+    const q=rand(2,9);return W(`לְכָל יֶלֶד יֵשׁ ${nb(10)} אֶצְבָּעוֹת בַּיָּדַיִם. כַּמָּה אֶצְבָּעוֹת יֵשׁ ל-${nb(q)} יְלָדִים?`,q*10,'אֶצְבָּעוֹת','קְבוּצוֹת שֶׁל 10 ← כֶּפֶל',[`${q} × 10 = ?`]);},
   div:()=>{const n=pick(NAMES),g=(m,f)=>n[1]==='m'?m:f;const t=rand(1,4);const k=rand(2,9),q=rand(2,9),p=k*q;
     if(t===1){const X=pick(['סֻכָּרִיּוֹת','מַדְבֵּקוֹת','עוּגִיּוֹת','קְלָפִים']);return W(`${n[0]} ${g('חִלֵּק','חִלְּקָה')} ${nb(p)} ${X} שָׁוֶה בְּשָׁוֶה בֵּין ${nb(k)} חֲבֵרִים. כַּמָּה ${X} קִבֵּל כָּל חָבֵר?`,q,X,'מְחַלְּקִים שָׁוֶה בְּשָׁוֶה ← חִלּוּק',[`${p} : ${k} = ?`]);}
-    if(t===2)return W(`בַּגַּן יֵשׁ ${nb(p)} יְלָדִים. הַגַּנֶּנֶת סִדְּרָה אוֹתָם בִּקְבוּצוֹת שֶׁל ${nb(k)}. כַּמָּה קְבוּצוֹת יֵשׁ?`,q,'קְבוּצוֹת',`כַּמָּה פְּעָמִים ${nb(k)} נִכְנָס בְּ-${nb(p)}? ← חִלּוּק`,[`${p} : ${k} = ?`]);
+    if(t===2)return W(`בַּגַּן יֵשׁ ${nb(p)} יְלָדִים. הַגַּנֶּנֶת סִדְּרָה אוֹתָם בִּקְבוּצוֹת שֶׁל ${nb(k)}. כַּמָּה קְבוּצוֹת יֵשׁ?`,q,'קְבוּצוֹת',`כַּמָּה פְּעָמִים ${nb(k)} נִכְנָס ב-${nb(p)}? ← חִלּוּק`,[`${p} : ${k} = ?`]);
     if(t===3){const c=rand(2,9);return W(`בַּחֲנָיָה יֵשׁ ${nb(c*4)} גַּלְגַּלִּים שֶׁל מְכוֹנִיּוֹת. לְכָל מְכוֹנִית יֵשׁ ${nb(4)} גַּלְגַּלִּים. כַּמָּה מְכוֹנִיּוֹת יֵשׁ בַּחֲנָיָה?`,c,'מְכוֹנִיּוֹת','קְבוּצוֹת שֶׁל 4 ← חִלּוּק',[`${c*4} : 4 = ?`]);}
     const kk=pick([6,10]),qq=rand(2,9);return W(`${n[0]} ${g('צָרִיךְ','צְרִיכָה')} ${nb(kk*qq)} בֵּיצִים. בְּכָל קַרְטוֹן יֵשׁ ${nb(kk)} בֵּיצִים. כַּמָּה קַרְטוֹנִים ${g('הוּא צָרִיךְ','הִיא צְרִיכָה')} לִקְנוֹת?`,qq,'קַרְטוֹנִים',`כַּמָּה קְבוּצוֹת שֶׁל ${nb(kk)}? ← חִלּוּק`,[`${kk*qq} : ${kk} = ?`]);},
   money:()=>{const n=pick(NAMES),g=(m,f)=>n[1]==='m'?m:f;const t=rand(1,4);
     if(t===1){const k=rand(2,9),q=rand(2,9);return W(`עִפָּרוֹן עוֹלֶה ${nb(k)} שְׁקָלִים. ${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} עֶפְרוֹנוֹת. כַּמָּה ${g('הוּא שִׁלֵּם','הִיא שִׁלְּמָה')}?`,q*k,'שְׁקָלִים','כָּל עִפָּרוֹן בְּאוֹתוֹ מְחִיר ← כֶּפֶל',[`${q} × ${k} = ?`]);}
-    if(t===2){const B2=pick([20,50,100]);const c=rand(3,B2-2);return W(`${n[0]} ${g('קָנָה','קָנְתָה')} כַּדּוּר בְּ-${nb(c)} שְׁקָלִים, ${g('וְשִׁלֵּם','וְשִׁלְּמָה')} בִּשְׁטָר שֶׁל ${nb(B2)} שְׁקָלִים. כַּמָּה עֹדֶף ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,B2-c,'שְׁקָלִים','עֹדֶף = מַה שֶּׁשִּׁלַּמְתָּ פָּחוֹת הַמְּחִיר',[`${B2} − ${c} = ?`]);}
+    if(t===2){const B2=pick([20,50,100]);const c=rand(3,B2-2);return W(`${n[0]} ${g('קָנָה','קָנְתָה')} כַּדּוּר ב-${nb(c)} שְׁקָלִים, ${g('וְשִׁלֵּם','וְשִׁלְּמָה')} בִּשְׁטָר שֶׁל ${nb(B2)} שְׁקָלִים. כַּמָּה עֹדֶף ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,B2-c,'שְׁקָלִים','עֹדֶף = מַה שֶּׁשִּׁלַּמְתָּ פָּחוֹת הַמְּחִיר',[`${B2} − ${c} = ?`]);}
     if(t===3){const a=rand(5,40),b=rand(3,40);return W(`גְּלִידָה עוֹלָה ${nb(a)} שְׁקָלִים, וּמִיץ עוֹלֶה ${nb(b)} שְׁקָלִים. כַּמָּה עוֹלִים שְׁנֵיהֶם בְּיַחַד?`,a+b,'שְׁקָלִים','"בְּיַחַד" ← חִבּוּר',[`${a} + ${b} = ?`]);}
-    const k=rand(2,10),q=rand(2,9);return W(`מַחְבֶּרֶת עוֹלָה ${nb(k)} שְׁקָלִים. ${lp(n)} יֵשׁ ${nb(k*q)} שְׁקָלִים. כַּמָּה מַחְבָּרוֹת ${g('הוּא יָכוֹל','הִיא יְכוֹלָה')} לִקְנוֹת?`,q,'מַחְבָּרוֹת',`כַּמָּה פְּעָמִים ${nb(k)} נִכְנָס בְּ-${nb(k*q)}? ← חִלּוּק`,[`${k*q} : ${k} = ?`]);},
+    const k=rand(2,10),q=rand(2,9);return W(`מַחְבֶּרֶת עוֹלָה ${nb(k)} שְׁקָלִים. ${lp(n)} יֵשׁ ${nb(k*q)} שְׁקָלִים. כַּמָּה מַחְבָּרוֹת ${g('הוּא יָכוֹל','הִיא יְכוֹלָה')} לִקְנוֹת?`,q,'מַחְבָּרוֹת',`כַּמָּה פְּעָמִים ${nb(k)} נִכְנָס ב-${nb(k*q)}? ← חִלּוּק`,[`${k*q} : ${k} = ?`]);},
   two:()=>{const n=pick(NAMES),X=pick(ITEMS),g=(m,f)=>n[1]==='m'?m:f;const t=rand(1,5);
     if(t===1){const a=rand(8,40),b=rand(3,30),c=rand(2,a+b-2);const s=a+b;return W(`${lp(n)} הָיוּ ${nb(a)} ${X}. ${g('הוּא קִבֵּל','הִיא קִבְּלָה')} עוֹד ${nb(b)}, וְאַחַר כָּךְ ${g('נָתַן','נָתְנָה')} ${nb(c)} לְחָבֵר. כַּמָּה ${X} יֵשׁ ${g('לוֹ','לָהּ')} עַכְשָׁו?`,s-c,X,'קֹדֶם מְחַבְּרִים, אַחַר כָּךְ מְחַסְּרִים',[`${a} + ${b} = ${s}`,`${s} − ${c} = ?`]);}
     if(t===2){const q=rand(2,6),k=rand(3,10),s=q*k,c=rand(2,s-2);return W(`${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} חֲבִילוֹת, וּבְכָל חֲבִילָה ${nb(k)} מַדְבֵּקוֹת. ${g('הוּא הִדְבִּיק','הִיא הִדְבִּיקָה')} ${nb(c)} מַדְבֵּקוֹת בַּמַּחְבֶּרֶת. כַּמָּה מַדְבֵּקוֹת נִשְׁאֲרוּ?`,s-c,'מַדְבֵּקוֹת','קֹדֶם כֶּפֶל, אַחַר כָּךְ חִסּוּר',[`${q} × ${k} = ${s}`,`${s} − ${c} = ?`]);}
     if(t===3){const a=rand(30,90),b=rand(5,a-5),c=rand(3,40);return W(`בַּסִּפְרִיָּה הָיוּ ${nb(a)} סְפָרִים. בַּבֹּקֶר הִשְׁאִילוּ ${nb(b)} סְפָרִים, וּבַצָּהֳרַיִם הֶחֱזִירוּ ${nb(c)} סְפָרִים. כַּמָּה סְפָרִים יֵשׁ עַכְשָׁו בַּסִּפְרִיָּה?`,a-b+c,'סְפָרִים','קֹדֶם מְחַסְּרִים, אַחַר כָּךְ מְחַבְּרִים',[`${a} − ${b} = ${a-b}`,`${a-b} + ${c} = ?`]);}
-    if(t===4){const q=rand(2,5),k=rand(3,9),B2=pick([50,100]);const s=q*k;return W(`${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} גְּלִידוֹת, כָּל אַחַת בְּ-${nb(k)} שְׁקָלִים, ${g('וְשִׁלֵּם','וְשִׁלְּמָה')} בִּשְׁטָר שֶׁל ${nb(B2)} שְׁקָלִים. כַּמָּה עֹדֶף ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,B2-s,'שְׁקָלִים','קֹדֶם כַּמָּה עָלָה הַכֹּל, אַחַר כָּךְ הָעֹדֶף',[`${q} × ${k} = ${s}`,`${B2} − ${s} = ?`]);}
+    if(t===4){const q=rand(2,5),k=rand(3,9),B2=pick([50,100]);const s=q*k;return W(`${n[0]} ${g('קָנָה','קָנְתָה')} ${nb(q)} גְּלִידוֹת, כָּל אַחַת ב-${nb(k)} שְׁקָלִים, ${g('וְשִׁלֵּם','וְשִׁלְּמָה')} בִּשְׁטָר שֶׁל ${nb(B2)} שְׁקָלִים. כַּמָּה עֹדֶף ${g('הוּא קִבֵּל','הִיא קִבְּלָה')}?`,B2-s,'שְׁקָלִים','קֹדֶם כַּמָּה עָלָה הַכֹּל, אַחַר כָּךְ הָעֹדֶף',[`${q} × ${k} = ${s}`,`${B2} − ${s} = ?`]);}
     const [p,q]=two();const a=rand(5,40),d=rand(2,20),s=a+d;const both=p[1]==='f'&&q[1]==='f'?'לִשְׁתֵּיהֶן':'לִשְׁנֵיהֶם';
     return W(`${lp(p)} יֵשׁ ${nb(a)} ${X}. ${lp(q)} יֵשׁ ${nb(d)} ${X} יוֹתֵר ${p[1]==='m'?'מִמֶּנּוּ':'מִמֶּנָּה'}. כַּמָּה ${X} יֵשׁ ${both} בְּיַחַד?`,a+s,X,`קֹדֶם: כַּמָּה יֵשׁ ${lp(q)}? אַחַר כָּךְ: בְּיַחַד`,[`${a} + ${d} = ${s}`,`${a} + ${s} = ?`]);}
 };
 
 /* ---------- curriculum: worlds → units → 3 levels (learn, game, challenge) + giant ---------- */
 const TB=(k)=>({lbl:'×'+k,name:`לוּחַ הַכֶּפֶל שֶׁל <span class="ltr">${k}</span>`,table:k,gen:mulG([k])});
-const DV=(ks,lbl,id)=>({id,lbl,name:ks.length>1?`חִלּוּק בְּ-<span class="ltr">${ks[0]}</span> וּבְ-<span class="ltr">${ks[1]}</span>`:`חִלּוּק בְּ-<span class="ltr">${ks[0]}</span>`,div:ks[0],gen:divG(ks),lesson:`חִלּוּק הוּא הַהֵפֶךְ שֶׁל כֶּפֶל: ${nb(ks[0]+' × 4 = '+ks[0]*4)}, אָז ${nb(ks[0]*4+' : '+ks[0]+' = 4')}.`});
+const DV=(ks,lbl,id)=>({id,lbl,name:ks.length>1?`חִלּוּק ב-<span class="ltr">${ks[0]}</span> וּבְ-<span class="ltr">${ks[1]}</span>`:`חִלּוּק ב-<span class="ltr">${ks[0]}</span>`,div:ks[0],gen:divG(ks),lesson:`חִלּוּק הוּא הַהֵפֶךְ שֶׁל כֶּפֶל: ${nb(ks[0]+' × 4 = '+ks[0]*4)}, אָז ${nb(ks[0]*4+' : '+ks[0]+' = 4')}.`});
 const WORLDS=[
  {id:'num',in:'בְּעֵמֶק הַמִּסְפָּרִים',name:'עֵמֶק הַמִּסְפָּרִים',say:'עמק המספרים',bg:'valley',color:'#d99a2b',op:'47',icon:()=>SPR.sheep,gd:'turtle',gname:'צְבִיקָה הַצָּב',
   intro:['שָׁלוֹם! אֲנִי צְבִיקָה. הַמְּבַלְבֵּל עִרְבֵּב אֶת כָּל הַמִּסְפָּרִים בָּעֵמֶק.','עֲזֹר לִי לְסַדֵּר אוֹתָם: עֲשָׂרוֹת, אֲחָדוֹת, זוּגוֹת וּסְדָרוֹת.'],outro:['הִצְלַחְתָּ! הָעֵמֶק שׁוּב מְסֻדָּר.','אֲנִי בָּא לָגוּר בַּמַּמְלָכָה שֶׁלְּךָ!'],units:[
-  {id:'num-pv2',lbl:'47',name:'עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'כָּל מִסְפָּר דּוּ-סִפְרָתִי בָּנוּי מֵעֲשָׂרוֹת וַאֲחָדוֹת: ‎47 = 4 עֲשָׂרוֹת וְ-7 אֲחָדוֹת.',gen:GN.pv2},
+  {id:'num-pv2',lbl:'47',name:'עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'כָּל מִסְפָּר דּוּ-סִפְרָתִי בָּנוּי מֵעֲשָׂרוֹת וַאֲחָדוֹת: 47 הוּא 4 עֲשָׂרוֹת וְ-7 אֲחָדוֹת.',gen:GN.pv2},
   {id:'num-pv3',lbl:'538',name:'מֵאוֹת, עֲשָׂרוֹת וַאֲחָדוֹת',lesson:'בַּמִּסְפָּר ‎538 יֵשׁ 5 מֵאוֹת, 3 עֲשָׂרוֹת וּ-8 אֲחָדוֹת.',gen:GN.pv3},
   {id:'num-exp',lbl:'500+30+8',name:'פֵּרוּק מִסְפָּרִים',lesson:'מְפָרְקִים מִסְפָּר לְפִי הַסְּפָרוֹת: ‎538 = 500 + 30 + 8.',gen:GN.exp},
   {id:'num-eo',lbl:'2 4 6',name:'זוּגִי וְאִי-זוּגִי',lesson:'זוּגִי = אֶפְשָׁר לְסַדֵּר בְּזוּגוֹת בְּלִי שְׁאֵרִית. מִסְפָּר שֶׁנִּגְמָר בְּ-0, 2, 4, 6, 8 הוּא זוּגִי.',gen:GN.eo},
@@ -891,7 +891,7 @@ const WORLDS=[
   {id:'add-8',lbl:'37+5',name:'מַעֲבָר עֶשֶׂרֶת',lesson:'מַשְׁלִימִים לָעֶשֶׂרֶת הַבָּאָה, וּמוֹסִיפִים אֶת הַשְּׁאָר.',gen:GA.carry1},
   {id:'add-9',lbl:'47+9',name:'הַטְּרִיק שֶׁל 9',lesson:'9 זֶה 10 פָּחוֹת 1. מוֹסִיפִים 10, וּמוֹרִידִים 1.',gen:GA.plus9},
   {id:'add-10',lbl:'23+45',name:'שְׁנֵי מִסְפָּרִים גְּדוֹלִים',lesson:'עֲשָׂרוֹת עִם עֲשָׂרוֹת, אֲחָדוֹת עִם אֲחָדוֹת.',gen:GA.a22},
-  {id:'add-11',lbl:'38+27',name:'גְּדוֹלִים עִם מַעֲבָר',lesson:'כְּשֶׁהָאֲחָדוֹת עוֹבְרוֹת אֶת 10, נוֹצֶרֶת עוֹד עֶשֶׂרֶת.',gen:GA.a22c},
+  {id:'add-11',lbl:'38+27',name:'גְּדוֹלִים עִם מַעֲבָר',lesson:'כְּשֶׁהָאֲחָדוֹת מַגִּיעוֹת ל-10 אוֹ יוֹתֵר, נוֹצֶרֶת עוֹד עֶשֶׂרֶת.',gen:GA.a22c},
   {id:'add-12',lbl:'63+?=100',name:'הַשְׁלָמָה לְ-100',lesson:'מַשְׁלִימִים קֹדֶם לָעֶשֶׂרֶת הַבָּאָה, וְאַחַר כָּךְ עַד 100.',gen:GA.c100},
   {id:'add-13',lbl:'38↓27',name:'חִבּוּר בִּמְאֻנָּךְ',lesson:'כּוֹתְבִים מִסְפָּר מֵעַל מִסְפָּר. מַתְחִילִים מֵהָאֲחָדוֹת, מִיָּמִין. אִם יוֹצֵא 10 אוֹ יוֹתֵר, כּוֹתְבִים אֶת הָאֲחָדוֹת וּמַעֲבִירִים 1 לָעֲשָׂרוֹת.',gen:GA.col2,col:1},
   {id:'add-14',lbl:'300+400',name:'מֵאוֹת',lesson:'3 מֵאוֹת וְעוֹד 4 מֵאוֹת הֵן 7 מֵאוֹת.',gen:GA.hund},
@@ -933,7 +933,7 @@ const WORLDS=[
   DV([2,10],':2 :10','div-1'),DV([5],':5','div-2'),DV([3],':3','div-3'),DV([4],':4','div-4'),DV([6],':6','div-5'),DV([7],':7','div-6'),DV([8],':8','div-7'),DV([9],':9','div-8'),
   {id:'div-9',lbl:':?',name:'כָּל הַחִלּוּק',lesson:'עַכְשָׁו הַכֹּל מְעֻרְבָּב. חוֹשְׁבִים עַל הַכֶּפֶל!',gen:divG([2,3,4,5,6,7,8,9,10])},
   {id:'div-10',lbl:'36:?=4',name:'מְחַלֵּק חָסֵר',lesson:'‎36 : ? = 4 → מְחַפְּשִׂים: אֵיזֶה מִסְפָּר כָּפוּל 4 נוֹתֵן 36?',gen:GD.miss},
-  {id:'div-11',lbl:'17:5',name:'חִלּוּק עִם שְׁאֵרִית',lesson:'לִפְעָמִים נִשְׁאָר קְצָת. ‎17 : 5 = 3, וְנִשְׁאָרִים 2. זוֹ הַשְּׁאֵרִית.',gen:GD.rem},
+  {id:'div-11',lbl:'17:5',name:'חִלּוּק עִם שְׁאֵרִית',lesson:'לִפְעָמִים נִשְׁאָר קְצָת. ‎17 : 5 = 3 (שְׁאֵרִית 2): ‎3 × 5 = 15, וְנִשְׁאָרִים 2. זוֹ הַשְּׁאֵרִית.',gen:GD.rem},
   {id:'div-12',lbl:'48:4',name:'חִלּוּק מִסְפָּר גָּדוֹל',lesson:'מְפָרְקִים: ‎48 = 40 + 8. ‏‎40 : 4 = 10, ‏‎8 : 4 = 2, וּבְיַחַד 12.',gen:GD.d21},
   {id:'div-x10',lbl:'450:10',name:'חִלּוּק בְּ-10',lesson:'מְחַלְּקִים בְּ-10 ← מוֹרִידִים אֶפֶס מֵהַסּוֹף: ‎450 : 10 = 45.',gen:GD.d10},
   {boss:true,id:'div-boss',gen:mix([divG([3,4,6,7,8,9]),GD.miss,GD.rem,GD.d21])}]},
@@ -943,7 +943,7 @@ const WORLDS=[
   {id:'word-1',lbl:'−',name:'סִפּוּרֵי חִסּוּר',lesson:'מִלִּים כְּמוֹ "נָתַן", "אָכַל" וְ"נִשְׁאֲרוּ" אוֹמְרוֹת: חִסּוּר.',gen:WP.take(8,20)},
   {id:'word-2',lbl:'?>',name:'כַּמָּה יוֹתֵר?',lesson:'כַּמָּה יוֹתֵר? מוֹרִידִים אֶת הַקָּטָן מֵהַגָּדוֹל.',gen:WP.cmp(8,20)},
   {id:'word-3',lbl:'+ −',name:'סִפּוּרִים עַד 100',lesson:'אוֹתָם סִפּוּרִים, עִם מִסְפָּרִים גְּדוֹלִים יוֹתֵר.',gen:mix([WP.join(25,99),WP.take(25,99),WP.cmp(25,99)])},
-  {id:'word-4',lbl:'?',name:'מַה חָסֵר בַּסִּפּוּר?',lesson:'לִפְעָמִים לֹא יוֹדְעִים מַה הָיָה בַּהַתְחָלָה. חוֹשְׁבִים מַה קָרָה, וְהוֹלְכִים אָחוֹרָה.',gen:WP.unk(10,60)},
+  {id:'word-4',lbl:'?',name:'מֶה חָסֵר בַּסִּפּוּר?',lesson:'לִפְעָמִים לֹא יוֹדְעִים מֶה הָיָה בַּהַתְחָלָה. חוֹשְׁבִים מַה קָּרָה, וְהוֹלְכִים אָחוֹרָה.',gen:WP.unk(10,60)},
   {id:'word-5',lbl:'×',name:'סִפּוּרֵי כֶּפֶל',lesson:'כְּשֶׁיֵּשׁ כַּמָּה קְבוּצוֹת שָׁווֹת, מְשַׁתְּמְשִׁים בְּכֶפֶל.',gen:WP.mul},
   {id:'word-6',lbl:':',name:'סִפּוּרֵי חִלּוּק',lesson:'מְחַלְּקִים שָׁוֶה בְּשָׁוֶה, אוֹ מְסַדְּרִים בִּקְבוּצוֹת: זֶה חִלּוּק.',gen:WP.div},
   {id:'word-7',lbl:'₪',name:'כֶּסֶף וְעֹדֶף',lesson:'עֹדֶף = מַה שֶּׁשִּׁלַּמְתָּ פָּחוֹת הַמְּחִיר.',gen:WP.money},
@@ -955,7 +955,7 @@ const WORLDS=[
   {id:'time-h',lbl:'3:00',name:'שָׁעוֹת עֲגֻלּוֹת',lesson:'הַמָּחוֹג הַקָּצָר מַרְאֶה שָׁעוֹת. כְּשֶׁהַמָּחוֹג הָאָרֹךְ עַל 12, זוֹ שָׁעָה עֲגֻלָּה.',gen:GT.h},
   {id:'time-half',lbl:'3:30',name:'חֲצִי שָׁעָה',lesson:'כְּשֶׁהַמָּחוֹג הָאָרֹךְ עַל 6, עָבְרָה חֲצִי שָׁעָה: 30 דַּקּוֹת. הַקָּצָר בָּאֶמְצַע, בֵּין שְׁנֵי מִסְפָּרִים.',gen:GT.half},
   {id:'time-q',lbl:'3:15',name:'רֶבַע שָׁעָה',lesson:'הָאָרֹךְ עַל 3 ← 15 דַּקּוֹת. הָאָרֹךְ עַל 9 ← 45 דַּקּוֹת.',gen:GT.q},
-  {id:'time-add',lbl:'+2',name:'מָה תִּהְיֶה הַשָּׁעָה?',lesson:'בְּעוֹד שָׁעָה, הַמָּחוֹג הַקָּצָר זָז מִסְפָּר אֶחָד קָדִימָה.',gen:GT.add},
+  {id:'time-add',lbl:'+2',name:'מַה תִּהְיֶה הַשָּׁעָה?',lesson:'בְּעוֹד שָׁעָה, הַמָּחוֹג הַקָּצָר זָז מִסְפָּר אֶחָד קָדִימָה.',gen:GT.add},
   {id:'time-frac',lbl:'½ ⅓ ¼',name:'חֲצִי, שְׁלִישׁ וְרֶבַע',lesson:'מְחַלְּקִים צוּרָה לַחֲלָקִים שָׁוִים: 2 חֲלָקִים ← חֲצִי, 3 ← שְׁלִישׁ, 4 ← רֶבַע.',gen:GT.frac},
   {id:'time-h2',lbl:'½ 8',name:'חֲצִי שֶׁל מִסְפָּר',lesson:'חֲצִי שֶׁל 8 ← מְחַלְּקִים לִשְׁתֵּי קְבוּצוֹת שָׁווֹת: 4.',gen:GT.half2},
   {id:'time-q2',lbl:'¼ 12',name:'רֶבַע שֶׁל מִסְפָּר',lesson:'רֶבַע שֶׁל 12 ← מְחַלְּקִים לְאַרְבַּע קְבוּצוֹת שָׁווֹת: 3.',gen:GT.q2},
@@ -1156,8 +1156,29 @@ const TTS={ns:null,he:false,en:false,ok:false,blocked:false};
   if(!TTS.ns)return;let L;try{L=TTS.ns.languages?await TTS.ns.languages().catch(()=>undefined):undefined;}catch(e){}
   TTS.langs=L;TTS.he=!!(L&&L.some(x=>/^(he|iw)/i.test(x)));TTS.en=true;TTS.ok=true;try{TTS.ns.onState(({state,reason})=>{duck(state!=='idle');if(reason==='not_granted'||reason==='unavailable')TTS.blocked=true;});}catch(e){}pickVoice();})();
 const useClaude=lang=>{if(!TTS.ns||TTS.blocked)return false;const e=VP().eng;if(e==='browser')return false;if(e==='claude')return true;return lang==='en'?TTS.en:TTS.he;};
+/* nikud text -> full spelling (ktiv male), so a voice that ignores nikud still reads it right */
+function fullSpell(str){const t=String(str).replace(/<[^>]+>/g,' ');const NIK=/[\u0591-\u05C7]/;let out='';
+  const words=t.split(/(\s+)/);for(const w of words){if(!NIK.test(w)){out+=w;continue;}
+    const L=[];for(const ch of w){if(/[\u05D0-\u05EA]/.test(ch))L.push({c:ch,m:''});else if(L.length&&NIK.test(ch))L[L.length-1].m+=ch;else L.push({c:ch,m:'',x:1});}
+    let r='';for(let i=0;i<L.length;i++){const a=L[i],n=L[i+1];if(a.x){r+=a.c;continue;}
+      const has=(o,c)=>o&&o.m.includes(c);const isL=o=>o&&!o.x;
+      /* consonantal vav/yod inside a word are doubled */
+      let c=a.c;const mid=i>0&&isL(L[i-1])&&isL(n)&&(i>1||!'הובכלמש'.includes(L[0].c));
+      if(mid&&(c==='ו'||c==='י')&&a.m&&!(c==='י'&&has(a,'\u05B4'))&&!has(a,'\u05B9')&&!(c==='ו'&&a.m==='\u05BC')&&!(c==='י'&&!/[\u05B0-\u05BB]/.test(a.m)))c=c+c;
+      r+=c;
+      if(has(a,'\u05BB'))r+='ו';                       /* kubutz -> vav */
+      else if(has(a,'\u05B9')&&c!=='ו'&&!(n&&n.c==='ו')&&!['לא','כל','ראש','ראשי','זאת','צאן','ראשון','ראשונה'].includes(w.replace(/[^\u05D0-\u05EA]/g,'')))r+='ו'; /* holam -> vav */
+      else if(has(a,'\u05B4')&&a.c!=='י'&&isL(n)&&n.c!=='י'){      /* hiriq -> yod in an open syllable */
+        const nShva=has(n,'\u05B0'),nDag=has(n,'\u05BC');const prefixMin=i===0&&'מש'.includes(a.c)&&nDag&&L.filter(o=>!o.x).length>=4;
+        if(!prefixMin&&(!nShva||nDag))r+='י';}}
+    out+=r;}
+  out=out.replace(/[\u0591-\u05C7]/g,'').replace(/\s+/g,' ').trim();
+  /* a command at the start of a sentence is ambiguous for a voice (לחץ = lachats/lachatz): say the plural command */
+  const CMD={'לחץ':'לחצו','בחר':'בחרו','ענה':'ענו','בעט':'בעטו','קרא':'קראו','פתח':'פיתחו','זרוק':'זרקו','הכה':'הכו','המשך':'המשיכו','שלח':'שלחו','מחק':'מחקו','עצום':'עיצמו','שאף':'שאפו','נשוף':'נשפו','החזק':'החזיקו','קפוץ':'קפצו','עזור':'עזרו','נסה':'נסו'};
+  return out.replace(/(^|[.!?:]\s*)([\u05D0-\u05EA]+)/g,(m,p1,w)=>p1+(CMD[w]||w));}
+window.__fullSpell=fullSpell;
 const withNikud=s=>String(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-function browserSay(t,lang){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(t));u.lang=lang==='en'?'en-US':'he-IL';const v=lang==='en'?enVoice:heVoice;if(v)u.voice=v;u.rate=(lang==='en'?.85:.92)*(VP().rate||1);u.pitch=1.05;u.onstart=()=>duck(true);u.onend=u.onerror=()=>duck(false);speechSynthesis.speak(u);}
+function browserSay(t,lang){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(lang==='en'?plain(t):fullSpell(t));u.lang=lang==='en'?'en-US':'he-IL';const v=lang==='en'?enVoice:heVoice;if(v)u.voice=v;u.rate=(lang==='en'?.85:.92)*(VP().rate||1);u.pitch=1.05;u.onstart=()=>duck(true);u.onend=u.onerror=()=>duck(false);speechSynthesis.speak(u);}
 function say(t,lang){if(!t||window.__fast)return;lang=lang||'he';
   if(useClaude(lang)){try{speechSynthesis.cancel();}catch(e){}const txt=(lang==='he'?withNikud(t):plain(t)).slice(0,1900);
     TTS.ns.speak(txt,{language:lang,rate:Math.max(.7,Math.min(1.3,(VP().rate||1)*(lang==='en'?.9:.95)))}).catch(e=>{const c=e&&(e.code||e.reason);if(c==='not_granted'||c==='unavailable'){TTS.blocked=true;return;}if(c==='stopped')return;browserSay(t,lang);});return;}
@@ -1196,16 +1217,16 @@ const BGS={
   final(){sky('#22163d','#8e6fd1');const cx=BW/2;bx.fillStyle='#1d1433';bx.fillRect(cx-40,BH*.55,80,BH*.45);bx.fillRect(cx-50,BH*.4,16,BH*.6);bx.fillRect(cx+34,BH*.4,16,BH*.6);bx.fillRect(cx-12,BH*.3,24,BH*.7);for(let x=cx-50;x<cx+50;x+=6)bx.fillRect(x,BH*.55-3,3,3);}
 };
 const BGD={
-  meadow(t){clouds(t,6,'#ffffff','#d6ecf5');birds(t,3);},
-  valley(t){clouds(t,5,'#fffaf0','#f3dcb8');birds(t,2);},
+  meadow(t){clouds(t,6,'#ffffff','#d6ecf5');},
+  valley(t){clouds(t,5,'#fffaf0','#f3dcb8');},
   forest(t){clouds(t,3,'#ffffff','#d1eadb');for(let i=0;i<16;i++){const a=.5+.5*Math.sin(t/300+i*1.7);const x=Math.round(sr(i)*BW+Math.sin(t/1500+i)*8),y=Math.round(BH*.55+sr(i+3)*BH*.38+Math.cos(t/1100+i*2)*4);bx.fillStyle=`rgba(255,240,120,${a*.25})`;bx.fillRect(x-1,y-1,3,3);bx.fillStyle=`rgba(255,250,170,${a})`;bx.fillRect(x,y,1,1);}},
   cave(t){for(let i=0;i<12;i++){const a=(Math.sin(t/500+i*1.7)+1)/2;const x=Math.floor(sr(i+20)*BW),y=Math.floor(BH*.78+sr(i+40)*12);bx.fillStyle=`rgba(180,140,242,${.2+a*.25})`;bx.fillRect(x-1,y-5,4,7);bx.fillStyle=`rgba(200,170,255,${.45+a*.55})`;bx.fillRect(x,y-3,2,4);bx.fillRect(x+2,y-1,1,2);}
     bx.fillStyle='#8ecae6';for(let i=0;i<6;i++){const x=Math.floor(sr(i+60)*BW/9)*9,y=((t*.025+i*37)%(BH*.9))+10;bx.fillRect(x,Math.floor(y),1,2);}},
   mount(t){clouds(t,4,'#ffffff','#dbe7f2');bx.fillStyle='#fff';for(let i=0;i<50;i++){const x=(sr(i)*BW+t*.004*(1+i%3)+Math.sin(t/900+i)*3)%BW,y=(sr(i+7)*BH+t*.009*(1+i%2))%BH;bx.fillRect(Math.floor(x),Math.floor(y),1,1);}},
-  sea(t){clouds(t,4,'#ffffff','#cfeaf3');birds(t,2);const top=Math.round(BH*.62);bx.fillStyle='#e6f7ff';for(let r=0;r<6;r++)for(let x=0;x<BW+20;x+=16){const xx=Math.floor((x+t*.01*(r+1)+r*7)%(BW+20))-10;bx.fillRect(xx,top+3+r*6,4,1);}
+  sea(t){clouds(t,4,'#ffffff','#cfeaf3');const top=Math.round(BH*.62);bx.fillStyle='#e6f7ff';for(let r=0;r<6;r++)for(let x=0;x<BW+20;x+=16){const xx=Math.floor((x+t*.01*(r+1)+r*7)%(BW+20))-10;bx.fillRect(xx,top+3+r*6,4,1);}
     for(let i=0;i<3;i++){const ph=((t/3200+i*.37)%1);if(ph<.22){const p=ph/.22,x0=Math.round(sr(i+80)*(BW-30)+10),x=x0+Math.round(p*14),y=Math.round(top-Math.sin(p*Math.PI)*12);bx.fillStyle='#f28c28';bx.fillRect(x,y,3,2);bx.fillRect(x-1,y-1,1,1);bx.fillRect(x-1,y+2,1,1);if(p<.12||p>.88){bx.fillStyle='#ffffff';bx.fillRect(x0+(p>.5?14:0)-2,top-1,5,1);}}}
     for(let i=0;i<8;i++)if(Math.sin(t/250+i*2.1)>.85){bx.fillStyle='#ffffff';bx.fillRect(Math.floor(sr(i+90)*BW),top+2+Math.floor(sr(i+91)*20),1,1);}},
-  city(t){for(const [x,w,hg] of CITY())for(let wy=BH-hg+3;wy<BH-3;wy+=5)for(let wx=x+2;wx<x+w-3;wx+=4){bx.fillStyle=Math.sin(t/1400+wx*3.1+wy*1.7)>.1?'#ffd166':'#3e3352';bx.fillRect(wx,wy,2,2);}birds(t,2);},
+  city(t){for(const [x,w,hg] of CITY())for(let wy=BH-hg+3;wy<BH-3;wy+=5)for(let wx=x+2;wx<x+w-3;wx+=4){bx.fillStyle=Math.sin(t/1400+wx*3.1+wy*1.7)>.1?'#ffd166':'#3e3352';bx.fillRect(wx,wy,2,2);}},
   clock(t){starsBG(t,30);const cx=Math.round(BW*.12)+12,cy=Math.round(BH*.3+14),d=new Date();const ma=(d.getMinutes()+d.getSeconds()/60)*Math.PI/30,ha=((d.getHours()%12)+d.getMinutes()/60)*Math.PI/6;
     bx.fillStyle='#23303b';for(let k=0;k<7;k++)bx.fillRect(Math.round(cx+Math.sin(ma)*k),Math.round(cy-Math.cos(ma)*k),1,1);for(let k=0;k<5;k++)bx.fillRect(Math.round(cx+Math.sin(ha)*k),Math.round(cy-Math.cos(ha)*k),1,1);
     gear(BW-22,BH*.35,8,10,t/1800,'#b8860b');gear(BW-36,BH*.47,5,7,-t/1100,'#d4a72c');},
@@ -1283,7 +1304,7 @@ function studio(first){setScreen('sStudio','meadow',first?null:showMap);
     const pr=h('div','orow','<h4>חָבֵר לַמַּסָּע</h4>');
     for(const [k,p] of Object.entries(PETS)){const b=h('button','hatb'+(save.av.pet===k?' sel':''),p.s());b.title=plain(p.n);b.onclick=()=>{save.av.pet=k;sfx.pop(3);persist();render();};pr.appendChild(b);}
     rows.append(hr,pr);
-    const nm=h('div','lcap',`${PET().n} ← הֶחָבֵר שֶׁלְּךָ`);
+    const nm=h('div','lcap',`הֶחָבֵר שֶׁלְּךָ: ${PET().n}`);
     const go=h('button','bigbtn',ICON.play+`<span>${first?'יוֹצְאִים לַמַּסָּע!':'מוּכָן!'}</span>`);go.onclick=()=>showMap(first);
     const col=h('div','');col.style.cssText='display:flex;flex-direction:column;align-items:center;gap:10px';col.append(pv,nm);wrap.append(col,rows);s.append(wrap,go);};
   render();}
@@ -1314,7 +1335,7 @@ function showJourney(greet){
     b.innerHTML=`<span class="op ltr">${Wd.op}</span><span class="gd ${fr?'':'caged'}" style="position:absolute">${GUARD[Wd.gd]}</span>${open?'':`<span class="lk">${SPR.lock}</span>`}<span class="ico">${Wd.icon()}</span><span class="nm">${Wd.name}</span><span class="bar"><i style="width:${done/Wd.levels.length*100}%"></i></span><span class="cnt">${done}/${Wd.levels.length}</span>`;
     b.onclick=()=>{if(!open){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');sfx.no();return;}showWorld(Wd);};grid.appendChild(b);});
   m.appendChild(grid);
-  m.appendChild(h('div','statline',`<span>${ICON.cal}<b>${save.days.length}</b> יְמֵי אִמּוּן</span><span>${SPR.flame}<b>${dayStreak()}</b> בִּרְצִיפוּת</span><span>${ICON.grid.replace('currentColor','#3a8fc4')}<b>${masteredCount()}</b>/100</span>${save.rq.length?`<span>טָעֻיּוֹת לְתַרְגֵּל: <b>${save.rq.length}</b></span>`:''}<span id="saveNote"></span>`));
+  m.appendChild(h('div','statline',`<span>${ICON.cal}<b>${save.days.length}</b> יְמֵי אִמּוּן</span><span>${SPR.flame}<b>${dayStreak()}</b> בִּרְצִיפוּת</span><span>${ICON.grid.replace('currentColor','#3a8fc4')}<bdi dir="ltr"><b>${masteredCount()}</b>/100</bdi></span>${save.rq.length?`<span>טָעֻיּוֹת לְתַרְגֵּל: <b>${save.rq.length}</b></span>`:''}<span id="saveNote"></span>`));
   updateSaveNote();
   const rs=h('button','reset','לְהוֹרִים: הַחְזִיקוּ 5 שְׁנִיּוֹת כְּדֵי לְאַפֵּס הַכֹּל');let ht=0;
   rs.onpointerdown=()=>{rs.classList.add('hold');ht=setTimeout(()=>{const snd=save.snd;save=blank();save.snd=snd;persist();renderStart();showMap();},5000);};
@@ -1372,13 +1393,13 @@ function hintData(q){
   if(q.k==='add3'){const {a,b,c}=q;let p;if(a+b===10)p=[`${a} + ${b} = 10`,`10 + ${c} = ?`];else if(b+c===10)p=[`${b} + ${c} = 10`,`10 + ${a} = ?`];else if(a+c===10)p=[`${a} + ${c} = 10`,`10 + ${b} = ?`];else p=[`${a} + ${b} = ${a+b}`,`${a+b} + ${c} = ?`];
     if(a+b+c>30)return {v:cap('מֵאוֹת, עֲשָׂרוֹת וַאֲחָדוֹת')+ptab([a+b+c]),s:p};
     return {v:cap('מְחַפְּשִׂים זוּג שֶׁל 10')+frames([...Array(a).fill('a'),...Array(b).fill('b'),...Array(c).fill('c')]),s:p};}
-  if(q.k==='rem'){const {p,d,qq,r}=q;return {v:cap(`כַּמָּה פְּעָמִים ${L_(d)} נִכְנָס בְּ-${L_(p)}?`)+skipS(d,Math.max(qq,1),false),s:[`${qq} × ${d} = ${qq*d}`,`${p} − ${qq*d} = ${r}`]};}
+  if(q.k==='rem'){const {p,d,qq,r}=q;return {v:cap(`כַּמָּה פְּעָמִים ${L_(d)} נִכְנָס ב-${L_(p)}?`)+skipS(d,Math.max(qq,1),false),s:[`${qq} × ${d} = ${qq*d}`,`${p} − ${qq*d} = ${r}`]};}
   const {l,r,res,op,miss,t}=q;
   if(op==='+'){
     if(miss!=='res'){const known=miss==='r'?l:r;
-      if(t==='c100'){const up=Math.ceil(known/10)*10;return {v:cap(`כַּמָּה חָסֵר מִ-${L_(known)} עַד 100?`)+`<div class="bt">${baseTen(known,'#e8873a')}</div>`,s:known%10?[`${known} + ${up-known} = ${up}`,`${up} + ${100-up} = 100`,`${up-known} + ${100-up} = ?`]:[`100 − ${known} = ?`]};}
+      if(t==='c100'){const up=Math.ceil(known/10)*10;return {v:cap(`כַּמָּה חָסֵר מ-${L_(known)} עַד 100?`)+`<div class="bt">${baseTen(known,'#e8873a')}</div>`,s:known%10?[`${known} + ${up-known} = ${up}`,`${up} + ${100-up} = 100`,`${up-known} + ${100-up} = ?`]:[`100 − ${known} = ?`]};}
       if(res<=20)return {v:cap('כַּמָּה רִבּוּעִים רֵיקִים?')+frames([...Array(known).fill('a'),...Array(res-known).fill('e')]),s:[`${res} − ${known} = ?`]};
-      return {v:cap(`מִ-${L_(known)} עַד ${L_(res)}: כַּמָּה חָסֵר?`)+`<div class="bt">${baseTen(known,'#e8873a')}${baseTen(res,'#3a8fc4')}</div>`,s:[`${res} − ${known} = ?`]};}
+      return {v:cap(`מ-${L_(known)} עַד ${L_(res)}: כַּמָּה חָסֵר?`)+`<div class="bt">${baseTen(known,'#e8873a')}${baseTen(res,'#3a8fc4')}</div>`,s:[`${res} − ${known} = ?`]};}
     if(t==='dbl')return {v:cap('כָּפוּל: אוֹתוֹ מִסְפָּר פַּעֲמַיִם')+frames([...Array(l).fill('a'),...Array(r).fill('b')]),s:[`${l} + ${l} = ?`]};
     if(t==='near'){const m=Math.min(l,r);return {v:cap('כִּמְעַט כָּפוּל!')+frames([...Array(l).fill('a'),...Array(r).fill('b')]),s:[`${m} + ${m} = ${2*m}`,`${2*m} + 1 = ?`]};}
     if(t==='p9'||t==='p19'){const nine=t==='p9'?9:19,big=r===nine?l:r,add=t==='p9'?10:20;return {v:cap(`${L_(t==='p9'?'9 = 10 − 1':'19 = 20 − 1')}`),s:[`${big} + ${add} = ${big+add}`,`${big+add} − 1 = ?`]};}
@@ -1395,8 +1416,8 @@ function hintData(q){
     return {v:cap('קֹדֶם עֲשָׂרוֹת, אַחַר כָּךְ אֲחָדוֹת')+`<div class="bt">${baseTen(l,'#e8873a')}${baseTen(r,'#3a8fc4')}</div>`,s};
   }
   if(op==='−'){
-    if(miss!=='res'){if(l<=20)return {v:cap(`כַּמָּה צָרִיךְ לִמְחֹק כְּדֵי שֶׁיִּשָּׁאֲרוּ ${L_(res)}?`)+frames([...Array(res).fill('b'),...Array(l-res).fill('a')]),s:[`${l} − ${res} = ?`]};
-      return {v:cap(`מִ-${L_(l)} צָרִיךְ לָרֶדֶת עַד ${L_(res)}`)+`<div class="bt">${baseTen(l,'#e8873a')}</div>`,s:[`${l} − ${res} = ?`]};}
+    if(miss!=='res'){if(l<=20)return {v:cap(`כַּמָּה צָרִיךְ לִמְחֹק כְּדֵי ${res===1?'שֶׁיִּשָּׁאֵר':'שֶׁיִּשָּׁאֲרוּ'} ${L_(res)}?`)+frames([...Array(res).fill('b'),...Array(l-res).fill('a')]),s:[`${l} − ${res} = ?`]};
+      return {v:cap(`מ-${L_(l)} צָרִיךְ לָרֶדֶת עַד ${L_(res)}`)+`<div class="bt">${baseTen(l,'#e8873a')}</div>`,s:[`${l} − ${res} = ?`]};}
     if(t==='m9'||t==='m19'){const sub=t==='m9'?10:20;return {v:cap(L_(t==='m9'?'9 = 10 − 1':'19 = 20 − 1')),s:[`${l} − ${sub} = ${l-sub}`,`${l-sub} + 1 = ?`]};}
     if(l<=20){const o=l%10,v=cap('מוֹחֲקִים וְסוֹפְרִים מַה נִּשְׁאַר')+frames([...Array(l-r).fill('a'),...Array(r).fill('x')]);
       if(l>10&&r<=o)return {v,s:[`${o} − ${r} = ${o-r}`,`${l-o} + ${o-r} = ?`]};
@@ -1408,7 +1429,7 @@ function hintData(q){
       if(r%10===0)return {v:cap('מוֹרִידִים עֲשָׂרוֹת')+bv,s:[`${l} − ${r} = ?`]};
       if(r<10)return {v:cap('מוֹרִידִים אֲחָדוֹת')+bv,s:[`${l} − ${r} = ?`]};
       return {v:cap('מוֹרִידִים קֹדֶם עֲשָׂרוֹת, אַחַר כָּךְ אֲחָדוֹת')+bv,s:[`${l} − ${tens(r)} = ${l-tens(r)}`,`${l-tens(r)} − ${r%10} = ?`]};}
-    const cap1=r<10?`מוֹרִידִים מִ-${L_(l)} רַק אֲחָדוֹת`:`מוֹרִידִים מִ-${L_(l)} קֹדֶם ${L_(tens(r)||r)}`;
+    const cap1=r<10?`מוֹרִידִים מ-${L_(l)} רַק אֲחָדוֹת`:`מוֹרִידִים מ-${L_(l)} קֹדֶם ${L_(tens(r)||r)}`;
     const v=cap(cap1)+`<div class="bt">${baseTen(l,'#e8873a')}</div>`;
     if(tens(r)&&r%10)return {v,s:[`${l} − ${tens(r)} = ${l-tens(r)}`,`${l-tens(r)} − ${r%10} = ?`]};
     if(!tens(r)&&r<=l%10)return {v,s:[`${l%10} − ${r} = ${l%10-r}`,`${tens(l)} + ${l%10-r} = ?`]};
@@ -1434,7 +1455,7 @@ function hintHTML(q,level){
   if(q.h1!=null){const c1=cap(q.h1);if(level===1)return c1;if(q.st&&q.st.length)return c1+steps(q.st);return q.h2?cap(q.h2):c1;}
   const d=hintData(q);if(level===1)return d.v;if(d.s.length)return steps(d.s);
   if(q.op==='×')return cap(`קְפִיצוֹת שֶׁל ${L_(q.r)}`)+skipS(q.r,q.l,true);
-  return cap(`מְחַלְּקִים ${L_(q.l)} לְ-${L_(q.r)} תֵּבוֹת. כַּמָּה בְּכָל תֵּבָה?`)+share(q.r,q.res);
+  return cap(`מְחַלְּקִים ${L_(q.l)} ל-${L_(q.r)} תֵּבוֹת. כַּמָּה בְּכָל תֵּבָה?`)+share(q.r,q.res);
 }
 
 /* ---------- column arithmetic ---------- */
@@ -1445,7 +1466,7 @@ function colBorrow(st,c){st.tops[c]+=10;st.marks[c]=st.tops[c];let j=c+1;while(s
 function colHint(q,st){const c=st.c;
   if(q.op==='+'){const a=st.A[c]|0,b=st.B[c]|0,ci=st.carries[c]|0;if(c>=st.A.length&&c>=st.B.length)return cap('מוֹרִידִים אֶת הַ-1 לְמַטָּה');
     const s=a+b+ci;return steps([`${a} + ${b}${ci?' + 1':''} = ${s}`])+cap(s>=10?`כּוֹתְבִים ${L_(s%10)} וּמַעֲבִירִים 1`:`כּוֹתְבִים ${L_(s)}`);}
-  if(colNeedBorrow(st,c)){const old=st.tops[c];colBorrow(st,c);renderCol(q,st);return cap(`${L_(old)} קָטָן מִ-${L_(st.B[c])} ← פּוֹרְטִים ${c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
+  if(colNeedBorrow(st,c)){const old=st.tops[c];colBorrow(st,c);renderCol(q,st);return cap(`${L_(old)} קָטָן מ-${L_(st.B[c])} ← פּוֹרְטִים ${c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
   return steps([`${st.tops[c]} − ${st.B[c]|0} = ?`]);}
 function renderCol(q,st){const box=$('#colw');if(!box)return;const W2=st.W;box.style.gridTemplateColumns=`repeat(${W2+1},var(--cw))`;let s='';const cell=(c2,cls='')=>`<div class="cc ${cls}">${c2}</div>`;
   s+=cell('','mk');for(let g=1;g<=W2;g++){const c=W2-g;const m=q.op==='+'?(st.carries[c]?'1':''):(st.marks[c]!=null?st.marks[c]:'');s+=cell(m,'mk'+(q.op==='+'?' cr':''));}
@@ -1478,7 +1499,7 @@ function learnMul(lv){const u=lv.u,k=u.table;setScreen('sLearn',u.w.bg,()=>showW
 function learnDiv(lv){const u=lv.u,k=u.div,n=rand(3,5),p=k*n;setScreen('sLearn',u.w.bg,()=>showWorld(u.w));
   $('#hudMid').innerHTML=`<div class="chip">לִמּוּד</div>`;const s=$('#sLearn');s.innerHTML='';const wrap=h('div','learn');
   wrap.innerHTML=`<h1>${u.name}</h1>`+(u.lesson?`<div class="lsent">${u.lesson}</div>`:'');
-  const capE=h('div','lcap',`מְחַלְּקִים <span class="ltr">${p}</span> יַהֲלוֹמִים לְ-<span class="ltr">${k}</span> תֵּבוֹת`);
+  const capE=h('div','lcap',`מְחַלְּקִים <span class="ltr">${p}</span> יַהֲלוֹמִים ל-<span class="ltr">${k}</span> תֵּבוֹת`);
   const pile=h('div','pile',SPR.gem.repeat(p));const row=h('div','dealrow');const boxes=[];for(let i=0;i<k;i++){const b=h('div','dealbox');row.appendChild(b);boxes.push(b);}
   const res=h('div','');const btns=h('div','btnrow');const deal=h('button','bigbtn',ICON.play+'<span>חַלֵּק</span>');const go=h('button','bigbtn plain sm',ICON.skip+'<span>לַתִּרְגּוּל</span>');
   const start=()=>{save.seen[u.id]=1;persist();playLevel(lv);};go.onclick=start;btns.append(deal,go);wrap.append(capE,pile,row,res,btns);s.appendChild(wrap);
@@ -1495,7 +1516,7 @@ function lesson(lv){const u=lv.u;setScreen('sLearn',u.w.bg,()=>showWorld(u.w));
   let stepI=0;const seq=[];
   if(ex.k==='col'){stage.innerHTML=`<div class="lcap">דֻּגְמָה:</div><div class="colwrap" id="colw"></div><div class="hintbox" id="hint" hidden></div>`;const st=colInit(ex);renderCol(ex,st);
     next.onclick=()=>{if(st.c>=st.R.length)return start();const hb=$('#hint');hb.hidden=false;
-      if(ex.op==='−'&&colNeedBorrow(st,st.c)){const old=st.tops[st.c];colBorrow(st,st.c);hb.innerHTML=cap(`${L_(old)} קָטָן מִ-${L_(st.B[st.c])} ← פּוֹרְטִים ${st.c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[st.c]} − ${st.B[st.c]|0} = ${st.R[st.c]}`]);}
+      if(ex.op==='−'&&colNeedBorrow(st,st.c)){const old=st.tops[st.c];colBorrow(st,st.c);hb.innerHTML=cap(`${L_(old)} קָטָן מ-${L_(st.B[st.c])} ← פּוֹרְטִים ${st.c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[st.c]} − ${st.B[st.c]|0} = ${st.R[st.c]}`]);}
       else hb.innerHTML=colHint(ex,st).replace('<b>?</b>',st.R[st.c]);
       colAdvance(ex,st,st.R[st.c],false);renderCol(ex,st);sfx.pop(st.c);
       if(st.c>=st.R.length){next.querySelector('span').textContent='עַכְשָׁו תּוֹרְךָ!';go.hidden=true;burst(...center($('#colw')),24);}};return;}
@@ -1756,7 +1777,7 @@ function teacher(tab){setScreen('sTeach','city',showMap);$('#hudMid').innerHTML=
   ['+','−','×',':'].forEach(o=>{const b=h('button','big'+(T.op===o?' sel':''),o);b.onclick=()=>{T.op=o;T.stage='build';sfx.pop(1);teacher('make');};ops.appendChild(b);});st1.appendChild(ops);
   const kind=h('div','optrow');[['תַּרְגִּיל',false],['סִפּוּר',true]].forEach(([n,v])=>{const b=h('button',T.story===v?'sel':'',n);b.onclick=()=>{T.story=v;teacher('make');};kind.appendChild(b);});st1.appendChild(kind);
   wrap.appendChild(st1);
-  if(T.story){const st2=h('div','tstep','<h3>2. מִי בַּסִּפּוּר, וּמָה יֵשׁ?</h3>');const hr=h('div','optrow');HEROES.forEach((x,i)=>{const b=h('button',T.hero===i?'sel':'',x[0]);b.onclick=()=>{T.hero=i;teacher('make');};hr.appendChild(b);});
+  if(T.story){const st2=h('div','tstep','<h3>2. מִי בַּסִּפּוּר, וּמַה יֵּשׁ?</h3>');const hr=h('div','optrow');HEROES.forEach((x,i)=>{const b=h('button',T.hero===i?'sel':'',x[0]);b.onclick=()=>{T.hero=i;teacher('make');};hr.appendChild(b);});
     const ir=h('div','optrow');ITEMS.forEach((x,i)=>{const b=h('button',T.item===i?'sel':'',x);b.onclick=()=>{T.item=i;teacher('make');};ir.appendChild(b);});st2.append(hr,ir);wrap.appendChild(st2);}
   const st3=h('div','tstep',`<h3>${T.story?'3':'2'}. אֵילוּ מִסְפָּרִים?</h3>`);
   const eq=h('div','eqcard');const boxA=h('span','ans'+(T.f==='a'?' foc':'')+(T.a?'':' empty'),T.a||'?');const boxB=h('span','ans'+(T.f==='b'?' foc':'')+(T.b?'':' empty'),T.b||'?');
@@ -1807,13 +1828,13 @@ function showTable(){setScreen('sTable','mount',showMap);const c=masteredCount()
 function showFinal(){setScreen('sFinal','final',showMap);$('#hudMid').innerHTML=`<div class="starcount">${SPR.star}<span>${totalStars()}</span></div>`;
   const date=new Date().toLocaleDateString('he-IL');
   $('#sFinal').innerHTML=`<div class="final"><div class="t1">תְּעוּדָה</div><div class="nm">אוֹרֶן גֶּרְמָן</div><div class="rl">אַלּוּף הַחֶשְׁבּוֹן שֶׁל אֶרֶץ הַבְּלוֹקִים</div><div class="fr">${AV()}${PET().s()}${WORLDS.filter(freed).map(w=>GUARD[w.gd]).join('')}</div><div class="cs">${castle(revealedFor(pts()))}</div>
-    <div class="statline"><span>${SPR.star}<b>${totalStars()}</b></span><span>${ICON.grid.replace('currentColor','#3a8fc4')}<b>${masteredCount()}</b>/100</span><span>${ICON.cal}<b>${save.days.length}</b> יְמֵי אִמּוּן</span></div>
+    <div class="statline"><span>${SPR.star}<b>${totalStars()}</b></span><span>${ICON.grid.replace('currentColor','#3a8fc4')}<bdi dir="ltr"><b>${masteredCount()}</b>/100</bdi></span><span>${ICON.cal}<b>${save.days.length}</b> יְמֵי אִמּוּן</span></div>
     <div style="font-size:15px;color:#4a5a66">+ − × : · ${date}</div></div><div class="note">לשמירה: צלמו את המסך</div>`;
   sfx.win();rain();sayNow='אורן גרמן, אלוף החשבון של ארץ הבלוקים!';}
 
 updateGems();cloudInit();
 const BUS={};function emit(e,...a){(BUS[e]||[]).forEach(f=>{try{f(...a);}catch(x){console.error(x);}});}
-window.OREN={get save(){return save;},persist,sfx,RAW,tone,noise,NT,audio,get A(){return A;},musicStart,musicStop,setTheme,duck,say,hush,sprite,SPR,AV,PET,GUARD,h,$,rand,pick,shuffle,setScreen,showMap,burst,rain,center,addGems,updateGems,floatText,ICON,D,RM,graphemes,story,today,dayStreak,masteredCount,WORLDS,ALLLV,ALLU,stars,totalStars,mergeIn,castle,revealedFor,pts,startLevel,kingdom,get family(){return FAM.on?FAM.id:null;},famPull,parentPlay,skipLevel,get isParentPlay(){return !!kidSave;},get realSave(){return kidSave||save;},showJourney,showWorld,unlocked,studio,sayLang:(t,l)=>say(t,l),get heVoice(){return heVoice;},setVoicePref,
+window.OREN={get save(){return save;},persist,sfx,RAW,tone,noise,NT,audio,get A(){return A;},musicStart,musicStop,setTheme,duck,say,hush,sprite,SPR,AV,PET,GUARD,h,$,rand,pick,shuffle,setScreen,showMap,burst,rain,center,addGems,updateGems,floatText,ICON,D,RM,graphemes,story,today,dayStreak,masteredCount,WORLDS,ALLLV,ALLU,stars,totalStars,mergeIn,castle,revealedFor,pts,startLevel,kingdom,settleSet:()=>{lastSetJ=JSON.stringify(save.set||{});},get family(){return FAM.on?FAM.id:null;},famPull,parentPlay,skipLevel,get isParentPlay(){return !!kidSave;},get realSave(){return kidSave||save;},showJourney,showWorld,unlocked,studio,sayLang:(t,l)=>say(t,l),get heVoice(){return heVoice;},setVoicePref,
   set sayNow(v){sayNow=v;},get sayNow(){return sayNow;},hud:html=>{$('#hudMid').innerHTML=html;},resetAll:keep=>{const snd=save.snd;save=blank();save.snd=snd;Object.assign(save,keep||{});persist();renderStart();},on:(e,f)=>{(BUS[e]=BUS[e]||[]).push(f);},emit,blank};
 window.__oren4={renderAudio,THEMES,RAW,setTheme,get mus(){return mus;},WORLDS,ALLLV,ALLU,hintHTML,hintData,uniq,colInit,colNeedBorrow,digs,qkey,bubbleOpts,storyFor,teachCheck,HEROES,get play(){return play;},get save(){return save;},startLevel,playLevel,showMap,showWorld,kingdom,studio,teacher,playSpeed,setFast:v=>{window.__fast=v;},mergeIn,migrateOld,lp};
 })();
@@ -2232,6 +2253,57 @@ body.pplay #screens{padding-bottom:52px}
 #sHome .parbtn{position:static;margin-top:4px}
 /* parent trial bar must not cover dialogs */
 body.pplay .dlg,body.pplay .overlay{padding-bottom:78px}
+/* ===== screen review fixes ===== */
+/* a real keyboard reads left to right */
+.kb,.kr{direction:ltr}
+/* picture answers fit inside their buttons */
+.chb.picb{height:auto;min-height:112px;min-width:112px;padding:10px}
+.chb.picb .pic svg{width:84px;height:84px}
+.chs{row-gap:16px}
+/* stories: compact lines, buttons always reachable */
+.story{margin:0 12px}.sl{margin:0;padding:4px 8px;line-height:1.75}
+.story+.btnrow{position:sticky;bottom:10px;z-index:4;background:rgba(255,255,255,.92);padding:8px 14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+#sTal,#sHome{padding-bottom:72px}
+/* top bar on phones: buttons keep their size, title shrinks */
+.hud .ibtn{flex-shrink:0}
+.hud-mid .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+/* cards centered when a row is not full */
+.acts{display:flex;flex-wrap:wrap;justify-content:center}.acts>.actc{width:170px}
+.hub.gsub{display:flex;flex-wrap:wrap;justify-content:center}.hub.gsub>.bld{width:220px}
+/* no focus ring on mouse/touch clicks */
+button:focus:not(:focus-visible){outline:none}
+/* locked robot levels: solid, with a lock */
+.lvb.locked{opacity:1;filter:none;background:#d9d4c7;color:#7b7466;position:relative}
+.lvb.locked::after{content:"🔒";position:absolute;top:2px;inset-inline-start:4px;font-size:14px}
+/* readable locked-badge hints */
+.bdg small{font-size:14px;color:#4a5a66}.bdg{opacity:.85}
+/* notices at the bottom, never over titles */
+.toast{top:auto;bottom:24px}
+/* break: Oren's friend */
+.bk svg{width:96px;height:96px}
+/* breathing words big and clear */
+.blab{font-size:40px;min-width:220px}
+/* home doors on phone: four in a row without touching */
+@media (max-width:760px){.doors2{gap:12px}.doors2 .door{width:74px;height:74px;box-shadow:inset 0 -6px 0 var(--dc),0 0 0 4px var(--dc),0 6px 0 4px rgba(0,0,0,.22)}.doors2 .door .dico svg{width:34px;height:34px}.doors2 .door>b{font-size:13px}
+  .chb.picb{min-height:92px;min-width:92px}.chb.picb .pic svg{width:66px;height:66px}
+  .sth{flex-wrap:wrap}.sth h2{font-size:21px;width:100%;text-align:center;order:-1}.sth svg{width:44px;height:44px}
+  .hud-mid .chip{font-size:13px}}
+.coach .cbub{box-sizing:border-box}
+/* balanced line breaks, no lonely last word */
+.lsent,.card .sub,.qq,.hbub2{text-wrap:balance}
+/* sliders a child can grab */
+.trng{height:44px;accent-color:var(--ok)}
+.trng::-webkit-slider-thumb{width:40px;height:40px}
+.arrow{border:14px solid transparent;border-left:26px solid #e4572e;border-right:0;transform:translate(-100%,-50%)}
+.cbn{width:min(560px,94vw,calc(100vh - 250px))}
+@media (max-width:760px){#ov .bigbtn.emo{font-size:24px;padding:4px 9px}.orow .sw{width:30px;height:30px}}
+/* locked lessons: solid card with a lock, clearly not pressable yet */
+.actc.locked{opacity:1;filter:none;background:#ddd6c6;color:#7b7466;position:relative;box-shadow:inset 0 0 0 3px #c9bfa8}
+.actc.locked::after{content:"🔒";position:absolute;top:6px;inset-inline-start:8px;font-size:18px}
+/* coloring grid fits on a laptop screen */
+.cbn{width:min(560px,94vw,calc(100vh - 300px))}
+/* "Oren the teacher" fits on a laptop screen: keypad in two rows */
+@media (min-width:761px) and (max-height:900px){#sTeach .pad{grid-template-columns:repeat(6,62px);gap:8px}#sTeach .key{height:54px;font-size:27px}}
 
 /* ===== 🕹️ arcade ===== */
 .arc{width:min(980px,100%);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 16px 22px;color:#fff;
@@ -2355,6 +2427,40 @@ body.pplay .dlg,body.pplay .overlay{padding-bottom:78px}
 .keeper{width:56px;height:92px}.keeper .kh{left:15px;width:26px;height:26px}.keeper .kb{top:26px;left:8px;width:40px;height:52px}.keeper .gl{top:20px;font-size:22px}
 @media (max-width:760px){.keeper{transform:translateX(-50%) scale(.8);transform-origin:bottom}}
 @media (max-width:760px){.nline .tk:not(.big) b{display:none}.nline .tk.big b{font-size:16px}.nline{width:84%}}
+/* ===== review fixes ===== */
+/* panels fill the screen: no empty dark band below */
+.arc.game,.arc.prz{min-height:calc(100dvh - 190px)}
+.arc.game{display:flex;flex-direction:column}.arc.game .field{flex:1 1 auto;height:auto;min-height:min(56vh,440px)}
+.arc.prz{justify-content:center;gap:26px}
+/* hall */
+.cab small{font-size:15px;opacity:1;color:#efe6ff}.cab .hs.new{color:#ffd23f}
+/* prize rate: one line */
+.prz .rate{align-items:baseline;gap:12px;font-size:36px;direction:ltr}.prz .rate .req{color:#36d6ff}.prz .rate svg{width:34px;height:34px;vertical-align:-4px}
+/* mole: more room between rows so labels never touch the hole above */
+.holes{gap:46px 22px}.hole{height:110px}
+.mole .tag{font-size:20px;padding:1px 7px}
+/* frog: upright labels on one baseline, room below */
+.nline .tk{font-style:normal}.nline .tk b{top:auto;bottom:-32px;font-style:normal;font-size:17px;line-height:1}
+.field.ff{gap:58px}
+.lily{bottom:0;font-size:36px;z-index:1}
+/* soccer: answers in the top half, keeper below them; simple legs */
+.goal{align-items:start}.corner{height:46%;align-items:center;padding-top:0}
+.keeper .kl{position:absolute;top:78px;width:12px;height:14px;background:#1a0b3d}.keeper .kl.l{left:13px}.keeper .kl.r{right:13px}
+/* swim: race goes right→left; names sit in their own lane on the right */
+.lanes{direction:rtl;top:50%;transform:translateY(-70%)}
+.lane .who{top:50%;right:8px;left:auto;transform:translateY(-50%);font-size:16px;background:rgba(10,30,60,.55);padding:2px 8px;direction:rtl}
+.lane .swr{right:76px;left:auto;transition:right .3s}.lane .me{transform:none}
+.lane .fin{right:auto;left:6px}
+.field.pool{background:linear-gradient(#1d0e46,#0d3a66)}
+@media (max-width:760px){
+  .cab small{font-size:14px}
+  .holes{gap:34px 14px}.hole{height:96px}
+  .nline .tk b{font-size:15px;bottom:-28px}.lily{font-size:30px}.field.ff{gap:50px}
+  .lane .who{font-size:13px;right:4px;padding:1px 5px}
+}
+.prz .rate span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.prz .rate svg{display:inline-block}
+.corner{height:42%}
+@media (max-width:760px){.arc.game,.arc.prz{min-height:calc(100dvh - 120px)}}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */
@@ -2367,6 +2473,8 @@ const today=O.today;
 const L_=t=>`<span class="ltr">${t}</span>`;
 const nb=n=>`<b>${n}</b>`;
 const plainHe=s=>String(s).replace(/<[^>]+>/g,' ').replace(/[֑-ׇ]/g,'').replace(/\s+/g,' ').trim();
+/* text for the voice: keep the nikud (the voice layer turns it into full spelling) */
+const spk=s=>String(s).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
 
 /* ---------- extra pixel sprites ---------- */
 const P=(rows,pal)=>sprite(rows,pal);
@@ -2438,7 +2546,7 @@ function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400
   let i=0,err=0,gems=0,lock=false,tries=0;O.setScreen('sTal',o.bg||'valley',o.back);
   const s=$('#sTal');s.innerHTML='';const wrap=h('div','tq');s.appendChild(wrap);
   const render=()=>{const q=qs[i];tries=0;lock=false;hudT(o.title,progressBar(i,qs.length));O.sayNow=q.say||plainHe(q.pr);
-    wrap.innerHTML='';const card=h('div','prq tqc',q.pr);if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמֵעַ'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
+    wrap.innerHTML='';const card=h('div','prq tqc',q.pr);if(q.play){const pb=h('button','hintbtn',ICON.say+`<span>${q.playLbl||'הַשְׁמַע'}</span>`);pb.onclick=q.play;card.appendChild(pb);}
     wrap.appendChild(card);const row=h('div','chs'+(q.ltr?' ltr':''));q.opts.forEach((op,k)=>{const b=h('button','chb '+(q.cls||''),op);b.onclick=()=>pickA(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');if(q.auto&&q.play)setTimeout(()=>{if(qs[i]===q)q.play();},D(350));};
   const resolve=(q)=>{const ex=wrap.querySelector('.hintbox');if(q.explain){ex.hidden=false;ex.innerHTML=`<div class="cap">${q.explain}</div>`;}if(q.reveal)q.reveal(wrap.querySelector('.tqc'));};
@@ -2454,7 +2562,8 @@ function quiz(o){const qs=[],seen=new Set();let t=0;while(qs.length<o.n&&t++<400
 /* ---------- buildings & activities registry ---------- */
 const BUILD=[];const ACT={};
 function building(b){BUILD.push(b);b.acts.forEach(a=>{ACT[a.id]=a;a.b=b;});}
-const bState=b=>window.TAL_bState?window.TAL_bState(b):(S().set.hide[b.id]?'off':'on');
+const touchOnly=()=>matchMedia('(pointer:coarse)').matches&&!matchMedia('(any-pointer:fine)').matches;
+const bState=b=>(b.needsKeys&&touchOnly())?'off':window.TAL_bState?window.TAL_bState(b):(S().set.hide[b.id]?'off':'on');
 const actOff=id=>!!(S().set.offA||{})[id];
 function actStars(id){return (S().tl[id]||{}).s|0;}
 const GROUPS=[{id:'readg',n:'קוֹרְאִים וְכוֹתְבִים',e:'📖',c:'#c0392b',ids:['read','write','stories','eng']},{id:'explore',n:'חוֹקְרִים וְחוֹשְׁבִים',e:'🔬',c:'#3cb371',ids:['lab','world','think','code']},{id:'create',n:'יוֹצְרִים',e:'🎨',c:'#ff7eb6',ids:['art','music','type']},{id:'calm',n:'נִרְגָּעִים',e:'🍃',c:'#7cc3a0',ids:['mind']}];
@@ -2465,8 +2574,8 @@ function bldCard(b,back){const bs=bState(b);const [got,max]=bStars(b);
   const c=h('button','wcard2 bld',`<span class="ico">${b.icon()}</span><span class="nm">${b.name}</span><span class="bar"><i style="width:${got/max*100}%"></i></span><span class="cnt">${SPR.star}${got}/${max}</span>`);c.style.setProperty('--lc',b.color);
   if(bs!=='on'){c.classList.add('lockb');c.querySelector('.cnt').innerHTML='🔒 '+bs.lock;c.onclick=()=>{sfx.no();window.TAL_locked&&window.TAL_locked(b);};}else c.onclick=()=>{sfx.pop(2);openBuilding(b);};return c;}
 /* level 1: four big doors */
-function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);hudT('עִיר הַכִּשְׁרוֹנוֹת',`<div class="starcount">${SPR.star}<span>${Object.values(S().tl).reduce((a,c)=>a+(c.s|0),0)}</span></div>`);
-  O.sayNow='עיר הכשרונות. במה נשחק?';const s=$('#sTal');s.innerHTML='';
+function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);O.hud(`<div class="starcount">${SPR.star}<span>${Object.values(S().tl).reduce((a,c)=>a+(c.s|0),0)}</span></div>`);
+  O.sayNow='עיר הכישרונות. מה נשחק?';const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd bob">${X.portal}</span><h1>עִיר הַכִּשְׁרוֹנוֹת</h1>`));
   const g4=h('div','gdoors');
   GROUPS.forEach(g=>{const bs=visB(g);if(!bs.length)return;const anyNew=bs.some(b=>bState(b)==='on');
@@ -2474,9 +2583,9 @@ function openHub(){KEY=null;O.setScreen('sTal','valley',O.showMap);hudT('עִי�
     c.style.setProperty('--gc',g.c);c.onclick=()=>{sfx.pop(3);const on=bs.filter(b=>bState(b)==='on');if(bs.length===1&&on.length===1)openBuilding(bs[0]);else openGroup(g);};g4.appendChild(c);});
   s.appendChild(g4);O.emit('hub',s);}
 /* level 2: just the buildings of one door */
-function openGroup(g){KEY=null;O.setScreen('sTal','valley',openHub);hudT(g.n);O.sayNow=plainHe(g.n);const s=$('#sTal');s.innerHTML='';
+function openGroup(g){KEY=null;O.setScreen('sTal','valley',openHub);O.hud('');O.sayNow=spk(g.n);const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd">${g.e}</span><h1>${g.n}</h1>`));const grid=h('div','hub gsub');visB(g).forEach(b=>grid.appendChild(bldCard(b)));s.appendChild(grid);O.emit('group',s,g);}
-function openBuilding(b){KEY=null;const gg=groupOf(b);O.setScreen('sTal',b.bg,visB(gg).length>1?()=>openGroup(gg):openHub);hudT(b.name);O.sayNow=plainHe(b.name);const s=$('#sTal');s.innerHTML='';
+function openBuilding(b){KEY=null;const gg=groupOf(b);O.setScreen('sTal',b.bg,visB(gg).length>1?()=>openGroup(gg):openHub);O.hud('');O.sayNow=spk(b.name);const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd">${b.icon()}</span><h1>${b.name}</h1>`));if(b.blurb)s.appendChild(h('div','lsent',b.blurb));
   const grid=h('div','acts');
   b.acts.forEach(a=>{if(a.avail&&!a.avail())return;if(actOff(a.id))return;const st=actStars(a.id);const c=h('button','actc',`<span class="ai">${a.icon()}</span><span class="an">${a.name}</span><span class="st">${[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join('')}</span>`);
@@ -2501,12 +2610,12 @@ let lastAct=Date.now(),session=0,snooze=0;
 setInterval(()=>{if(document.hidden||Date.now()-lastAct>60000||$('#hud').hidden)return;const s=S();const d=today();s.time[d]=(s.time[d]|0)+15;session+=15;
   if(session%60===0)O.persist();
   const lim=(s.set.brk|0)*60;if(lim&&session>=lim+snooze&&$('#ov').hidden&&$('#dlg').hidden&&$('#sPlay').hidden){breakTime();}},15000);
-function breakTime(){const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card"><div class="bk">${FACES.calm.s}</div><h2>זְמַן לְהַפְסָקָה קְטַנָּה</h2><div class="sub">שִׂחַקְתָּ הַרְבֵּה! אֶפְשָׁר לְהִתְמַתֵּחַ, לִשְׁתּוֹת מַיִם, אוֹ לִנְשֹׁם יַחַד.</div></div>`;
+function breakTime(){const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card"><div class="bk">${(S().prof&&S().prof.an?ALLSPR(S().prof.an):FACES.happy.s)}</div><h2>זְמַן לְהַפְסָקָה קְטַנָּה</h2><div class="sub">שִׂחַקְתָּ הַרְבֵּה! אֶפְשָׁר לְהִתְמַתֵּחַ, לִשְׁתּוֹת מַיִם, אוֹ לִנְשֹׁם יַחַד.</div></div>`;
   const row=h('div','btnrow');const a=h('button','bigbtn',ICON.play+'<span>נְשִׁימָה יַחַד</span>');a.onclick=()=>{ov.hidden=true;session=0;snooze=0;ACT['mind-breath'].run(openHub);};
   const b=h('button','bigbtn plain sm',ICON.redo+'<span>עוֹד קְצָת</span>');b.onclick=()=>{ov.hidden=true;snooze+=600;};row.append(a,b);ov.firstChild.appendChild(row);sfx.star(0);}
 
 /* exports for other chunks */
-window.TAL={openGroup,GROUPS,bState,dailyPool,S,X,ALLSPR,FACES,quiz,result,record,finishAct,building,ACT,BUILD,openHub,openBuilding,hudT,progressBar,starsHTML,plainHe,L_,nb,dailyEnsure,setKey:f=>{KEY=f;},get key(){return KEY;},breakTime,artSVG:(...a)=>artSVG(...a)};
+window.TAL={spk,openGroup,GROUPS,bState,dailyPool,S,X,ALLSPR,FACES,quiz,result,record,finishAct,building,ACT,BUILD,openHub,openBuilding,hudT,progressBar,starsHTML,plainHe,L_,nb,dailyEnsure,setKey:f=>{KEY=f;},get key(){return KEY;},breakTime,artSVG:(...a)=>artSVG(...a)};
 function artSVG(str){return window.TAL_artSVG?window.TAL_artSVG(str):'';}
 
 })();
@@ -2518,7 +2627,7 @@ const WORDS=[['חָתוּל',['חָ','תוּל'],'cat','cat'],['כֶּלֶב',['
  ['תַּפּוּחַ',['תַּ','פּוּחַ'],'apple','apple'],['מְכוֹנִית',['מְ','כוֹ','נִית'],'car','car'],['צִפּוֹר',['צִ','פּוֹר'],'bird','bird'],['עוּגָה',['עוּ','גָה'],'cake','cake'],['סֵפֶר',['סֵ','פֶר'],'bookS','book'],
  ['כּוֹבַע',['כּוֹ','בַע'],'hat','hat'],['סִירָה',['סִי','רָה'],'boat','boat'],['מַפְתֵּחַ',['מַפְ','תֵּחַ'],'key','key'],['לֵב',['לֵב'],'heart','heart'],['כּוֹס',['כּוֹס'],'cup','cup'],
  ['בֵּיצָה',['בֵּי','צָה'],'egg','egg'],['נַעַל',['נַ','עַל'],'shoe','shoe'],['דֶּגֶל',['דֶּ','גֶל'],'flag','flag'],['כִּבְשָׂה',['כִּבְ','שָׂה'],'sheep','sheep'],['דְּרָקוֹן',['דְּ','רָ','קוֹן'],'dragon','dragon'],
- ['קֶשֶׁת',['קֶ','שֶׁת'],'rainbow','rainbow'],['פָּנָס',['פָּ','נָס'],'lantern','lamp'],['עָנָן',['עָ','נָן'],'cloud','cloud'],['יַהֲלוֹם',['יַ','הֲ','לוֹם'],'gem','diamond']].map(([w,syl,spr,en])=>({w,syl,spr,en}));
+ ['קֶשֶׁת',['קֶ','שֶׁת'],'rainbow','rainbow'],['פָּנָס',['פָּ','נָס'],'lantern','lantern'],['עָנָן',['עָ','נָן'],'cloud','cloud'],['יַהֲלוֹם',['יַ','הֲ','לוֹם'],'gem','diamond']].map(([w,syl,spr,en])=>({w,syl,spr,en}));
 T.WORDS=WORDS;
 const pic=w=>`<span class="pic">${ALLSPR(w.spr)}</span>`;
 const first=w=>w.w.replace(/[֑-ׇ]/g,'')[0];
@@ -2530,15 +2639,15 @@ const SENT=[['הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא.','מִי 
  ['בַּלַּיְלָה רוֹאִים אֶת הַיָּרֵחַ.','מָה רוֹאִים בַּלַּיְלָה?','moon',['sun','rainbow']],['הַדָּג שׂוֹחֶה בַּיָּם.','מִי שׂוֹחֶה?','fish',['sheep','dragon']],
  ['אַבָּא קָנָה עוּגָה לְיוֹם הַהֻלֶּדֶת.','מָה אַבָּא קָנָה?','cake',['shoe','key']],['הַסִּירָה שָׁטָה עַל הַמַּיִם.','מָה שָׁט עַל הַמַּיִם?','boat',['car','ball']],
  ['בַּבֹּקֶר הַשֶּׁמֶשׁ זוֹרַחַת.','מָה זוֹרֵחַ בַּבֹּקֶר?','sun',['moon','cloud']],['נוֹעָה שָׂמָה כּוֹבַע עַל הָרֹאשׁ.','מָה נוֹעָה שָׂמָה עַל הָרֹאשׁ?','hat',['shoe','cup']],
- ['פָּתַחְתִּי אֶת הַדֶּלֶת עִם מַפְתֵּחַ.','עִם מָה פָּתַחְתִּי אֶת הַדֶּלֶת?','key',['flag','heart']],['הַכִּבְשָׂה אוֹכֶלֶת דֶּשֶׁא בַּשָּׂדֶה.','מִי אוֹכֵל דֶּשֶׁא?','sheep',['fish','bird']]];
+ ['אַבָּא פָּתַח אֶת הַדֶּלֶת בְּמַפְתֵּחַ.','בַּמֶּה אַבָּא פָּתַח אֶת הַדֶּלֶת?','key',['flag','heart']],['הַכִּבְשָׂה אוֹכֶלֶת דֶּשֶׁא בַּשָּׂדֶה.','מִי אוֹכֵל דֶּשֶׁא?','sheep',['fish','bird']]];
 function buildWord(back){const pool=shuffle(WORDS.filter(w=>w.syl.length>1)).slice(0,6);let i=0,err=0,gems=0;O.setScreen('sTal','city',back);
-  const s=$('#sTal');const run=()=>{const w=pool[i];let k=0;T.hudT('בּוֹנִים מִלָּה',T.progressBar(i,pool.length));O.sayNow=T.plainHe(w.w);
+  const s=$('#sTal');const run=()=>{const w=pool[i];let k=0;T.hudT('בּוֹנִים מִלָּה',T.progressBar(i,pool.length));O.sayNow=T.spk(w.w);
     s.innerHTML='';const card=h('div','prq tqc',`${pic(w)}<div class="slots">${w.syl.map(()=>'<span class="slot2"></span>').join('')}</div>`);s.appendChild(card);
     const row=h('div','chs');shuffle(w.syl.map((x,ix)=>[x,ix])).forEach(([sy,ix])=>{const b=h('button','chb tx',sy);b.onclick=()=>{if(b.disabled)return;
       if(w.syl[k]===sy){const sl=card.querySelectorAll('.slot2')[k];sl.textContent=sy;sl.classList.add('on');b.disabled=true;b.classList.add('ok');k++;sfx.pop(k);
-        if(k===w.syl.length){const g=2;gems+=g;O.addGems(g,card);sfx.ok(i);O.floatText(card,'+2');card.querySelector('.slots').classList.add('flash');O.say(T.plainHe(w.w));setTimeout(()=>{if(!card.isConnected)return;i++;if(i<pool.length)run();else T.finishAct('read-build',err,pool.length,gems,back,()=>buildWord(back));},D(1400));}}
+        if(k===w.syl.length){const g=2;gems+=g;O.addGems(g,card);sfx.ok(i);O.floatText(card,'+2');card.querySelector('.slots').classList.add('flash');O.say(T.spk(w.w));setTimeout(()=>{if(!card.isConnected)return;i++;if(i<pool.length)run();else T.finishAct('read-build',err,pool.length,gems,back,()=>buildWord(back));},D(1400));}}
       else{err++;sfx.no();b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');}};row.appendChild(b);});
-    s.appendChild(row);s.appendChild(h('div','note','לוֹחֲצִים עַל הַהֲבָרוֹת לְפִי הַסֵּדֶר, מִיָּמִין לִשְׂמֹאל'));};run();}
+    s.appendChild(row);s.appendChild(h('div','lsent','לוֹחֲצִים עַל הַהֲבָרוֹת לְפִי הַסֵּדֶר, מִיָּמִין לִשְׂמֹאל'));};run();}
 let dict=null,dictChecked=false;
 async function checkDict(){if(dictChecked)return dict;dictChecked=true;try{for(let i=0;i<20&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));if(window.claude&&window.claude.use)dict=await window.claude.use('dictation');}catch(e){dict=null;}return dict;}
 checkDict();
@@ -2563,11 +2672,11 @@ building({id:'read',name:'הַסִּפְרִיָּה',color:'#c0392b',bg:'city',
 /* English */
 const EW=WORDS.filter(w=>w.en);
 building({id:'eng',name:'אַנְגְּלִית',color:'#3a8fc4',bg:'sea',icon:()=>X.abc,blurb:'מִלִּים רִאשׁוֹנוֹת בְּאַנְגְּלִית. לוֹחֲצִים עַל הָרַמְקוֹל כְּדֵי לִשְׁמֹעַ.',acts:[
-  {id:'eng-letter',name:'אוֹתִיּוֹת',icon:()=>X.abc,run:back=>quiz({id:'eng-letter',title:'English ABC',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const L=w.en[0].toUpperCase();const opts=shuffle([w,...shuffle(EW.filter(x=>x.en[0]!==w.en[0])).slice(0,2)]);
+  {id:'eng-letter',name:'אוֹתִיּוֹת',icon:()=>X.abc,run:back=>quiz({id:'eng-letter',title:'אַנְגְּלִית: אוֹתִיּוֹת',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const L=w.en[0].toUpperCase();const opts=shuffle([w,...shuffle(EW.filter(x=>x.en[0]!==w.en[0])).slice(0,2)]);
      return {pr:`<div class="bigw ltr">${L} ${L.toLowerCase()}</div><div class="qq">אֵיזוֹ תְּמוּנָה מַתְחִילָה בָּאוֹת הַזֹּאת?</div>`,opts:opts.map(pic),ans:opts.indexOf(w),cls:'picb',play:()=>sayEn(L+'. '+w.en),auto:1,explain:`<span class="ltr bigw">${w.en}</span>`,key:L};}})},
-  {id:'eng-word',name:'מִלִּים',icon:()=>X.ball,run:back=>quiz({id:'eng-word',title:'English words',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const opts=shuffle([w,...others(w,2,x=>!!x.en)]);
+  {id:'eng-word',name:'מִלִּים',icon:()=>X.ball,run:back=>quiz({id:'eng-word',title:'אַנְגְּלִית: מִלִּים',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const opts=shuffle([w,...others(w,2,x=>!!x.en)]);
      return {pr:`${pic(w)}<div class="qq">אֵיךְ אוֹמְרִים בְּאַנְגְּלִית?</div>`,opts:opts.map(x=>x.en),ans:opts.indexOf(w),cls:'en',ltr:1,play:()=>sayEn(w.en),explain:`<span class="ltr bigw">${w.en}</span> = ${w.w}`,key:w.en};}})},
-  {id:'eng-listen',name:'מַקְשִׁיבִים',icon:()=>'<span style="font-size:34px">👂</span>',run:back=>quiz({id:'eng-listen',title:'Listen!',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const opts=shuffle([w,...others(w,3,x=>!!x.en)]);
+  {id:'eng-listen',name:'מַקְשִׁיבִים',icon:()=>'<span style="font-size:34px">👂</span>',run:back=>quiz({id:'eng-listen',title:'אַנְגְּלִית: מַקְשִׁיבִים',bg:'sea',back,n:8,gen:()=>{const w=pick(EW);const opts=shuffle([w,...others(w,3,x=>!!x.en)]);
      return {pr:`<div class="qq">הַקְשֵׁב לַמִּלָּה וּבְחַר תְּמוּנָה</div>`,opts:opts.map(pic),ans:opts.indexOf(w),cls:'picb',play:()=>sayEn(w.en),auto:1,playLbl:'שׁוּב',explain:`<span class="ltr bigw">${w.en}</span> = ${w.w}`,key:w.en};}})}]});
 /* World & Israel */
 const FL={il:['יִשְׂרָאֵל','<rect width="60" height="40" fill="#fff"/><rect y="4" width="60" height="5" fill="#0038b8"/><rect y="31" width="60" height="5" fill="#0038b8"/><path d="M30 12 L37 24 L23 24Z M30 28 L23 16 L37 16Z" fill="none" stroke="#0038b8" stroke-width="1.8"/>'],
@@ -2600,14 +2709,14 @@ const STORIES=[
   q:[['מִמָּה הָיְתָה הַסִּירָה?','מִנְּיָר',['מֵעֵץ','מִבַּרְזֶל']],['מָה קָרָה כְּשֶׁהִתְחִיל גֶּשֶׁם?','הַנְּיָר נִהְיָה רָטֹב',['הַסִּירָה עָפָה','הַשֶּׁמֶשׁ זָרְחָה']]]},
  {t:'חָכָם הַיַּנְשׁוּף סוֹפֵר כּוֹכָבִים',spr:['owl','star'],s:['בַּיַּעַר גָּר יַנְשׁוּף חָכָם.','כָּל לַיְלָה הוּא סוֹפֵר אֶת הַכּוֹכָבִים.','בַּלַּיְלָה הָרִאשׁוֹן הוּא סָפַר עֲשָׂרָה כּוֹכָבִים.','בַּלַּיְלָה הַשֵּׁנִי הוּא סָפַר עוֹד חֲמִשָּׁה.','חָכָם חִיֵּךְ: "חֶשְׁבּוֹן זֶה כֵּיף!"'],
   q:[['כַּמָּה כּוֹכָבִים הוּא סָפַר בְּסַךְ הַכֹּל?','15',['10','5']],['אֵיפֹה גָּר הַיַּנְשׁוּף?','בַּיַּעַר',['בַּיָּם','בָּעִיר']]]}];
-function readStory(k,back){const st=STORIES[k];O.setScreen('sTal','clock',back);T.hudT('סִפּוּר');const s=$('#sTal');s.innerHTML='';
+function readStory(k,back){const st=STORIES[k];O.setScreen('sTal','final',back);T.hudT('סִפּוּר');const s=$('#sTal');s.innerHTML='';
   const page=h('div','story');page.innerHTML=`<div class="sth"><span>${ALLSPR(st.spr[0])}</span><h2>${st.t}</h2><span>${ALLSPR(st.spr[1])}</span></div>`+st.s.map((x,i)=>`<p class="sl" data-i="${i}">${x}</p>`).join('');s.appendChild(page);
   const row=h('div','btnrow');const rd=h('button','bigbtn blue sm',ICON.say+'<span>הַקְרֵא לִי</span>');const go=h('button','bigbtn',ICON.play+'<span>לַשְּׁאֵלוֹת</span>');row.append(rd,go);s.appendChild(row);
   const mark=i=>{page.querySelectorAll('.sl').forEach(p=>p.classList.toggle('cur',+p.dataset.i===i));};
-  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);O.say(T.plainHe(p.textContent));});
-  rd.onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
-  go.onclick=()=>{O.hush();let qi=0;quiz({id:'story-'+k,title:st.t,bg:'clock',back:()=>openStories(back),n:st.q.length,gen:()=>{const [q,a,ds]=st.q[qi++];const opts=shuffle([a,...ds]);return {pr:`<div class="sent">${q}</div>`,opts,ans:opts.indexOf(a),cls:'tx',key:q};}});};}
-function openStories(back){O.setScreen('sTal','clock',back);T.hudT('סִפּוּרֵי עֶרֶב');const s=$('#sTal');s.innerHTML='';s.appendChild(h('div','whead',`<span class="gd">${X.moon}</span><h1>סִפּוּרֵי עֶרֶב</h1>`));
+  page.querySelectorAll('.sl').forEach(p=>p.onclick=()=>{mark(+p.dataset.i);O.say(T.spk(p.textContent));});
+  rd.onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();st.s.forEach((x,i)=>{const u=new SpeechSynthesisUtterance(window.__fullSpell?window.__fullSpell(x):T.plainHe(x));u.lang='he-IL';u.rate=.88;u.onstart=()=>mark(i);speechSynthesis.speak(u);});};
+  go.onclick=()=>{O.hush();let qi=0;quiz({id:'story-'+k,title:st.t,bg:'final',back:()=>openStories(back),n:st.q.length,gen:()=>{const [q,a,ds]=st.q[qi++];const opts=shuffle([a,...ds]);return {pr:`<div class="sent">${q}</div>`,opts,ans:opts.indexOf(a),cls:'tx',key:q};}});};}
+function openStories(back){O.setScreen('sTal','final',back);T.hudT('סִפּוּרֵי עֶרֶב');const s=$('#sTal');s.innerHTML='';s.appendChild(h('div','whead',`<span class="gd">${X.moon}</span><h1>סִפּוּרֵי עֶרֶב</h1>`));
   const g=h('div','acts');STORIES.forEach((st,k)=>{const n=(T.S().tl['story-'+k]||{}).s|0;const c=h('button','actc',`<span class="ai">${ALLSPR(st.spr[0])}</span><span class="an">${st.t}</span><span class="st">${[0,1,2].map(j=>j<n?SPR.star:SPR.starOff).join('')}</span>`);c.onclick=()=>readStory(k,()=>openStories(back));g.appendChild(c);});s.appendChild(g);}
 building({id:'stories',name:'סִפּוּרֵי עֶרֶב',color:'#6c4fc1',bg:'clock',icon:()=>X.moon,blurb:'סִפּוּרִים קְצָרִים לִקְרִיאָה, עִם שְׁאֵלוֹת בַּסּוֹף.',acts:STORIES.map((st,k)=>({id:'story-'+k,name:st.t,icon:()=>ALLSPR(st.spr[0]),run:back=>readStory(k,back)}))});
 T.openStories=openStories;
@@ -2638,21 +2747,21 @@ function typeLesson(n,back){const text=lessonText(n);let i=0,err=0,t0=0;O.setScr
     else{err++;sfx.no();box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');}});}
 function lessonsMenu(back){O.setScreen('sTal','city',back);T.hudT('שִׁעוּרֵי הַקְלָדָה');const s=$('#sTal');s.innerHTML='';const ty=T.S().typ;
   s.appendChild(h('div','lsent','מַנִּיחִים אֶצְבָּעוֹת עַל <b>ש ד ג כ</b> וְעַל <b>ח ל ך ף</b>. כָּל אֶצְבַּע לוֹחֶצֶת עַל הַמַּקָּשִׁים בַּצֶּבַע שֶׁלָּהּ.'));
-  s.appendChild(h('div','',kbHTML(null)));const g=h('div','acts');
+  const g=h('div','acts');
   LESSONS.forEach((l,n)=>{const open=n===0||(ty.best[n-1]|0)>0;const st=ty.best[n]|0;const c=h('button','actc'+(open?'':' locked'),`<span class="an ltr" style="font-size:24px">${l.join(' ')}</span><span class="an">שִׁעוּר ${n+1}</span><span class="st">${[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join('')}</span>`);
     c.disabled=!open;c.onclick=()=>typeLesson(n,()=>lessonsMenu(back));g.appendChild(c);});s.appendChild(g);}
 function rainGame(back){const ty=T.S().typ;let top=0;Object.keys(ty.best).forEach(k=>{top=Math.max(top,+k);});const al=learned(Math.max(1,top));
-  O.setScreen('sTal','city',back);T.hudT('גֶּשֶׁם אוֹתִיּוֹת');const s=$('#sTal');s.innerHTML='';const field=h('div','rainf');const sc=h('div','score','★ 0');s.append(sc,field);
+  O.setScreen('sTal','city',back);T.hudT('גֶּשֶׁם אוֹתִיּוֹת');const s=$('#sTal');s.innerHTML='';const field=h('div','rainf');const sc=h('div','score','⭐ 0');s.append(h('div','lsent','לְחַץ בַּמִּקְלֶדֶת עַל הָאוֹת שֶׁנּוֹפֶלֶת, לִפְנֵי שֶׁהִיא נוֹגַעַת בַּדֶּשֶׁא!'),sc,field);
   let score=0,blocks=[],t0=performance.now(),last=t0,spawn=0,alive=true,end=t0+60000;const H=()=>field.clientHeight;
   const mk=()=>{const ch=pick(al);const b=h('div','rb',ch);b.style.left=rand(4,90)+'%';field.appendChild(b);blocks.push({b,ch,y:-40});};
   const loop=now=>{if(!alive||$('#sTal').hidden||!field.isConnected){alive=false;return;}const dt=now-last;last=now;const sp=(28+score*1.2)/1000;spawn-=dt;if(spawn<=0){mk();spawn=Math.max(500,1500-score*25);}
     blocks.forEach(o=>{o.y+=sp*dt;o.b.style.top=o.y+'px';});const fallen=blocks.filter(o=>o.y>H()-30);fallen.forEach(o=>{o.b.remove();sfx.no();});blocks=blocks.filter(o=>o.y<=H()-30);
     if(now>=end){alive=false;T.setKey(null);const st=score>=40?3:score>=20?2:1;const g=Math.min(25,Math.floor(score/2));O.addGems(g);T.record('type-rain',st,{b:score});T.result({title:'נִגְמַר הַזְּמַן!',sub:`פּוֹצַצְתָּ ${score} אוֹתִיּוֹת`,stars:st,gems:g,back,again:()=>rainGame(back)});return;}
-    sc.textContent=`★ ${score} · ${Math.ceil((end-now)/1000)}`;requestAnimationFrame(loop);};
+    sc.textContent=`⭐ ${score}   ⏱️ ${Math.ceil((end-now)/1000)}`;requestAnimationFrame(loop);};
   T.setKey(e=>{const k=keyOf(e);if(!k||k===' ')return;e.preventDefault();const o=blocks.filter(x=>x.ch===k).sort((a,b)=>b.y-a.y)[0];if(o){o.b.classList.add('boom');setTimeout(()=>o.b.remove(),250);blocks=blocks.filter(x=>x!==o);score++;sfx.pop(score%10);}else sfx.no();});
   window.__rain={get blocks(){return blocks;},hit:k=>{const o=blocks.find(x=>x.ch===k);if(o){blocks=blocks.filter(x=>x!==o);o.b.remove();score++;}},finish:()=>{end=0;}};
   requestAnimationFrame(loop);}
-building({id:'type',name:'מִגְדַּל הַמִּקְלֶדֶת',color:'#5a5f66',bg:'city',icon:()=>X.keys,blurb:'לוֹמְדִים לְהַקְלִיד בְּעִבְרִית בְּעֶשֶׂר אֶצְבָּעוֹת.',acts:[
+building({id:'type',needsKeys:true,name:'מִגְדַּל הַמִּקְלֶדֶת',color:'#5a5f66',bg:'city',icon:()=>X.keys,blurb:'לוֹמְדִים לְהַקְלִיד בְּעִבְרִית בְּעֶשֶׂר אֶצְבָּעוֹת.',acts:[
   {id:'type-lessons',name:'שִׁעוּרֵי הַקְלָדָה',icon:()=>X.keys,run:lessonsMenu},
   {id:'type-rain',name:'גֶּשֶׁם אוֹתִיּוֹת',icon:()=>X.cloud,run:rainGame}]});
 T.TYPE={CODE,LESSONS,lessonText,learned,keyOf};
@@ -2687,14 +2796,14 @@ function rhythm(back){const rounds=shuffle(PATS.slice()).slice(0,4);let r=0,tota
       setTimeout(()=>{msg.textContent='עַכְשָׁו!';},D(4*beat*1000));
       setTimeout(()=>{running=false;const on=patOnsets(p).map(x=>t0+x*beat*1000*(window.__fast?1/15:1));const tol=window.__fast?60:170;let hit=0;const used=new Set();
         on.forEach(o=>{const k=taps.findIndex((t,j)=>!used.has(j)&&Math.abs(t-o)<tol);if(k>=0){used.add(k);hit++;}});const extra=taps.length-used.size;const sc=Math.max(0,hit-extra);
-        total+=on.length;good+=sc;msg.innerHTML=sc===on.length?'מְעֻלֶּה! בְּדִיּוּק בַּקֶּצֶב.':`פָּגַעְתָּ בְּ-${sc} מִתּוֹךְ ${on.length}`;if(sc===on.length)sfx.ok(r);else sfx.no();
+        total+=on.length;good+=sc;msg.innerHTML=sc===on.length?'מְעֻלֶּה! בְּדִיּוּק בַּקֶּצֶב.':`פָּגַעְתָּ ב-${sc} מִתּוֹךְ ${on.length}`;if(sc===on.length)sfx.ok(r);else sfx.no();
         setTimeout(()=>{r++;if(r<rounds.length)run();else{T.setKey(null);const pc=good/total;const st=pc>=.85?3:pc>=.6?2:1;O.addGems(5+st*2);T.record('mus-rhythm',st);T.result({title:'מְתוֹפֵף אַלּוּף!',stars:st,gems:5+st*2,back,again:()=>rhythm(back)});}},D(1800));},D((4+4+.6)*beat*1000));};
     window.__rhythm={get t0(){return t0;},onsets:()=>patOnsets(p).map(x=>t0+x*beat*1000*(window.__fast?1/15:1)),tap};};run();}
 /* piano */
 const WHITE=[60,62,64,65,67,69,71,72,74,76],BLACK={61:0,63:1,66:3,68:4,70:5,73:7,75:8};
 const KMAP={KeyA:60,KeyS:62,KeyD:64,KeyF:65,KeyG:67,KeyH:69,KeyJ:71,KeyK:72,KeyL:74,Semicolon:76,KeyW:61,KeyE:63,KeyT:66,KeyY:68,KeyU:70,KeyO:73,KeyP:75};
 const nameOf=m=>{const pc=(m-60+120)%12;const i=SC.indexOf(pc);return i>=0?SOL[i]:'';};
-const SONGS=[['נִצְנְצִי כּוֹכָב',[60,60,67,67,69,69,67,65,65,64,64,62,62,60,67,67,65,65,64,64,62,67,67,65,65,64,64,62,60,60,67,67,69,69,67,65,65,64,64,62,62,60]],
+const SONGS=[['נַצְנְצִי כּוֹכָב',[60,60,67,67,69,69,67,65,65,64,64,62,62,60,67,67,65,65,64,64,62,67,67,65,65,64,64,62,60,60,67,67,69,69,67,65,65,64,64,62,62,60]],
  ['שִׁיר הַשִּׂמְחָה',[64,64,65,67,67,65,64,62,60,60,62,64,64,62,62,64,64,65,67,67,65,64,62,60,60,62,64,62,60,60]],
  ['יוֹנָתָן הַקָּטָן',[67,64,64,65,62,62,60,62,64,65,67,67,67,67,64,64,65,62,62,60,64,67,67,60]],
  ['אָחִי יַעֲקֹב',[67,69,71,67,67,69,71,67,71,72,74,71,72,74,74,76,74,72,71,67,74,76,74,72,71,67,67,62,67,67,62,67]]];
@@ -2734,9 +2843,9 @@ const tank=k=>`<div class="tank"><span class="item" id="itm">${ALLSPR(k)}</span>
 const MAG=[['הַמַּסְמֵר','nail',1],['הַמְּהַדֵּק','clip',1],['הַבֹּרֶג','screw',1],['הָעִפָּרוֹן','pencil',0],['הֶעָלֶה','leaf',0],['הַכַּדּוּר','ball',0],['הָאֶבֶן','stone',0],['הַפְּקָק','cork',0],['הַתַּפּוּחַ','apple',0]];
 const ANIMALS=[['הַכֶּלֶב','dog','יוֹנֵק'],['הֶחָתוּל','cat','יוֹנֵק'],['הַכִּבְשָׂה','sheep','יוֹנֵק','',1],['הַלִּוְיָתָן','whale','יוֹנֵק','הַלִּוְיָתָן חַי בַּיָּם, אֲבָל הוּא יוֹנֵק: הוּא נוֹשֵׁם אֲוִיר וּמֵינִיק אֶת הַגּוּרִים.'],['הַצִּפּוֹר','bird','עוֹף','',1],['הַנֶּשֶׁר','eagle','עוֹף'],['הַיַּנְשׁוּף','owl','עוֹף'],['הַדָּג','fish','דָּג'],['הַצָּב','turtle','זוֹחֵל','לַצָּב יֵשׁ שִׁרְיוֹן וְקַשְׂקַשִּׂים. הוּא זוֹחֵל.']];
 const CLASSES=['יוֹנֵק','עוֹף','דָּג','זוֹחֵל'];
-const BODY=[['רֹאשׁ',[50,14]],['שֵׂעָר',[50,6]],['עֵינַיִם',[50,30]],['פֶּה',[50,42]],['יָד',[10,68]],['בֶּטֶן',[50,66]],['רֶגֶל',[34,90]]];
+const BODY=[['רֹאשׁ',[50,34]],['שֵׂעָר',[50,19]],['עֵינַיִם',[36,42]],['פֶּה',[50,55]],['יָד',[5,76]],['בֶּטֶן',[50,72]],['רֶגֶל',[30,92]]];
 /* plant simulator */
-function plant(back){let day=0,stage=0,water=false,sun=true;O.setScreen('sTal','forest',back);T.hudT('מָה צָרִיךְ צֶמַח?');const s=$('#sTal');s.innerHTML='';
+function plant(back){let day=1,stage=0,water=false,sun=true;O.setScreen('sTal','forest',back);T.hudT('מָה צָרִיךְ צֶמַח?');const s=$('#sTal');s.innerHTML='';
   const view=h('div','plantv');const info=h('div','lcap');const row=h('div','btnrow');const wb=h('button','bigbtn blue sm','💧 <span>לְהַשְׁקוֹת</span>');const sb=h('button','bigbtn gold sm','☀️ <span>שֶׁמֶשׁ</span>');const nb2=h('button','bigbtn',ICON.play+'<span>הַיּוֹם הַבָּא</span>');row.append(wb,sb,nb2);s.append(view,info,row);
   const draw=()=>{const st=['🌰','🌱','🌿','🪴','🌷'][stage];view.innerHTML=`<div class="sky ${sun?'sunny':'dark'}">${sun?X.sun:X.cloud}</div><div class="pot"><span class="pl s${stage}">${st}</span><div class="soil ${water?'wet':''}"></div></div><div class="day">יוֹם ${day}</div>`;
     info.innerHTML=stage>=4?'הַצֶּמַח פָּרַח! 🌷':water?'הָאֲדָמָה רְטֻבָּה':'הָאֲדָמָה יְבֵשָׁה';sb.classList.toggle('plain',!sun);};
@@ -2870,18 +2979,18 @@ function symmetry(back){const R=5,M=8;let r=0,err=0,gems=0;O.setScreen('sTal','v
   run();}
 /* --- colour by number (each cell = exercise) --- */
 const PICS=[
- {n:'לֵב',p:['........','.RR..RR.','RRRRRRRR','RRRRRRRR','.RRRRRR.','..RRRR..','...RR...','........'],c:{R:2}},
+ {n:'לֵב',p:['........','.RR..RR.','RPPRRRRR','RPRRRRRR','.RRRRRR.','..RRRR..','...RR...','........'],c:{R:2,P:11}},
  {n:'עֵץ',p:['...GG...','..GGGG..','.GGgGGG.','GGGGGgGG','.GgGGGG.','...BB...','...BB...','..BBBB..'],c:{G:5,g:6,B:12}},
  {n:'בַּיִת',p:['...RR...','..RRRR..','.RRRRRR.','RRRRRRRR','.WWWWWW.','.WKWWBW.','.WKWWWW.','.WKWWWW.'],c:{R:2,W:13,K:12,B:8}},
  {n:'דָּג',p:['........','..OOO..O','.OOOOOOO','OEOOOOO.','OOOOOOO.','.OOOOOOO','..OOO..O','........'],c:{O:3,E:0}},
  {n:'פִּטְרִיָּה',p:['..RRRR..','.RWRRWR.','RRRRRRRR','RWRRRRWR','...WW...','...WW...','..WWWW..','........'],c:{R:2,W:1}},
- {n:'כּוֹכָב',p:['...YY...','...YY...','YYYYYYYY','.YYYYYY.','..YYYY..','.YY..YY.','YY....YY','........'],c:{Y:4}}];
+ {n:'כּוֹכָב',p:['...YY...','...YY...','YYYOOYYY','.YYOOYY.','..YYYY..','.YY..YY.','YY....YY','........'],c:{Y:4,O:3}}];
 function exFor(ans,lvl){const t=lvl===0?pick(['+','-']):lvl===1?pick(['+','-','+']):pick(['×','+','-']);
   if(t==='×'){const f=[];for(let a=2;a<=10;a++)if(ans%a===0&&ans/a<=10&&ans/a>=1)f.push(a);if(f.length){const a=pick(f);return `${a}×${ans/a}`;}}
-  if(t==='-'||ans<3){const b=rand(1,9);return `${ans+b}-${b}`;}const a=rand(1,ans-1);return `${a}+${ans-a}`;}
+  const cap=lvl===0?10:20;if((t==='-'||ans<3)&&ans<cap){const b=rand(1,Math.min(9,cap-ans));return `${ans+b}-${b}`;}const a=rand(1,ans-1);return `${a}+${ans-a}`;}
 function colorByNum(back,pi){const lvl=Math.min(2,((T.S().tl['art-cbn']||{}).n|0)>>1);pi=pi==null?((T.S().tl['art-cbn']||{}).n|0)%PICS.length:pi;const P=PICS[pi];const M=8;
-  O.setScreen('sTal','valley',back);T.hudT('צוֹבְעִים לְפִי מִסְפָּרִים');O.sayNow='פתרו את התרגיל וצבעו בצבע של התשובה';const s=$('#sTal');s.innerHTML='';
-  const keys=Object.keys(P.c);const nums=shuffle(Array.from({length:lvl===2?20:18},(_,k)=>k+2)).slice(0,keys.length);const ansOf={};keys.forEach((k,j)=>ansOf[k]=nums[j]);
+  O.setScreen('sTal','valley',back);T.hudT('צְבִיעָה לְפִי מִסְפָּרִים');O.sayNow='פתרו את התרגיל וצבעו בצבע של התשובה';const s=$('#sTal');s.innerHTML='';
+  const keys=Object.keys(P.c);const nums=shuffle(Array.from({length:lvl===0?9:lvl===1?13:19},(_,k)=>k+2)).slice(0,keys.length);const ansOf={};keys.forEach((k,j)=>ansOf[k]=nums[j]);
   let sel=0,err=0,left=0;const legend=h('div','cleg');
   keys.forEach((k,j)=>{const b=h('button','lg'+(j===0?' on':''),`<span class="swc" style="--c:${PAL[P.c[k]]}"></span><b>${ansOf[k]}</b>`);b.onclick=()=>{sel=j;legend.querySelectorAll('.lg').forEach((x,q)=>x.classList.toggle('on',q===j));sfx.pop(2);};legend.appendChild(b);});
   const g=h('div','cbn');g.style.setProperty('--n',M);
@@ -2911,13 +3020,13 @@ const quiet=()=>{O.musicStop();O.hush&&O.hush();};
 const leave=back=>()=>{clearT();stopAmb();if((O.save.snd|0)>=2)O.musicStart();back();};
 function soft(f,dur,vol){const a=O.audio();if(!a||(O.save.snd|0)<1)return;O.tone(f,a.ctx.currentTime+.02,dur,{type:'sine',vol:vol||.12,rel:dur*.6,bus:a.sfxBus});}
 /* --- breathing --- */
-function breath(back,cycles){cycles=cycles||5;clearT();const bk=leave(back);O.setScreen('sTal','forest',bk);quiet();T.hudT('נְשִׁימָה שֶׁל בּוּעָה');O.sayNow='';const s=$('#sTal');s.innerHTML='';
-  const v=h('div','breathv','<div class="bub"><span class="bt"></span></div><div class="bc"></div>');const lab=h('div','lsent','נוֹשְׁמִים יַחַד עִם הַבּוּעָה');s.append(v,lab);
+function breath(back,cycles){cycles=cycles||5;clearT();const bk=leave(back);O.setScreen('sTal','forest',bk);quiet();T.hudT('נְשִׁימַת בּוּעָה');O.sayNow='';const s=$('#sTal');s.innerHTML='';
+  const v=h('div','breathv','<div class="bub"><span class="bt"></span></div><div class="bc"></div>');const lab=h('div','lsent blab','נוֹשְׁמִים יַחַד עִם הַבּוּעָה');s.append(v,lab);
   const bub=v.querySelector('.bub'),bt=v.querySelector('.bt'),bc=v.querySelector('.bc');let c=0;guard=v;
   const IN=D(4000),HOLD=D(2000),OUT=D(5000);
   const step=()=>{if($('#sTal').hidden)return clearT();if(c>=cycles){done();return;}bc.innerHTML=Array.from({length:cycles},(_,k)=>`<i class="${k<c?'on':''}"></i>`).join('');
-    bub.style.transitionDuration=IN+'ms';bub.className='bub grow';bt.textContent='שְׁאַף...';soft(262,IN/1000,.07);
-    later(()=>{bub.className='bub grow hold';bt.textContent='הַחְזֵק';later(()=>{bub.style.transitionDuration=OUT+'ms';bub.className='bub';bt.textContent='נְשֹׁף...';soft(196,OUT/1000,.06);later(()=>{c++;step();},OUT);},HOLD);},IN);};
+    bub.style.transitionDuration=IN+'ms';bub.className='bub grow';bt.textContent='';lab.textContent='שְׁאַף...';soft(262,IN/1000,.07);
+    later(()=>{bub.className='bub grow hold';lab.textContent='הַחְזֵק';later(()=>{bub.style.transitionDuration=OUT+'ms';bub.className='bub';lab.textContent='נְשֹׁף...';soft(196,OUT/1000,.06);later(()=>{c++;step();},OUT);},HOLD);},IN);};
   later(step,D(600));
   function done(){bc.innerHTML='';bt.textContent='😊';lab.innerHTML='יָפֶה מְאוֹד! אֵיךְ אַתָּה מַרְגִּישׁ עַכְשָׁו?';sfx.star(0);T.record('mind-breath',3);O.addGems(4);
     const row=h('div','faces sm');['calm','happy','tired','sad'].forEach(k=>{const b=h('button','face',`${FACES[k].s}<span>${FACES[k].n}</span>`);b.onclick=()=>{logMood(k);sfx.pop(3);bk();};row.appendChild(b);});s.appendChild(row);}
@@ -2962,7 +3071,7 @@ function jar(back){clearT();O.setScreen('sTal','forest',back);T.hudT('צִנְצ
   const upd=()=>{ok.disabled=sel.size<1;};
   ok.onclick=()=>{const s0=T.S();const d=O.today();const ex=s0.jar.find(j=>j.d===d);if(ex)ex.i=[...new Set([...ex.i,...sel])];else s0.jar.push({d,i:[...sel]});if(s0.jar.length>200)s0.jar=s0.jar.slice(-200);s0.jarT=Date.now();
     const first=!ex;T.record('mind-jar',3);if(first)O.addGems(4,ok);top.querySelector('.jarw').innerHTML=jarSVG(total());top.querySelector('.jarw').classList.add('pop');sfx.build&&sfx.build();
-    g.remove();ok.remove();top.querySelector('.lsent').innerHTML=`תּוֹדָה! בַּצִּנְצֶנֶת יֵשׁ כְּבָר ${total()} דְּבָרִים טוֹבִים. 💛`;const b=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');b.onclick=back;row.appendChild(b);};
+    g.remove();ok.remove();top.querySelector('.lsent').innerHTML=`תּוֹדָה! בַּצִּנְצֶנֶת יֵשׁ ${total()===1?'דָּבָר טוֹב אֶחָד':`כְּבָר ${total()} דְּבָרִים טוֹבִים`}. 💛`;const b=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');b.onclick=back;row.appendChild(b);};
   s.append(top,g,row);}
 /* --- body scan --- */
 const SCAN=[['שְׁבוּ בְּנוֹחוּת וְעִצְמוּ עֵינַיִם.',null],['שִׂימוּ לֵב לְכַפּוֹת הָרַגְלַיִם. הֵן נוֹגְעוֹת בָּרִצְפָּה.',92],['עַכְשָׁו הָרַגְלַיִם. הֵן כְּבֵדוֹת וּרְגוּעוֹת.',80],['הַבֶּטֶן עוֹלָה וְיוֹרֶדֶת עִם הַנְּשִׁימָה.',62],['הַיָּדַיִם. סִגְרוּ אֶגְרוֹף חָזָק... וְשַׁחְרְרוּ.',66],['הַכְּתֵפַיִם. הָרִימוּ אוֹתָן לָאָזְנַיִם... וְהוֹרִידוּ.',46],['הַפָּנִים. חַיְּכוּ חִיּוּךְ קָטָן.',30],['כָּל הַגּוּף רָגוּעַ. פִּקְחוּ עֵינַיִם לְאַט.',null]];
@@ -3017,7 +3126,7 @@ function play(li,back){const L=LV[li];const n=L.n;let prog=[],running=false;cons
   function fail(msg){sfx.no();info.innerHTML=msg;setTimeout(()=>{place(L.s);running=false;run.disabled=false;prow.querySelectorAll('.now').forEach(b=>b.classList.remove('now'));},D(900));}
   function win(){const used=prog.length;const st=used<=L.opt?3:used<=L.opt+2?2:1;const cs=C();const prev=cs[li]|0;cs[li]=Math.max(prev,st);
     const doneN=Object.values(cs).filter(v=>v>0).length;const tot=Object.values(cs).reduce((a,v)=>a+(v|0),0);T.record('code-maze',Math.min(3,Math.round(tot/NL)),{b:doneN});
-    const g=prev?1:5+st;O.addGems(g);T.result({title:st===3?'קוֹד מֻשְׁלָם!':'הָרוֹבּוֹט הִגִּיעַ!',sub:`הִשְׁתַּמַּשְׁתָּ בְּ-${used} בְּלוֹקִים${st<3?` · אֶפְשָׁר גַּם בְּ-${L.opt}`:''}`,stars:st,gems:g,back:li+1<NL?()=>play(li+1,back):mback,again:()=>play(li,back)});}
+    const g=prev?1:5+st;O.addGems(g);T.result({title:st===3?'קוֹד מֻשְׁלָם!':'הָרוֹבּוֹט הִגִּיעַ!',sub:`הִשְׁתַּמַּשְׁתָּ ב-${used} בְּלוֹקִים${st<3?` · אֶפְשָׁר גַּם ב-${L.opt}`:''}`,stars:st,gems:g,back:li+1<NL?()=>play(li+1,back):mback,again:()=>play(li,back)});}
   drawP();
   window.__code={L,add,run:()=>run.click(),solve:()=>{prog=solution(L);drawP();run.click();}};}
 function solution(L){const {n,w,s,g}=L;const maxRun=L.rep?3:1;const prev=new Map([[s,null]]);const q=[s];while(q.length){const c=q.shift();if(c===g)break;const x=c%n,y=(c/n)|0;
@@ -3062,7 +3171,7 @@ function maze(back){const n=[5,6,7,8][Math.min(3,plays('think-maze'))];const W=g
   const pad=h('div','cpad');['U','L','R','D'].forEach(k=>{const b=h('button','cdir d'+k,{U:'⬆',D:'⬇',L:'⬅',R:'➡'}[k]);b.onclick=()=>mv(k);pad.appendChild(b);});
   wrap.onclick=e=>{const r=wrap.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*n),y=Math.floor((e.clientY-r.top)/r.height*n);const px=p%n,py=(p/n)|0;
     if(x===px&&y===py-1)mv('U');else if(x===px&&y===py+1)mv('D');else if(y===py&&x===px+1)mv('R');else if(y===py&&x===px-1)mv('L');};
-  s.append(h('div','lsent','עִזְרוּ לֶחָתוּל לְהַגִּיעַ לָעוּגָה! (אֶפְשָׁר גַּם עִם הַחִצִּים בַּמִּקְלֶדֶת)'),wrap,pad);
+  s.append(h('div','lsent','עִזְרוּ לֶחָתוּל לְהַגִּיעַ לָעוּגָה!'+(matchMedia('(pointer:coarse)').matches?'':' (אֶפְשָׁר גַּם עִם הַחִצִּים)')),wrap,pad);
   T.setKey(e=>{const k={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(k){e.preventDefault();mv(k);}});
   let done=false;function win(){if(done)return;done=true;T.setKey(null);sfx.build&&sfx.build();setTimeout(()=>wrap.isConnected&&T.finishAct('think-maze',0,1,3,back,()=>maze(back),'יָצָאתָ מֵהַמָּבוֹךְ!'),D(600));}
   window.__maze={solve:()=>{const prev=new Map([[0,null]]);const q=[0];const DD=[['U',0,-1,0],['R',1,0,1],['D',0,1,2],['L',-1,0,3]];while(q.length){const c=q.shift();for(const [d,dx,dy,wi] of DD){if(W[c][wi])continue;const id=c+dx+dy*n;if(!prev.has(id)){prev.set(id,[c,d]);q.push(id);}}}
@@ -3076,7 +3185,7 @@ function memory(back){const lv=Math.min(2,plays('think-mem'));const pairs=[4,6,8
       if(a.dataset.k===b.dataset.k){setTimeout(()=>{a.classList.add('got');b.classList.add('got');sfx.ok(found);found++;open=[];lock=false;info.textContent=`מָצָאתָ ${found} מִתּוֹךְ ${pairs}`;if(found===pairs)win();},D(350));}
       else setTimeout(()=>{a.classList.remove('flip');b.classList.remove('flip');open=[];lock=false;},D(900));}};g.appendChild(c);});
   s.append(info,g);
-  function win(){const extra=moves-pairs;const err=extra<=pairs*.5?0:extra<=pairs?2:5;setTimeout(()=>g.isConnected&&T.finishAct('think-mem',err,10,2,back,()=>memory(back),`מָצָאתָ הַכֹּל בְּ-${moves} נִסְיוֹנוֹת!`),D(600));}
+  function win(){const extra=moves-pairs;const err=extra<=pairs*.5?0:extra<=pairs?2:5;setTimeout(()=>g.isConnected&&T.finishAct('think-mem',err,10,2,back,()=>memory(back),`מָצָאתָ הַכֹּל ב-${moves} נִסְיוֹנוֹת!`),D(600));}
   window.__mem={solve:()=>{const by={};[...g.children].forEach(c=>(by[c.dataset.k]=by[c.dataset.k]||[]).push(c));let t=0;Object.values(by).forEach(([a,b])=>{setTimeout(()=>{a.click();b.click();},t);t+=D(500);});}};}
 /* --- patterns --- */
 const PS=['apple','ball','fish','sun','heart','car','bird','cake','boat','star'];
@@ -3100,7 +3209,7 @@ const W=()=>{const s=T.S();s.wr=s.wr||{};return s.wr;};
 const wordFor=l=>(T.WORDS||[]).find(w=>w.w.replace(/[֑-ׇ]/g,'')[0]===l);
 const FONT='bold 230px "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif';
 function menu(back){O.setScreen('sTal','meadow',back);T.hudT('בֵּית הַכְּתִיבָה');O.sayNow='בחרו אות לכתוב';const s=$('#sTal');s.innerHTML='';
-  s.appendChild(h('div','whead',`<span class="gd">${X.pen}</span><h1>כּוֹתְבִים אוֹתִיּוֹת</h1>`));s.appendChild(h('div','lsent','עוֹבְרִים עִם הָאֶצְבַּע אוֹ הָעַכְבָּר עַל הָאוֹת הָאֲפֹרָה.'));
+  s.appendChild(h('div','whead',`<span class="gd">${X.pen}</span><h1>כּוֹתְבִים אוֹתִיּוֹת</h1>`));s.appendChild(h('div','lsent','בְּחַר אוֹת וּבוֹא נִכְתֹּב אוֹתָהּ!'));
   const g=h('div','abg');const w=W();AB.forEach(([l],i)=>{const st=w[l]|0;const b=h('button','abb'+(st?' got':''),`<b>${l}</b><span>${[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join('')}</span>`);b.onclick=()=>trace(i,back,[i,...[1,2,3].map(k=>(i+k)%AB.length)]);g.appendChild(b);});
   s.appendChild(g);const nx=AB.findIndex(([l])=>!(w[l]|0));const row=h('div','btnrow');const go=h('button','bigbtn',ICON.play+'<span>4 אוֹתִיּוֹת לְתִרְגּוּל</span>');const st=nx<0?Math.floor(Math.random()*AB.length):nx;
   go.onclick=()=>trace(st,back,[0,1,2,3].map(k=>(st+k)%AB.length));row.appendChild(go);s.appendChild(row);}
@@ -3146,7 +3255,7 @@ let parentOn=false;
 function login(then){if(O.isParentPlay){parentOn=true;then&&then();return;}const st=RSET();const ov=$('#ov');ov.hidden=false;const first=!st.pw;
   ov.innerHTML=`<div class="card plog"><div class="pli">${first?'🔑':'🔒'}</div><h2>${first?'יצירת משתמש הורה':'כניסת הורה'}</h2>
     <div class="sub">${first?'בחרו סיסמה קבועה (לפחות 4 תווים). היא תשמש אתכם לכניסה ללוח ההורים, בכל מכשיר.':'הקלידו את סיסמת ההורה'}</div>
-    <input id="pw1" type="password" class="pgin" autocomplete="off" aria-label="סיסמה">${first?'<input id="pw2" type="password" class="pgin" autocomplete="off" placeholder="שוב" aria-label="אימות סיסמה">':''}<div class="pgerr" id="pgErr"></div></div>`;
+    <input id="pw1" type="password" class="pgin" autocomplete="off" placeholder="סיסמה" aria-label="סיסמה">${first?'<input id="pw2" type="password" class="pgin" autocomplete="off" placeholder="שוב את הסיסמה" aria-label="אימות סיסמה">':''}<div class="pgerr" id="pgErr"></div></div>`;
   const row=h('div','btnrow');const no=h('button','bigbtn plain sm','<span>ביטול</span>');no.onclick=()=>{ov.hidden=true;};const ok=h('button','bigbtn sm','<span>'+(first?'שמירה וכניסה':'כניסה')+'</span>');row.append(no,ok);
   if(!first){const fg=h('button','plink','שכחתי סיסמה');fg.onclick=()=>forgot(then);ov.firstChild.append(row,fg);}else ov.firstChild.appendChild(row);
   const p1=$('#pw1'),p2=$('#pw2');setTimeout(()=>p1.focus(),60);const err=t=>{$('#pgErr').textContent=t;sfx.no();};
@@ -3159,6 +3268,7 @@ function forgot(then){const ov=$('#ov');ov.innerHTML=`<div class="card plog"><h2
   const q=$('#fq');setTimeout(()=>q.focus(),60);const go=()=>{if(q.value.trim()==='888'){delete RSET().pw;O.persist();login(then);}else{$('#pgErr').textContent='לא נכון';sfx.no();}};ok.onclick=go;q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')go();};}
 
 window.TAL_parentGate=()=>login(()=>parentChoice());
+O.on('screen',id=>{if(id!=='sPar'&&!O.isParentPlay&&$('#ov').hidden)parentOn=false;});
 /* ---------- permissions ---------- */
 let permP=null;
 function getPerm(){if(!permP)permP=(async()=>{for(let i=0;i<30&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));try{return window.claude&&window.claude.use?await window.claude.use('permissions'):null;}catch(e){return null;}})();return permP;}
@@ -3195,7 +3305,7 @@ function profile(back){const pr=Object.assign({},prof()||{});let step=0;O.setScr
   const Q=[['מָה הַחַיָּה הָאֲהוּבָה עָלֶיךָ?','הִיא תְּלַוֶּה אוֹתְךָ בָּעִיר',P_AN.map(([k,n])=>[k,`<span class="pic sm">${ALLSPR(k)}</span><span>${n}</span>`]),'an'],
     ['מָה הַצֶּבַע הָאָהוּב עָלֶיךָ?','',P_COL.map(([c,n])=>[c,`<span class="swc big" style="--c:${c}"></span><span>${n}</span>`]),'col'],
     ['מָה הֲכִי כֵּיף לְךָ?','',P_LOVE.map(([k,n,e])=>[k,`<span class="ae">${e}</span><span>${n}</span>`]),'love']];
-  const run=()=>{const [q,sub,opts,key]=Q[step];T.hudT('הַכַּרְטִיס שֶׁלִּי',T.progressBar(step,Q.length));O.sayNow=plain(q);s.innerHTML='';
+  const run=()=>{const [q,sub,opts,key]=Q[step];T.hudT('הַכַּרְטִיס שֶׁלִּי',T.progressBar(step,Q.length));O.sayNow=T.spk(q);s.innerHTML='';
     s.appendChild(h('div','whead',`<span class="gd bob">${O.AV()}</span><h1>${q}</h1>`));if(sub)s.appendChild(h('div','lsent',sub));
     const g=h('div','profg');opts.forEach(([v,html])=>{const b=h('button','pfb'+(pr[key]===v?' on':''),html);b.onclick=()=>{pr[key]=v;sfx.pop(step+2);step++;if(step<Q.length)run();else done();};g.appendChild(b);});s.appendChild(g);};
   const done=()=>{const S0=T.S();S0.prof=pr;S0.profT=Date.now();O.persist();sfx.win();const an=P_AN.find(a=>a[0]===pr.an);s.innerHTML='';T.hudT('הַכַּרְטִיס שֶׁלִּי');
@@ -3243,7 +3353,7 @@ const BADGES=[
 function earned(){const s=T.S();s.bdg=s.bdg||{};return s.bdg;}
 function checkBadges(){const s=T.S(),e=earned();let got=null;for(const [id,n,ic,,f] of BADGES){if(e[id])continue;let ok=false;try{ok=!!f(s);}catch(x){}if(ok){e[id]=Date.now();got=[n,ic];}}
   if(got){s.bdgT=Date.now();O.persist();toast(`${got[1]} תָּג חָדָשׁ: <b>${got[0]}</b>!`);}}
-function toast(html){const t=h('div','toast',html);document.body.appendChild(t);sfx.star(1);setTimeout(()=>t.classList.add('out'),D(3200));setTimeout(()=>t.remove(),D(3800));}
+function toast(html){if(parentOn||!$('#sPar').hidden)return;document.querySelectorAll('.toast').forEach(x=>x.remove());const t=h('div','toast',html);document.body.appendChild(t);sfx.star(1);setTimeout(()=>t.classList.add('out'),D(2400));setTimeout(()=>t.remove(),D(2900));}
 setInterval(()=>{if(!$('#ov').hidden||$('#hud').hidden||!$('#sPlay').hidden)return;checkBadges();},4000);
 function badges(back){O.setScreen('sTal','valley',back);const e=earned();T.hudT('הַתַּגִּים שֶׁלִּי',`<div class="starcount">🏅<span>${Object.keys(e).length}/${BADGES.length}</span></div>`);O.sayNow='התגים שלי';const s=$('#sTal');s.innerHTML='';
   s.appendChild(h('div','whead',`<span class="gd">🏅</span><h1>הַתַּגִּים שֶׁלִּי</h1>`));const g=h('div','bdgg');
@@ -3271,7 +3381,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function parentChoice(){const ov=$('#ov');ov.hidden=false;ov.innerHTML='<div class="card plog"><h2>שלום! מה תרצו לעשות?</h2></div>';const r=h('div','pchoice');
   const a=h('button','ucard par',`<span class="ua">📊</span><b>לוח הורים</b><small>התקדמות, משימות, זמן והגדרות</small>`);a.onclick=()=>{ov.hidden=true;panel('sum');};
   const b=h('button','ucard kid',`<span class="ua">🎮</span><b>לשחק כהורה</b><small>הכל פתוח, לא משפיע על אורן</small>`);b.onclick=()=>{ov.hidden=true;enterTry();O.showMap();};
-  r.append(a,b);ov.firstChild.appendChild(r);}
+  r.append(a,b);ov.firstChild.appendChild(r);const c=h('button','plink','ביטול');c.onclick=()=>{ov.hidden=true;parentOn=false;};ov.firstChild.appendChild(c);}
 /* ======================= PARENT PANEL ======================= */
 const BAR=(v,max,col)=>`<span class="pbar"><i style="width:${max?Math.min(100,v/max*100):0}%;background:${col||'#4fae4f'}"></i></span>`;
 const fmtMin=sec=>{const m=Math.round(sec/60);return m<60?m+' דק׳':(m/60).toFixed(1)+' שע׳';};
@@ -3302,7 +3412,7 @@ function sumTab(box){const s0=T.S(),sv=O.save;
   if(!SET().voiceOk){const w=h('button','pwarn','🔊 עוד לא בדקתם את הקול של המשחק. לחצו כאן — לוקח דקה: שומעים דוגמה ואומרים אוקי.');w.onclick=()=>panel('voice');box.appendChild(w);}
   const acc=sv.ans?Math.round((sv.ok|0)/sv.ans*100):0;const totT=Object.values(s0.time).reduce((a,v)=>a+(v|0),0);const talSt=Object.values(s0.tl).reduce((a,c)=>a+(c.s|0),0);
   sec(box,'במבט אחד',`<div class="ptiles">
-    <div><b>${(sv.days||[]).length}</b><span>ימי משחק</span></div><div><b>${O.dayStreak()}</b><span>רצף ימים</span></div>
+    <div><b>${new Set([...(sv.days||[]),...Object.keys(s0.time).filter(k=>(s0.time[k]|0)>=60)]).size}</b><span>ימי משחק</span></div><div><b>${O.dayStreak()}</b><span>רצף ימים</span></div>
     <div><b>${acc}%</b><span>דיוק בחשבון (${sv.ans|0} שאלות)</span></div><div><b>${O.totalStars()}</b><span>כוכבים במסע</span></div>
     <div><b>${O.masteredCount()}/100</b><span>עובדות בלוח הכפל</span></div><div><b>${fmtMin(totT)}</b><span>זמן כולל</span></div>
     <div><b>${talSt}</b><span>כוכבים בעיר הכשרונות</span></div><div><b>${Object.keys(s0.bdg||{}).length}/${BADGES.length}</b><span>תגים</span></div></div>`);
@@ -3356,6 +3466,7 @@ function tryTab(box){const ts=sec(box,'משתמש הורה — לשחק ולנס
   const hm=h('button','pchip','🏠 בית');hm.onclick=()=>O.showMap();const ex=h('button','pchip on','🚪 חזרה ללוח ההורים');ex.onclick=()=>{O.parentPlay(false);parentOn=true;panel('try');};
   bar.append(sk,hm,ex);document.body.appendChild(bar);O.on('mode',on=>{bar.hidden=!on;});})();
 /* --- screen time --- */
+setTimeout(()=>{SET();if(O.settleSet)O.settleSet();},0);
 const LIM=()=>{const st=SET();st.lim=st.lim||{daily:0,bed:0,today:null};return st.lim;};
 const usedMin=()=>Math.floor(((T.S().time||{})[O.today()]|0)/60);
 function limitToday(){const l=LIM();if(l.today&&l.today.d===O.today())return l.today.min;return l.daily|0;}
@@ -3381,7 +3492,7 @@ function timeUp(kind){if(lockEl&&lockEl.isConnected)return;O.hush&&O.hush();O.mu
 setInterval(()=>{if(parentOn||O.isParentPlay||$('#hud').hidden||!$('#sPar').hidden)return;const l=LIM();const lim=limitToday(),used=usedMin();
   if(l.bed&&new Date().getHours()>=l.bed&&l.bedOff!==O.today()){if($('#sPlay').hidden)timeUp('bed');return;}
   if(!lim)return;const left=lim-used;
-  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ ${left===1?'עוֹד דַּקָּה אַחַת':`עוֹד ${left} דַּקּוֹת`} לְסִיּוּם הַיּוֹם`);O.say(`עוד ${left} דקות לסיום היום`);}
+  if(left<=5&&left>0&&warned!==O.today()+lim){warned=O.today()+lim;toast(`⏰ ${left===1?'עוֹד דַּקָּה אַחַת':`עוֹד ${left} דַּקּוֹת`} לְסִיּוּם הַיּוֹם`);O.say(left===1?'עוד דקה אחת לסיום היום':`עוד ${left} דקות לסיום היום`);}
   if(left<=0){if(!$('#sPlay').hidden&&used<lim+3)return;timeUp('time');}},5000);
 /* --- voice --- *//* --- voice --- */
 const SAMPLE='שָׁלוֹם אוֹרֶן! הַיּוֹם נִלְמַד יַחַד. הֶחָתוּל יָשֵׁן עַל הַכִּסֵּא. כַּמָּה זֶה שָׁלוֹשׁ וְעוֹד אַרְבַּע? נָכוֹן, שֶׁבַע!';
@@ -3467,8 +3578,8 @@ function setTab(box){const st=SET();
     const sh=h('button','bigbtn plain sm','📤 <span>שיתוף</span>');sh.onclick=()=>{if(navigator.share)navigator.share({title:'המסע של אורן',url:link}).catch(()=>{});else cp.click();};r.append(cp,sh);fs.appendChild(r);}
   const bk=sec(box,'גיבוי','<div class="pnote">ההתקדמות נשמרת אוטומטית בענן. אפשר גם להעתיק גיבוי ידני ולהדביק אותו במחשב אחר.</div>');
   const ta=h('textarea','pta');ta.setAttribute('aria-label','גיבוי');ta.rows=3;ta.onkeydown=e=>e.stopPropagation();const r=h('div','btnrow');
-  const ex=h('button','bigbtn plain sm','<span>הצג גיבוי</span>');ex.onclick=()=>{ta.value=JSON.stringify(O.save);ta.select();try{navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(()=>O.floatText(ex,'הועתק!'),()=>{});}catch(e){}};
-  const im=h('button','bigbtn sm','<span>שחזור מגיבוי</span>');im.onclick=()=>{try{const o=JSON.parse(ta.value);if(!o||typeof o!=='object'||!o.v)throw 0;o.t=Date.now()+1;O.mergeIn(o);O.persist();O.floatText(im,'שוחזר!');sfx.win();setTimeout(()=>panel('set'),600);}catch(e){O.floatText(im,'גיבוי לא תקין');sfx.no();}};
+  const ex=h('button','bigbtn sm','<span>הצג גיבוי</span>');ex.onclick=()=>{ta.value=JSON.stringify(O.save);ta.select();try{navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(()=>O.floatText(ex,'הועתק!'),()=>{});}catch(e){}};
+  const im=h('button','bigbtn plain sm','<span>שחזור מגיבוי</span>');im.onclick=()=>{try{const o=JSON.parse(ta.value);if(!o||typeof o!=='object'||!o.v)throw 0;o.t=Date.now()+1;O.mergeIn(o);O.persist();O.floatText(im,'שוחזר!');sfx.win();setTimeout(()=>panel('set'),600);}catch(e){O.floatText(im,'גיבוי לא תקין');sfx.no();}};
   r.append(ex,im);bk.append(ta,r);}
 })();
 
@@ -3498,9 +3609,9 @@ function home(){const S0=T.S();
   const pr=S0.prof||{};const st=S0.set;const d=st.noDaily?null:T.dailyEnsure();const q=quest();const nx=d?d.done.findIndex(x=>!x):-1;
   /* Oren, his friend, and one sentence */
   const say=!d?`${T.hello()}, אוֹרֶן! בְּמָה נְשַׂחֵק?`:nx>=0?`${q.e} ${q.a}`:d.claimed?'כָּל הַכָּבוֹד! עַכְשָׁו זְמַן חוֹפְשִׁי 🎈':'סִיַּמְתָּ! פְּתַח אֶת הַפְּרָס 🎁';
-  const tl=T.timeLeft&&T.timeLeft()!=null?`<small class="tleft">⏱️ ${T.timeLeft()} דַּקּוֹת</small>`:'';
+  const tl=T.timeLeft&&T.timeLeft()?`<small class="tleft">⏱️ ${T.timeLeft()===1?'דַּקָּה אַחַת':T.timeLeft()+' דַּקּוֹת'}</small>`:'';
   s.appendChild(h('div','hstage',`<div class="hbub2" style="--fc:${pr.col||'#4fae4f'}">${say}${tl}</div><div class="hpair"><span class="hav bob">${O.AV()}</span>${pr.an?`<span class="hpet2 bob" style="animation-delay:-.7s">${ALLSPR(pr.an)}</span>`:''}</div>`));
-  O.sayNow=T.plainHe(say);
+  O.sayNow=T.spk(say);
   /* the path: circles only, and one big button */
   if(d){const card=h('div','today');const path=h('div','tpath');
     d.t.forEach((id,i)=>{const inf=stepInfo(id);if(i)path.appendChild(h('i','tlink'+(d.done[i-1]?' on':'')));
@@ -3509,7 +3620,7 @@ function home(){const S0=T.S();
     path.appendChild(h('i','tlink'+(nx<0?' on':'')));path.appendChild(h('span','tgoal'+(nx<0?' won':''),`<span>${nx<0?'🏆':'🎁'}</span>`));
     card.appendChild(path);const row=h('div','btnrow');
     if(nx>=0){const go=h('button','bigbtn huge',ICON.play+'<span>מַמְשִׁיכִים</span>');go.onclick=()=>{sfx.pop(3);runStep(nx);};row.appendChild(go);}
-    else if(!d.claimed){const c=h('button','bigbtn gold huge','🎁 <span>פְּתַח אֶת הַפְּרָס!</span>');c.onclick=()=>{d.claimed=1;O.addGems(15,c);O.persist();const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card qwin"><div class="qbig">${q.e}</div><h2>${q.t}</h2><div class="sub">${q.z}</div><div class="gain">+15 ${SPR.gem}</div></div>`;const r=h('div','btnrow');const ok=h('button','bigbtn',ICON.play+'<span>יֶשׁ!</span>');ok.onclick=()=>{ov.hidden=true;home();};r.appendChild(ok);ov.firstChild.appendChild(r);sfx.win();O.rain();O.say(T.plainHe(q.z));};row.appendChild(c);}
+    else if(!d.claimed){const c=h('button','bigbtn gold huge','🎁 <span>פְּתַח אֶת הַפְּרָס!</span>');c.onclick=()=>{d.claimed=1;O.addGems(15,c);O.persist();const ov=$('#ov');ov.hidden=false;ov.innerHTML=`<div class="card qwin"><div class="qbig">${q.e}</div><h2>${q.t}</h2><div class="sub">${q.z}</div><div class="gain">+15 ${SPR.gem}</div></div>`;const r=h('div','btnrow');const ok=h('button','bigbtn',ICON.play+'<span>יֶשׁ!</span>');ok.onclick=()=>{ov.hidden=true;home();};r.appendChild(ok);ov.firstChild.appendChild(r);sfx.win();O.rain();O.say(T.spk(q.z));};row.appendChild(c);}
     if(row.children.length)card.appendChild(row);s.appendChild(card);}
   /* round doors, one word each */
   const doors=h('div','doors2');
@@ -3522,14 +3633,14 @@ function home(){const S0=T.S();
 window.TAL_home=home;T.home=home;
 /* the guide: points at the one thing to press, says it, then gets out of the way */
 let coachEl=null;
-function coach(target,text,key,times){if(!target||!target.isConnected)return;const S0=T.S();S0.coach=S0.coach||{};const n=S0.coach[key]|0;if(n>=(times||1))return;S0.coach[key]=n+1;
+function coach(target,text,key,times){if(!target||!target.isConnected||!$('#ov').hidden||!$('#dlg').hidden||document.querySelector('.tlock'))return;const S0=T.S();S0.coach=S0.coach||{};const n=S0.coach[key]|0;if(n>=(times||1))return;S0.coach[key]=n+1;
   uncoach();const pr=S0.prof||{};const el=h('div','coach',`<div class="cbub"><span class="cpet">${pr.an?ALLSPR(pr.an):O.AV()}</span><span>${text}</span></div><div class="chand">👆</div>`);document.body.appendChild(el);coachEl=el;
-  const place=()=>{if(!target.isConnected){uncoach();return;}const r=target.getBoundingClientRect();const hand=el.querySelector('.chand'),bub=el.querySelector('.cbub');
+  const place=()=>{if(!target.isConnected||!$('#ov').hidden||!$('#dlg').hidden||document.querySelector('.tlock')){uncoach();return;}const r=target.getBoundingClientRect();const hand=el.querySelector('.chand'),bub=el.querySelector('.cbub');
     hand.style.left=(r.left+r.width/2-22)+'px';hand.style.top=(r.bottom-8)+'px';const bw=Math.min(340,innerWidth-24);bub.style.width=bw+'px';
     let top=r.bottom+48;if(top+90>innerHeight){top=r.top-100;hand.classList.add('up');hand.style.top=(r.top-56)+'px';}else hand.classList.remove('up');
     bub.style.top=top+'px';bub.style.left=Math.max(12,Math.min(innerWidth-bw-12,r.left+r.width/2-bw/2))+'px';};
   place();el._iv=setInterval(place,400);const off=()=>uncoach();target.addEventListener('click',off,{once:true});el.querySelector('.cbub').onclick=off;el._to=setTimeout(off,D(14000));
-  setTimeout(()=>O.say(T.plainHe(text)),D(400));}
+  setTimeout(()=>O.say(T.spk(text)),D(400));}
 function uncoach(){if(coachEl){clearInterval(coachEl._iv);clearTimeout(coachEl._to);coachEl.remove();coachEl=null;}}
 T.coach=coach;O.on('screen',()=>uncoach());
 /* where the guide points the first times */
@@ -3547,7 +3658,7 @@ O.on('synced',()=>{if(!$('#sHome').hidden&&$('#ov').hidden)home();});
 /* ===== 🕹️ THE ARCADE: short, bright mini-games that pay out tickets ===== */
 (()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,rand,pick,shuffle,SPR}=O;const sfx=O.sfx,D=O.D;
 const A=()=>{const s=T.S();s.arc=s.arc||{tickets:0,best:{},plays:0};s.arc.best=s.arc.best||{};return s.arc;};
-const plain=T.plainHe;let back0=null;
+let back0=null;
 const GAMES=[
  {id:'balloon',n:'בַּלּוֹנִים',e:'🎈',c:'#ff4fd8',d:'לוֹחֲצִים וּמְפוֹצְצִים'},
  {id:'soccer',n:'בְּעִיטוֹת לַשַּׁעַר',e:'⚽',c:'#3cf07a',d:'בּוֹעֲטִים לַתְּשׁוּבָה'},
@@ -3558,22 +3669,22 @@ const GAMES=[
 const G=id=>GAMES.find(g=>g.id===id);
 /* ---------- the hall ---------- */
 function openArcade(back){if(back)back0=back;back0=back0||O.showMap;T.setKey(null);O.setScreen('sTal','final',back0);O.musicStart&&0;
-  const a=A();T.hudT('הָאַרְקֵייד',`<div class="starcount tkc">🎟️<span>${a.tickets|0}</span></div>`);O.sayNow='הארקייד. בחר משחק.';
+  const a=A();T.hudT('הָאַרְקֵייד');O.sayNow='הָאַרְקֵייד. בְּחַר מִשְׂחָק.';
   const s=$('#sTal');s.innerHTML='';const hall=h('div','arc');
   hall.appendChild(h('div','arch',`<span class="neon">🕹️ הָאַרְקֵייד</span><span class="tkbig">🎟️ <b>${a.tickets|0}</b></span>`));
   const g=h('div','cabs');
-  GAMES.forEach((gm,i)=>{const best=a.best[gm.id]|0;const c=h('button','cab',`<span class="scr"><span class="ce">${gm.e}</span></span><b>${gm.n}</b><small>${gm.d}</small><span class="hs">${best?`🏆 שִׂיא: ${best}`:'✨ חָדָשׁ'}</span>`);
+  GAMES.forEach((gm,i)=>{const best=a.best[gm.id]|0;const played=!!(T.S().tl['arc-'+gm.id]||{}).n;const tag=best?`<span class="hs">🏆 שִׂיא: ${best}</span>`:played?'':'<span class="hs new">✨ חָדָשׁ</span>';const c=h('button','cab',`<span class="scr"><span class="ce">${gm.e}</span></span><b>${gm.n}</b><small>${gm.d}</small>${tag}`);
     c.style.setProperty('--nc',gm.c);c.style.animationDelay=(i*.08)+'s';c.onclick=()=>{sfx.pop(3);start(gm.id);};g.appendChild(c);});
   hall.appendChild(g);
   const pz=h('button','prize',`<span>🎁</span><b>דּוּכַן הַפְּרָסִים</b>`);pz.onclick=()=>{sfx.pop(2);prizes();};hall.appendChild(pz);
   s.appendChild(hall);}
 /* ---------- prize counter ---------- */
-function prizes(){O.setScreen('sTal','final',()=>openArcade());const a=A();T.hudT('דּוּכַן הַפְּרָסִים',`<div class="starcount tkc">🎟️<span>${a.tickets|0}</span></div>`);O.sayNow='דוכן הפרסים. עשרה כרטיסים שווים שלושה יהלומים.';
+function prizes(){O.setScreen('sTal','final',()=>openArcade());const a=A();T.hudT('דּוּכַן הַפְּרָסִים');O.sayNow='דּוּכַן הַפְּרָסִים. עֲשָׂרָה כַּרְטִיסִים שָׁוִים שְׁלוֹשָׁה יַהֲלוֹמִים.';
   const s=$('#sTal');s.innerHTML='';const box=h('div','arc prz');
   const n=Math.floor((a.tickets|0)/10),g=n*3;
-  box.innerHTML=`<div class="arch"><span class="neon">🎁 דּוּכַן הַפְּרָסִים</span></div><div class="rate"><span>🎟️×10</span><span class="rarr">←</span><span>${SPR.gem}×3</span></div><div class="tkbig huge">🎟️ <b id="tkN">${a.tickets|0}</b></div>`;
+  box.innerHTML=`<div class="arch"><span class="neon">🎁 דּוּכַן הַפְּרָסִים</span></div><div class="rate"><span>10 🎟️</span><span class="req">=</span><span>3 ${SPR.gem}</span></div><div class="tkbig huge">🎟️ <b id="tkN">${a.tickets|0}</b></div>`;
   const row=h('div','btnrow');
-  if(n>0){const b=h('button','bigbtn gold huge2',`<span>הַחְלֵף ${n*10} 🎟️ בְּ-${g}</span>${SPR.gem}`);b.onclick=()=>{b.disabled=true;let k=0;const tk=$('#tkN');
+  if(n>0){const b=h('button','bigbtn gold huge2',`<span>הַחְלֵף ${n*10} 🎟️ ב-${g}</span>${SPR.gem}`);b.onclick=()=>{b.disabled=true;let k=0;const tk=$('#tkN');
       const iv=setInterval(()=>{if(!box.isConnected){clearInterval(iv);return;}k++;a.tickets--;tk.textContent=a.tickets;const f=h('span','fly','🎟️');f.style.left=(30+Math.random()*40)+'%';box.appendChild(f);setTimeout(()=>f.remove(),900);sfx.pop(k%8);
         if(k>=n*10){clearInterval(iv);O.addGems(g,b);sfx.win();O.rain();T.S().arcT=Date.now();O.persist();setTimeout(()=>{if(box.isConnected)prizes();},D(900));}},D(70));};row.appendChild(b);}
   else row.appendChild(h('div','lcap',`צָרִיךְ 10 🎟️ כְּדֵי לְהַחְלִיף. עוֹד ${10-(a.tickets|0)}!`));
@@ -3597,9 +3708,9 @@ const COLS=[['#ff4b5c','אֲדֻמִּים'],['#3d8bff','כְּחֻלִּים'],
 /* ---------- a. balloons ---------- */
 function balloon(){const F=frame('balloon','פּוֹצֵץ כַּמָּה שֶׁיּוֹתֵר בַּלּוֹנִים!');let score=0,alive=true,end=0,last=0,spawn=0,list=[],phase=0,want=null,pops=0;const best=lvl('balloon');
   const H=()=>F.field.clientHeight||400;
-  const rule=()=>{if(phase===0){want=null;F.rule('🎈 פּוֹצֵץ כַּמָּה שֶׁיּוֹתֵר בַּלּוֹנִים!','פוצץ כמה שיותר בלונים!');}
-    else if(phase===1){want={k:'c',v:pick(COLS)};F.rule(`פּוֹצֵץ רַק בַּלּוֹנִים <span class="cw" style="color:${want.v[0]}">${want.v[1]}</span>!`,'פוצץ רק בלונים '+plain(want.v[1]));}
-    else{want={k:'even'};F.rule('פּוֹצֵץ רַק בַּלּוֹנִים עִם מִסְפָּר <b>זוּגִי</b>! (2, 4, 6...)','פוצץ רק בלונים עם מספר זוגי');}};
+  const rule=()=>{if(phase===0){want=null;F.rule('🎈 פּוֹצֵץ כַּמָּה שֶׁיּוֹתֵר בַּלּוֹנִים!','פּוֹצֵץ כַּמָּה שֶׁיּוֹתֵר בַּלּוֹנִים!');}
+    else if(phase===1){want={k:'c',v:pick(COLS)};F.rule(`פּוֹצֵץ רַק בַּלּוֹנִים <span class="cw" style="color:${want.v[0]}">${want.v[1]}</span>!`,'פּוֹצֵץ רַק בַּלּוֹנִים '+want.v[1]);}
+    else{want={k:'even'};F.rule('פּוֹצֵץ רַק בַּלּוֹנִים עִם מִסְפָּר <b>זוּגִי</b>! (2, 4, 6...)','פּוֹצֵץ רַק בַּלּוֹנִים עִם מִסְפָּר זוּגִי');}};
   const good=b=>!want||(want.k==='c'?b.col===want.v[0]:b.num%2===0);
   const mk=()=>{const col=pick(COLS)[0];const num=rand(1,20);const el=h('button','bal',phase===2?`<b>${num}</b>`:'');el.style.setProperty('--bc',col);el.style.left=rand(4,84)+'%';el.setAttribute('aria-label','בלון');
     const o={el,col,num,y:H()+10,sp:(.045+Math.random()*.03)*(1+Math.min(score,25)*.02)};el.onpointerdown=e=>{e.preventDefault();hit(o);};F.field.appendChild(el);list.push(o);};
@@ -3616,9 +3727,9 @@ function balloon(){const F=frame('balloon','פּוֹצֵץ כַּמָּה שֶׁ
 function mole(){const F=frame('mole');let score=0,alive=true,end=0,tmr=0;const best=lvl('mole');const R=best>=8?20:10;
   const kind=best>=5&&Math.random()<.4?'even':'eq';const T0=rand(5,R===20?15:9);
   const mkEx=goodOne=>{if(kind==='even'){let n=rand(1,R);if(goodOne!==(n%2===0))n+=1;return {t:String(n),ok:n%2===0};}
-    let v=goodOne?T0:pick([...Array(R+1).keys()].filter(x=>x!==T0));const plus=Math.random()<.6||v<1;let a,b,t;if(plus){a=rand(0,v);b=v-a;t=`${a}+${b}`;}else{b=rand(1,Math.min(9,R-v)||1);a=v+b;t=`${a}−${b}`;}return {t,ok:v===T0};};
-  if(kind==='even')F.rule('🔨 הַכֵּה רַק בְּמִסְפָּרִים <b>זוּגִיִּים</b>! (2, 4, 6...)','הכה רק במספרים זוגיים');
-  else F.rule(`🔨 הַכֵּה רַק כְּשֶׁהַתְּשׁוּבָה הִיא <span class="big">${T0}</span>`,'הכה רק כשהתשובה היא '+T0);
+    let v=goodOne?T0:pick([...Array(R+1).keys()].filter(x=>x!==T0));const plus=v>=2&&(Math.random()<.6||v+1>R);let a,b,t;if(plus){a=rand(1,v-1);b=v-a;t=`${a}+${b}`;}else{b=rand(1,Math.min(9,R-v)||1);a=v+b;t=`${a}−${b}`;}return {t,ok:v===T0};};
+  if(kind==='even')F.rule('🔨 הַכֵּה רַק בְּמִסְפָּרִים <b>זוּגִיִּים</b>! (2, 4, 6...)','הַכֵּה רַק בְּמִסְפָּרִים זוּגִיִּים');
+  else F.rule(`🔨 הַכֵּה רַק כְּשֶׁהַתְּשׁוּבָה הִיא <span class="big">${T0}</span>`,'הַכֵּה רַק כְּשֶׁהַתְּשׁוּבָה הִיא '+T0);
   const g=h('div','holes');const holes=[];for(let i=0;i<9;i++){const hl=h('div','hole','<div class="mole"><i class="ey"></i><i class="ey r"></i><i class="ns"></i><b class="tag"></b></div>');g.appendChild(hl);holes.push(hl);
     const m=hl.querySelector('.mole');m.onpointerdown=e=>{e.preventDefault();whack(i);};}
   F.field.appendChild(g);F.field.classList.add('mf');
@@ -3643,11 +3754,11 @@ function frog(){const F=frame('frog');const best=lvl('frog');const MAX=best>=10?
   const info=h('div','jinfo');F.field.append(line,info,pad);
   const opt=n=>{let c=0;for(const j of [...JUMPS].reverse()){c+=Math.floor(n/j);n%=j;}return c;};
   const put=(el,v)=>{el.style.left=(v/MAX*100)+'%';};
-  const round=()=>{pos=0;used=0;tgt=rand(MAX>20?12:6,MAX);put(fr,0);put(lily,tgt);F.rule(`🐸 עֲזֹר לַצְּפַרְדֵּעַ לִנְחֹת עַל <span class="big">${tgt}</span>`,'עזור לצפרדע לנחות על '+tgt);
-    info.innerHTML=`סִבּוּב ${r+1} מִתּוֹךְ ${R} · קְפִיצוֹת: <b>0</b>`;F.time(`🎟️ ${tk}`);};
+  const round=()=>{pos=0;used=0;tgt=rand(MAX>20?12:6,MAX);put(fr,0);put(lily,tgt);F.rule(`🐸 עֲזֹר לַצְּפַרְדֵּעַ לִנְחֹת עַל <span class="big">${tgt}</span>`,'עֲזֹר לַצְּפַרְדֵּעַ לִנְחֹת עַל '+tgt);
+    info.innerHTML=`קְפִיצוֹת: <b>0</b>`;F.time(`🐸 ${r+1}/${R}`);F.score(tk);};
   function jump(j){if(busy)return;const np=Math.max(0,Math.min(MAX,pos+j));if(np===pos)return;pos=np;used++;put(fr,pos);fr.classList.remove('hop');void fr.offsetWidth;fr.classList.add('hop');sfx.jump?sfx.jump():sfx.pop(3);
-    info.innerHTML=`סִבּוּב ${r+1} מִתּוֹךְ ${R} · קְפִיצוֹת: <b>${used}</b>`;
-    if(pos===tgt){busy=true;const o=opt(tgt);const got=used<=o?3:used<=o+1?2:1;tk+=got;sfx.ok(r);O.floatText(lily,'+'+got+' 🎟️');lily.classList.add('win');
+    info.innerHTML=`קְפִיצוֹת: <b>${used}</b>`;
+    if(pos===tgt){busy=true;const o=opt(tgt);const got=used<=o?3:used<=o+1?2:1;tk+=got;F.score(tk);sfx.ok(r);O.floatText(lily,'+'+got+' 🎟️');lily.classList.add('win');
       setTimeout(()=>{if(!line.isConnected)return;lily.classList.remove('win');busy=false;r++;if(r>=R)done();else round();},D(1100));}
     else if(pos>tgt){info.innerHTML+=' · <span class="over">עָבַרְתָּ! קְפֹץ אֲחוֹרָה ↩</span>';}}
   T.setKey(e=>{const m={'1':1,'2':2,'5':5,'0':10};if(m[e.key]&&JUMPS.includes(m[e.key]))jump(m[e.key]);if(e.key==='Backspace'||e.key==='-'){e.preventDefault();jump(-1);}});
@@ -3658,16 +3769,16 @@ function frog(){const F=frame('frog');const best=lvl('frog');const MAX=best>=10?
 function answers(q,onPick){const opts=new Set([q.ans]);let g=0;while(opts.size<3&&g++<50){const d=pick([-3,-2,-1,1,2,3,10,-10]);const v=q.ans+d;if(v>=0)opts.add(v);}
   const arr=shuffle([...opts]);const row=h('div','ans3');arr.forEach((v,k)=>{const b=h('button','ab',String(v));b.onclick=()=>onPick(v===q.ans,b,row);row.appendChild(b);});
   T.setKey(e=>{const n=+e.key;if(n>=1&&n<=3&&row.isConnected)row.children[n-1].click();});return row;}
-const sayQ=t=>t.replace('×',' כפול ').replace('−',' פחות ').replace('+',' ועוד ');
+const sayQ=t=>t.replace('×',' כָּפוּל ').replace('−',' פָּחוֹת ').replace('+',' וְעוֹד ');
 /* ---------- b. soccer: kick to the corner with the right answer ---------- */
 function soccer(){const F=frame('soccer');const best=lvl('soccer');const N=8;let k=0,goals=0,busy=false,q=null,right=-1;
   F.field.classList.add('pitch');
   const goal=h('div','goal','<div class="net"></div>');const corners=[0,1,2].map(i=>{const c=h('button','corner','');c.onclick=()=>kick(i);goal.appendChild(c);return c;});
-  const keeper=h('div','keeper','<i class="kh"></i><i class="kb"></i><span class="gl l">🧤</span><span class="gl r">🧤</span>');goal.appendChild(keeper);
+  const keeper=h('div','keeper','<i class="kh"></i><i class="kb"></i><i class="kl l"></i><i class="kl r"></i><span class="gl l">🧤</span><span class="gl r">🧤</span>');goal.appendChild(keeper);
   const ball=h('div','sball','⚽');const msg=h('div','kmsg','');F.field.append(goal,ball,msg);
   const round=()=>{busy=false;q=qGen(best);const opts=new Set([q.ans]);while(opts.size<3){const v=q.ans+pick([-3,-2,-1,1,2,3]);if(v>=0)opts.add(v);}const arr=shuffle([...opts]);right=arr.indexOf(q.ans);
     corners.forEach((c,i)=>{c.textContent=arr[i];c.className='corner';});keeper.className='keeper';ball.className='sball';msg.textContent='';
-    F.rule(`⚽ בְּעַט לַפִּנָּה עִם הַתְּשׁוּבָה: <span class="big ltr">${q.txt} = ?</span>`,'בעט לפינה עם התשובה. '+sayQ(q.txt));F.time(`⚽ ${k+1}/${N}`);};
+    F.rule(`⚽ בְּעַט לַפִּנָּה עִם הַתְּשׁוּבָה: <span class="big ltr">${q.txt} = ?</span>`,'בְּעַט לַפִּנָּה עִם הַתְּשׁוּבָה. '+sayQ(q.txt));F.time(`⚽ ${k+1}/${N}`);};
   function kick(i){if(busy)return;busy=true;const ok=i===right;ball.className='sball to'+i;sfx.whoosh?sfx.whoosh():sfx.pop(2);
     const dive=ok?pick([0,1,2].filter(x=>x!==i)):i;setTimeout(()=>{keeper.className='keeper d'+dive;},D(120));
     setTimeout(()=>{if(!goal.isConnected)return;if(ok){goals++;F.score(goals);goal.classList.add('shake');msg.textContent='גּוֹל! 🎉';msg.className='kmsg win';sfx.win();setTimeout(()=>goal.classList.remove('shake'),D(500));}
@@ -3684,10 +3795,10 @@ function basket(){const F=frame('basket');const best=lvl('basket');const N=8;let
   const bar=h('div','pbar3',`<i class="zone" style="left:${50-zone/2}%;width:${zone}%"></i><i class="cur"></i>`);const shoot=h('button','bigbtn gold shoot','🏀 <span>זְרֹק!</span>');
   const area=h('div','barea');const msg=h('div','kmsg','');F.field.append(hoop,ball,msg,area);
   const ask=()=>{phase='q';q=qGen(best);area.innerHTML='';ball.className='bball';msg.textContent='';
-    F.rule(`🏀 עֲנֵה נָכוֹן וּתְקַבֵּל זְרִיקָה: <span class="big ltr">${q.txt} = ?</span>`,'ענה נכון ותקבל זריקה. '+sayQ(q.txt));F.time(`🏀 ${k+1}/${N}`);
+    F.rule(`🏀 עֲנֵה נָכוֹן וּתְקַבֵּל זְרִיקָה: <span class="big ltr">${q.txt} = ?</span>`,'עֲנֵה נָכוֹן וּתְקַבֵּל זְרִיקָה. '+sayQ(q.txt));F.time(`🏀 ${k+1}/${N}`);
     area.appendChild(answers(q,(ok,b,row)=>{if(phase!=='q')return;if(ok){b.classList.add('ok');sfx.ok(k);setTimeout(()=>{if(alive)aim();},D(350));}else{b.classList.add('bad');b.disabled=true;sfx.no();phase='x';
       setTimeout(()=>{row.querySelectorAll('.ab').forEach(x=>{if(+x.textContent===q.ans)x.classList.add('ok');});msg.textContent='הַתְּשׁוּבָה: '+q.ans;setTimeout(next,D(1300));},D(300));}}));};
-  const aim=()=>{phase='aim';area.innerHTML='';area.append(bar,shoot);F.rule('👆 לְחַץ "זְרֹק!" כְּשֶׁהַפַּס בַּיָּרֹק!','לחץ זרוק כשהפס בירוק');meter=0;dir=1;last=performance.now();T.setKey(e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();throwIt();}});requestAnimationFrame(swing);};
+  const aim=()=>{phase='aim';area.innerHTML='';area.append(bar,shoot);F.rule('👆 לְחַץ "זְרֹק!" כְּשֶׁהַפַּס בַּיָּרֹק!','לְחַץ זְרֹק כְּשֶׁהַפַּס בַּיָּרֹק');meter=0;dir=1;last=performance.now();T.setKey(e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();throwIt();}});requestAnimationFrame(swing);};
   const swing=now=>{if(!alive||phase!=='aim'||!bar.isConnected)return;const dt=now-last;last=now;meter+=dir*dt*.09*(1+best*.02);if(meter>=100){meter=100;dir=-1;}if(meter<=0){meter=0;dir=1;}bar.querySelector('.cur').style.left=meter+'%';requestAnimationFrame(swing);};
   shoot.onclick=()=>throwIt();
   function throwIt(force){if(phase!=='aim')return;phase='fly';const ok=force||Math.abs(meter-50)<=zone/2;ball.className='bball '+(ok?'swish':'miss');sfx.whoosh?sfx.whoosh():sfx.pop(2);
@@ -3701,11 +3812,11 @@ function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=
   F.field.classList.add('pool');
   const lanes=h('div','lanes',`<div class="lane"><span class="who">אַתָּה</span><span class="swr me">🏊</span><span class="fin">🏁</span></div><div class="lane"><span class="who">דּוֹלְפִין</span><span class="swr rv">🐬</span><span class="fin">🏁</span></div>`);
   const me=lanes.querySelector('.me'),rv=lanes.querySelector('.rv');const area=h('div','barea');F.field.append(lanes,area);
-  const put=()=>{me.style.left=(you/N*88)+'%';rv.style.left=(rival*88)+'%';};
-  const ask=()=>{q=qGen(best);area.innerHTML='';F.rule(`🏊 עֲנֵה מַהֵר כְּדֵי לִשְׂחוֹת: <span class="big ltr">${q.txt} = ?</span>`,'ענה מהר כדי לשחות. '+sayQ(q.txt));
+  const put=()=>{me.style.right=`calc(76px + ${you/N} * (100% - 140px))`;rv.style.right=`calc(76px + ${rival} * (100% - 140px))`;};
+  const ask=()=>{q=qGen(best);area.innerHTML='';F.rule(`🏊 עֲנֵה מַהֵר כְּדֵי לִשְׂחוֹת: <span class="big ltr">${q.txt} = ?</span>`,'עֲנֵה מַהֵר כְּדֵי לִשְׂחוֹת. '+sayQ(q.txt));
     area.appendChild(answers(q,(good,b)=>{if(!alive)return;if(good){you++;ok++;F.score(ok);b.classList.add('ok');me.classList.remove('stroke');void me.offsetWidth;me.classList.add('stroke');sfx.pop(4);put();if(you>=N)return end(true);setTimeout(()=>{if(alive)ask();},D(250));}
       else{b.classList.add('bad');b.disabled=true;sfx.no();}}));};
-  const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מוֹבִיל':'🏊 מוֹבִיל!');if(rival>=1)return end(false);requestAnimationFrame(loop);};
+  const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מוֹבִיל':'🏊 מוֹבִיל');if(rival>=1)return end(false);requestAnimationFrame(loop);};
   function end(win){if(!alive)return;alive=false;const st=win?(rival<.75?3:2):1;finish('swim',ok,ok+(win?5:0),st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)ok=sc;end(ok>=N);},hit:()=>{const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();},get score(){return ok;}};
   put();ask();countdown(F,()=>{last=performance.now();requestAnimationFrame(loop);});}

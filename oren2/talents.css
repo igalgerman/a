@@ -410,3 +410,54 @@ body.pplay #screens{padding-bottom:52px}
 #sHome .parbtn{position:static;margin-top:4px}
 /* parent trial bar must not cover dialogs */
 body.pplay .dlg,body.pplay .overlay{padding-bottom:78px}
+/* ===== screen review fixes ===== */
+/* a real keyboard reads left to right */
+.kb,.kr{direction:ltr}
+/* picture answers fit inside their buttons */
+.chb.picb{height:auto;min-height:112px;min-width:112px;padding:10px}
+.chb.picb .pic svg{width:84px;height:84px}
+.chs{row-gap:16px}
+/* stories: compact lines, buttons always reachable */
+.story{margin:0 12px}.sl{margin:0;padding:4px 8px;line-height:1.75}
+.story+.btnrow{position:sticky;bottom:10px;z-index:4;background:rgba(255,255,255,.92);padding:8px 14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+#sTal,#sHome{padding-bottom:72px}
+/* top bar on phones: buttons keep their size, title shrinks */
+.hud .ibtn{flex-shrink:0}
+.hud-mid .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+/* cards centered when a row is not full */
+.acts{display:flex;flex-wrap:wrap;justify-content:center}.acts>.actc{width:170px}
+.hub.gsub{display:flex;flex-wrap:wrap;justify-content:center}.hub.gsub>.bld{width:220px}
+/* no focus ring on mouse/touch clicks */
+button:focus:not(:focus-visible){outline:none}
+/* locked robot levels: solid, with a lock */
+.lvb.locked{opacity:1;filter:none;background:#d9d4c7;color:#7b7466;position:relative}
+.lvb.locked::after{content:"🔒";position:absolute;top:2px;inset-inline-start:4px;font-size:14px}
+/* readable locked-badge hints */
+.bdg small{font-size:14px;color:#4a5a66}.bdg{opacity:.85}
+/* notices at the bottom, never over titles */
+.toast{top:auto;bottom:24px}
+/* break: Oren's friend */
+.bk svg{width:96px;height:96px}
+/* breathing words big and clear */
+.blab{font-size:40px;min-width:220px}
+/* home doors on phone: four in a row without touching */
+@media (max-width:760px){.doors2{gap:12px}.doors2 .door{width:74px;height:74px;box-shadow:inset 0 -6px 0 var(--dc),0 0 0 4px var(--dc),0 6px 0 4px rgba(0,0,0,.22)}.doors2 .door .dico svg{width:34px;height:34px}.doors2 .door>b{font-size:13px}
+  .chb.picb{min-height:92px;min-width:92px}.chb.picb .pic svg{width:66px;height:66px}
+  .sth{flex-wrap:wrap}.sth h2{font-size:21px;width:100%;text-align:center;order:-1}.sth svg{width:44px;height:44px}
+  .hud-mid .chip{font-size:13px}}
+.coach .cbub{box-sizing:border-box}
+/* balanced line breaks, no lonely last word */
+.lsent,.card .sub,.qq,.hbub2{text-wrap:balance}
+/* sliders a child can grab */
+.trng{height:44px;accent-color:var(--ok)}
+.trng::-webkit-slider-thumb{width:40px;height:40px}
+.arrow{border:14px solid transparent;border-left:26px solid #e4572e;border-right:0;transform:translate(-100%,-50%)}
+.cbn{width:min(560px,94vw,calc(100vh - 250px))}
+@media (max-width:760px){#ov .bigbtn.emo{font-size:24px;padding:4px 9px}.orow .sw{width:30px;height:30px}}
+/* locked lessons: solid card with a lock, clearly not pressable yet */
+.actc.locked{opacity:1;filter:none;background:#ddd6c6;color:#7b7466;position:relative;box-shadow:inset 0 0 0 3px #c9bfa8}
+.actc.locked::after{content:"🔒";position:absolute;top:6px;inset-inline-start:8px;font-size:18px}
+/* coloring grid fits on a laptop screen */
+.cbn{width:min(560px,94vw,calc(100vh - 300px))}
+/* "Oren the teacher" fits on a laptop screen: keypad in two rows */
+@media (min-width:761px) and (max-height:900px){#sTeach .pad{grid-template-columns:repeat(6,62px);gap:8px}#sTeach .key{height:54px;font-size:27px}}

@@ -120,3 +120,37 @@
 .keeper{width:56px;height:92px}.keeper .kh{left:15px;width:26px;height:26px}.keeper .kb{top:26px;left:8px;width:40px;height:52px}.keeper .gl{top:20px;font-size:22px}
 @media (max-width:760px){.keeper{transform:translateX(-50%) scale(.8);transform-origin:bottom}}
 @media (max-width:760px){.nline .tk:not(.big) b{display:none}.nline .tk.big b{font-size:16px}.nline{width:84%}}
+/* ===== review fixes ===== */
+/* panels fill the screen: no empty dark band below */
+.arc.game,.arc.prz{min-height:calc(100dvh - 190px)}
+.arc.game{display:flex;flex-direction:column}.arc.game .field{flex:1 1 auto;height:auto;min-height:min(56vh,440px)}
+.arc.prz{justify-content:center;gap:26px}
+/* hall */
+.cab small{font-size:15px;opacity:1;color:#efe6ff}.cab .hs.new{color:#ffd23f}
+/* prize rate: one line */
+.prz .rate{align-items:baseline;gap:12px;font-size:36px;direction:ltr}.prz .rate .req{color:#36d6ff}.prz .rate svg{width:34px;height:34px;vertical-align:-4px}
+/* mole: more room between rows so labels never touch the hole above */
+.holes{gap:46px 22px}.hole{height:110px}
+.mole .tag{font-size:20px;padding:1px 7px}
+/* frog: upright labels on one baseline, room below */
+.nline .tk{font-style:normal}.nline .tk b{top:auto;bottom:-32px;font-style:normal;font-size:17px;line-height:1}
+.field.ff{gap:58px}
+.lily{bottom:0;font-size:36px;z-index:1}
+/* soccer: answers in the top half, keeper below them; simple legs */
+.goal{align-items:start}.corner{height:46%;align-items:center;padding-top:0}
+.keeper .kl{position:absolute;top:78px;width:12px;height:14px;background:#1a0b3d}.keeper .kl.l{left:13px}.keeper .kl.r{right:13px}
+/* swim: race goes right→left; names sit in their own lane on the right */
+.lanes{direction:rtl;top:50%;transform:translateY(-70%)}
+.lane .who{top:50%;right:8px;left:auto;transform:translateY(-50%);font-size:16px;background:rgba(10,30,60,.55);padding:2px 8px;direction:rtl}
+.lane .swr{right:76px;left:auto;transition:right .3s}.lane .me{transform:none}
+.lane .fin{right:auto;left:6px}
+.field.pool{background:linear-gradient(#1d0e46,#0d3a66)}
+@media (max-width:760px){
+  .cab small{font-size:14px}
+  .holes{gap:34px 14px}.hole{height:96px}
+  .nline .tk b{font-size:15px;bottom:-28px}.lily{font-size:30px}.field.ff{gap:50px}
+  .lane .who{font-size:13px;right:4px;padding:1px 5px}
+}
+.prz .rate span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.prz .rate svg{display:inline-block}
+.corner{height:42%}
+@media (max-width:760px){.arc.game,.arc.prz{min-height:calc(100dvh - 120px)}}
