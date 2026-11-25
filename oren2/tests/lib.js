@@ -25,5 +25,5 @@ function finish(name, lines) {
 const variant = process.argv[2] || 'desktop';
 const VIEWPORT = variant === 'phone' ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1366, height: 768 } };
 module.exports = { ROOT, TMP, PAGE, URL: 'file://' + PAGE, SHOTDIR, wrap, sleep, shot, finish, variant, VIEWPORT };
-// the pointing guide (coach marks) can cover dialogs mid-test; switch it off once the page is up
-module.exports.noCoach = async page => { await page.waitForFunction(() => window.TAL && window.TAL.S, null, { timeout: 15000 }); await page.evaluate(() => { window.TAL.S().coach = { home: 99, hub: 99, group: 99, map: 99 }; }); };
+// the pointing guide (coach marks), the first-time home tour and the place intros can cover dialogs mid-test; switch them off once the page is up
+module.exports.noCoach = async page => { await page.waitForFunction(() => window.TAL && window.TAL.S, null, { timeout: 15000 }); await page.evaluate(() => { window.TAL.S().coach = { home: 99, hub: 99, group: 99, map: 99, tour: 1, 'i-city': 1, 'i-map': 1, 'i-king': 1, 'i-arc': 1 }; }); };

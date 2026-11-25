@@ -57,20 +57,24 @@ async function collect() {
     const prep = `(()=>{const O=window.OREN,T=window.TAL;O.save.story.intro=1;O.save.gems=120;T.S().prof={an:'dragon',col:'#8e6fd1',love:'code'};})()`;
     await ev(prep); await ev(`window.OREN.showMap()`);
     await ev(`(()=>{window.TAL.S().prof=null;window.TAL.profile(window.OREN.showMap);})()`); await ev(prep);
-    // home: greeting, daily path, prize
+    // home: first-time tour, "what do you feel like today?", something else, the path, the story ending, the together suggestion
     for (let d = 0; d < 3; d++) {
-      await ev(`(()=>{const T=window.TAL;T.S().coach={};delete T.S().daily;window.OREN.showMap();})()`, 600);
-      await ev(`(()=>{const d=window.TAL.dailyEnsure();d.done=d.done.map(()=>1);d.claimed=0;window.OREN.showMap();})()`, 300);
+      await ev(`(()=>{const T=window.TAL;T.S().coach={};delete T.S().daily;window.OREN.showMap();})()`, 1500);
+      await ev(`(async()=>{for(let i=0;i<16;i++){const t=document.querySelector('.tour');if(!t)break;t.click();await new Promise(r=>setTimeout(r,300));}})()`, 300, 10000);
+      await ev(`window.TAL.otherDay()`, 300);
+      await ev(`(()=>{window.OREN.showMap();const c=document.querySelectorAll('#sHome .dcard');c.length&&c[${d}%c.length].click();})()`, 300);
+      await ev(`(()=>{const d=window.TAL.dailyEnsure();d.done=d.done.map(()=>1);d.claimed=0;d.sg=0;d.t=d.t.filter(x=>!/^tog:/.test(x));d.done=d.t.map(()=>1);window.OREN.showMap();})()`, 300);
       await ev(`document.querySelector('#sHome .bigbtn.huge')&&document.querySelector('#sHome .bigbtn.huge').click()`, 300);
+      await ev(`(()=>{const b=document.querySelector('#ov .bigbtn');b&&b.click();})()`, 300);
       await ev(`(()=>{document.querySelector('#ov').hidden=true;window.TAL.S().daily.claimed=1;window.OREN.showMap();})()`, 300); }
     log('home done');
     // journey: worlds and every level start
     await ev(`(async()=>{const O=window.OREN;O.save.story={intro:1};for(const w of O.WORLDS){O.showWorld(w);await new Promise(r=>setTimeout(r,150));window.__sweep();document.querySelector('#dlg').hidden=true;}})()`, 500, 60000);
     await ev(`(async()=>{const O=window.OREN,G=window.__oren4;for(const lv of O.ALLLV){try{if(lv.type==='learn'){delete O.save.seen[lv.u.id];O.startLevel(lv);}else G.playLevel(lv);}catch(e){}await new Promise(r=>setTimeout(r,80));window.__sweep();}})()`, 25000);
-    await ev(`window.OREN.kingdom()`); await ev(`window.OREN.studio(false)`);
+    await ev(`window.OREN.showJourney()`, 1500); await ev(`window.OREN.kingdom()`, 1500); await ev(`window.OREN.studio(false)`);
     log('journey done');
     // city: hub, groups, buildings, every activity a few times (answers right; each new question is read)
-    await ev(`window.TAL.openHub()`); for (let g = 0; g < 4; g++) await ev(`window.TAL.openGroup(window.TAL.GROUPS[${g}])`);
+    await ev(`window.TAL.openHub()`, 1500); for (let g = 0; g < 4; g++) await ev(`window.TAL.openGroup(window.TAL.GROUPS[${g}])`);
     const acts = await p.evaluate(() => window.TAL.BUILD.flatMap(b => [['B', b.id], ...b.acts.map(a => ['A', a.id])]));
     for (const [k, id] of acts) {
       if (k === 'B') { log('building ' + id); await ev(`window.TAL.openBuilding(window.TAL.BUILD.find(b=>b.id==='${id}'))`, 250); continue; }
@@ -82,7 +86,7 @@ async function collect() {
           if (await run(() => !document.querySelector('#ov').hidden).catch(() => false)) { await ev(`window.__sweep()`, 100); break; } } } }
     log('city done');
     // arcade and other kid lines
-    await ev(`(()=>{document.querySelector('#ov').hidden=true;window.TAL_arcade(()=>{});})()`);
+    await ev(`(()=>{document.querySelector('#ov').hidden=true;window.TAL_arcade(()=>{});})()`, 1500);
     for (const g of ['balloon', 'soccer', 'basket', 'swim', 'mole', 'frog']) { await ev(`(()=>{window.TAL_arcade(()=>{});window.__arc.start('${g}');})()`, 1200); await ev(`window.__arc.finish(9)`, 300); }
     await ev(`window.TAL.callParents('כְּדֵי לִקְרֹא בְּקוֹל צָרִיךְ אִשּׁוּר שֶׁל הוֹרֶה לַמִּיקְרוֹפוֹן.')`); await ev(`window.TAL.breakTime&&window.TAL.breakTime()`);
     await ev(`(()=>{window.TAL.parentPanel('voice');const b=[...document.querySelectorAll('#sPar button')].find(x=>/השמיעו|דוגמה/.test(x.textContent));b&&b.click();})()`, 300);
@@ -92,6 +96,7 @@ async function collect() {
       (D.INTRO || []).forEach(x => add(x[1])); add('אוֹרֶן, אַתָּה אַלּוּף הַחֶשְׁבּוֹן שֶׁל אֶרֶץ הַבְּלוֹקִים!');
       O.WORLDS.forEach(w => { (w.intro || []).forEach(add); (w.outro || []).forEach(add); add(w.say); });
       (D.QUESTS || []).forEach(q => { add(q.e + ' ' + q.a); add(sp(q.z)); add(q.t); });
+      (T.TOG || []).forEach(a => add(sp(typeof a.kid === 'function' ? a.kid('') : a.kid))); Object.values(T.RW || {}).forEach(r => add(sp(r.t)));
       (T.WORDS || []).forEach(w => add(sp(w.w)));
       ['זמן לנוח. כל הכבוד היום, אורן! נתראה מחר.', 'הזמן של היום נגמר. כל הכבוד היום, אורן! נתראה מחר.', 'עוד דקה אחת לסיום היום', ...[2, 3, 4, 5].map(n => `עוד ${n} דקות לסיום היום`)].forEach(add);
       (D.SENT || []).forEach(s => { add(s[0]); add(s[1]); });

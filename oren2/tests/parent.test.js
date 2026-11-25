@@ -64,7 +64,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  await p.locator('#ov .emo').first().click();await sleep(200);const r4=await p.evaluate(()=>({g:window.OREN.save.gems|0,m:window.TAL.S().set.msg}));ok('reply + gift',r4.m.seen&&r4.m.reply==='❤️'&&r4.g===g0+10,JSON.stringify(r4));
  await p.evaluate(()=>window.TAL.parentPanel('msg'));ok('parent sees reply',(await p.textContent('#sPar')).includes('אורן הגיב'));
  // badges
- await p.evaluate(()=>{window.TAL.S().tl['read-pw']={s:2,n:1};window.OREN.showMap();});await sleep(4600);ok('badge toast',await p.locator('.toast').count()>0||await p.evaluate(()=>!!window.TAL.S().bdg.star1));
+ await p.evaluate(()=>{window.TAL.S().tl['read-pw']={s:2,n:1};window.OREN.showMap();});await sleep(4600);ok('badge earned quietly',await p.evaluate(()=>!!window.TAL.S().bdg.star1));
  await p.evaluate(()=>window.TAL.badges(()=>{}));await sleep(200);ok('badge wall',await p.locator('.bdg.got').count()>=1);await shot('badges');
  // daily swap
  ok('kid home has no swap buttons (simple)',await p.evaluate(()=>{window.OREN.showMap();return document.querySelectorAll('#sHome .dsw,#sHome .merow').length===0;}));

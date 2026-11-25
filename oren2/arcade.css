@@ -3,10 +3,8 @@
   background:radial-gradient(ellipse at 50% 0%,#3a1670 0%,#1a0b3d 55%,#0b0620 100%);border:4px solid #ff4fd8;
   box-shadow:0 0 0 4px #1a0b3d,0 0 28px 6px rgba(255,79,216,.55),inset 0 0 40px rgba(54,214,255,.18),0 12px 0 4px rgba(0,0,0,.35);position:relative;overflow:hidden}
 .arc::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 5px)}
-.arch{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;flex-wrap:wrap}
+.arch{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;flex-wrap:wrap}
 .neon{font-weight:900;font-size:38px;color:#fff;text-shadow:0 0 6px #ff4fd8,0 0 14px #ff4fd8,0 0 28px #ff4fd8;letter-spacing:1px}
-.tkbig{font-weight:900;font-size:26px;background:#ffd23f;color:#3a1670;padding:6px 16px;box-shadow:0 0 14px rgba(255,210,63,.8),inset 0 -4px 0 rgba(0,0,0,.2);direction:ltr}
-.tkbig.huge{font-size:44px;padding:10px 28px}
 .cabs{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:16px;width:100%}
 .cab{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 10px 14px;background:linear-gradient(#2b1258,#160a33);color:#fff;border:3px solid var(--nc);
   box-shadow:0 0 12px var(--nc),inset 0 0 18px rgba(0,0,0,.5),0 6px 0 rgba(0,0,0,.45);animation:cabin .5s both;transition:transform .15s,box-shadow .15s;font-family:inherit}
@@ -17,12 +15,7 @@
 .cab .hs{font-size:13px;font-weight:800;background:rgba(255,255,255,.12);padding:2px 10px}
 @media (hover:hover){.cab:hover{transform:translateY(-4px);box-shadow:0 0 22px var(--nc),inset 0 0 18px rgba(0,0,0,.5),0 10px 0 rgba(0,0,0,.45)}}
 .cab:active{transform:translateY(3px)}
-.prize{display:flex;align-items:center;gap:10px;padding:10px 22px;background:linear-gradient(#ffd23f,#ffb000);color:#3a1670;font-weight:900;font-size:22px;box-shadow:0 0 16px rgba(255,210,63,.7),0 6px 0 rgba(0,0,0,.45)}
-.prize span{font-size:30px}
-.prz .rate{display:flex;align-items:center;gap:14px;font-size:34px;font-weight:900;direction:ltr}.prz .rate svg{width:34px;height:34px;vertical-align:middle}.prz .rarr{color:#36d6ff}
-.prz .lcap{background:rgba(255,255,255,.12);color:#fff}
 .bigbtn.huge2{font-size:26px;padding:14px 30px}.bigbtn.huge2 svg{width:30px;height:30px}
-.fly{position:absolute;top:45%;font-size:32px;animation:flyup .9s ease-out forwards;pointer-events:none}@keyframes flyup{to{transform:translateY(-220px) scale(.4);opacity:0}}
 .tkc span{direction:ltr}
 /* game frame */
 .arc.game{border-color:var(--nc);box-shadow:0 0 0 4px #1a0b3d,0 0 26px 4px var(--nc),0 12px 0 4px rgba(0,0,0,.35);padding:12px}
@@ -36,7 +29,6 @@
 .field{position:relative;width:100%;height:min(56vh,440px);overflow:hidden;background:linear-gradient(#11082a,#1d0e46);box-shadow:inset 0 0 0 3px rgba(255,255,255,.08);touch-action:none}
 .cdown{position:absolute;inset:0;display:grid;place-items:center;font-size:110px;font-weight:900;color:#fff;text-shadow:0 0 20px var(--nc),0 0 40px var(--nc);z-index:5;pointer-events:none}
 .cdown.pop{animation:cd .6s}@keyframes cd{from{transform:scale(1.8);opacity:0}}
-.tkwin{font-size:34px;font-weight:900;color:#3a1670;background:#ffd23f;padding:4px 18px;margin:6px auto 0;display:inline-block;direction:ltr}
 /* balloons */
 .bal{position:absolute;width:74px;height:90px;border-radius:50% 50% 47% 53%/55% 55% 45% 45%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.75) 0 9%,var(--bc) 10%);
   box-shadow:inset -8px -10px 0 rgba(0,0,0,.18);display:grid;place-items:center;color:#fff;font-weight:900;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.35);padding:0;cursor:pointer}
@@ -122,13 +114,10 @@
 @media (max-width:760px){.nline .tk:not(.big) b{display:none}.nline .tk.big b{font-size:16px}.nline{width:84%}}
 /* ===== review fixes ===== */
 /* panels fill the screen: no empty dark band below */
-.arc.game,.arc.prz{min-height:calc(100dvh - 190px)}
+.arc.game{min-height:calc(100dvh - 190px)}
 .arc.game{display:flex;flex-direction:column}.arc.game .field{flex:1 1 auto;height:auto;min-height:min(56vh,440px)}
-.arc.prz{justify-content:center;gap:26px}
 /* hall */
 .cab small{font-size:15px;opacity:1;color:#efe6ff}.cab .hs.new{color:#ffd23f}
-/* prize rate: one line */
-.prz .rate{align-items:baseline;gap:12px;font-size:36px;direction:ltr}.prz .rate .req{color:#36d6ff}.prz .rate svg{width:34px;height:34px;vertical-align:-4px}
 /* mole: more room between rows so labels never touch the hole above */
 .holes{gap:46px 22px}.hole{height:110px}
 .mole .tag{font-size:20px;padding:1px 7px}
@@ -151,6 +140,5 @@
   .nline .tk b{font-size:15px;bottom:-28px}.lily{font-size:30px}.field.ff{gap:50px}
   .lane .who{font-size:13px;right:4px;padding:1px 5px}
 }
-.prz .rate span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.prz .rate svg{display:inline-block}
 .corner{height:42%}
-@media (max-width:760px){.arc.game,.arc.prz{min-height:calc(100dvh - 120px)}}
+@media (max-width:760px){.arc.game{min-height:calc(100dvh - 120px)}}

@@ -1,6 +1,6 @@
-/* ===== 🕹️ THE ARCADE: short, bright mini-games that pay out tickets ===== */
+/* ===== 🕹️ THE ARCADE: short, bright mini-games, just for fun (records only, no currency) ===== */
 (()=>{'use strict';const O=window.OREN,T=window.TAL;if(!O||!T)return;const {h,$,rand,pick,shuffle,SPR}=O;const sfx=O.sfx,D=O.D;
-const A=()=>{const s=T.S();s.arc=s.arc||{tickets:0,best:{},plays:0};s.arc.best=s.arc.best||{};return s.arc;};
+const A=()=>{const s=T.S();s.arc=s.arc||{best:{},plays:0};s.arc.best=s.arc.best||{};delete s.arc.tickets;return s.arc;};
 let back0=null;
 const GAMES=[
  {id:'balloon',n:'בַּלּוֹנִים',e:'🎈',c:'#ff4fd8',d:'לוֹחֲצִים וּמְפוֹצְצִים'},
@@ -14,25 +14,13 @@ const G=id=>GAMES.find(g=>g.id===id);
 function openArcade(back){if(back)back0=back;back0=back0||O.showMap;T.setKey(null);O.setScreen('sTal','final',back0);O.musicStart&&0;
   const a=A();T.hudT('הָאַרְקֵייד');O.sayNow='הָאַרְקֵייד. בְּחַר מִשְׂחָק.';
   const s=$('#sTal');s.innerHTML='';const hall=h('div','arc');
-  hall.appendChild(h('div','arch',`<span class="neon">🕹️ הָאַרְקֵייד</span><span class="tkbig">🎟️ <b>${a.tickets|0}</b></span>`));
+  hall.appendChild(h('div','arch',`<span class="neon">🕹️ הָאַרְקֵייד</span>`));
   const g=h('div','cabs');
   GAMES.forEach((gm,i)=>{const best=a.best[gm.id]|0;const played=!!(T.S().tl['arc-'+gm.id]||{}).n;const tag=best?`<span class="hs">🏆 שִׂיא: ${best}</span>`:played?'':'<span class="hs new">✨ חָדָשׁ</span>';const c=h('button','cab',`<span class="scr"><span class="ce">${gm.e}</span></span><b>${gm.n}</b><small>${gm.d}</small>${tag}`);
     c.style.setProperty('--nc',gm.c);c.style.animationDelay=(i*.08)+'s';c.onclick=()=>{sfx.pop(3);start(gm.id);};g.appendChild(c);});
   hall.appendChild(g);
-  const pz=h('button','prize',`<span>🎁</span><b>דּוּכַן הַפְּרָסִים</b>`);pz.onclick=()=>{sfx.pop(2);prizes();};hall.appendChild(pz);
-  s.appendChild(hall);}
-/* ---------- prize counter ---------- */
-function prizes(){O.setScreen('sTal','final',()=>openArcade());const a=A();T.hudT('דּוּכַן הַפְּרָסִים');O.sayNow='דּוּכַן הַפְּרָסִים. עֲשָׂרָה כַּרְטִיסִים שָׁוִים שְׁלוֹשָׁה יַהֲלוֹמִים.';
-  const s=$('#sTal');s.innerHTML='';const box=h('div','arc prz');
-  const n=Math.floor((a.tickets|0)/10),g=n*3;
-  box.innerHTML=`<div class="arch"><span class="neon">🎁 דּוּכַן הַפְּרָסִים</span></div><div class="rate"><span>10 🎟️</span><span class="req">=</span><span>3 ${SPR.gem}</span></div><div class="tkbig huge">🎟️ <b id="tkN">${a.tickets|0}</b></div>`;
-  const row=h('div','btnrow');
-  if(n>0){const b=h('button','bigbtn gold huge2',`<span>הַחְלֵף ${n*10} 🎟️ ב-${g}</span>${SPR.gem}`);b.onclick=()=>{b.disabled=true;let k=0;const tk=$('#tkN');
-      const iv=setInterval(()=>{if(!box.isConnected){clearInterval(iv);return;}k++;a.tickets--;tk.textContent=a.tickets;const f=h('span','fly','🎟️');f.style.left=(30+Math.random()*40)+'%';box.appendChild(f);setTimeout(()=>f.remove(),900);sfx.pop(k%8);
-        if(k>=n*10){clearInterval(iv);O.addGems(g,b);sfx.win();O.rain();T.S().arcT=Date.now();O.persist();setTimeout(()=>{if(box.isConnected)prizes();},D(900));}},D(70));};row.appendChild(b);}
-  else row.appendChild(h('div','lcap',`צָרִיךְ 10 🎟️ כְּדֵי לְהַחְלִיף. עוֹד ${10-(a.tickets|0)}!`));
-  const bk=h('button','bigbtn plain sm','🕹️ <span>חֲזָרָה לָאַרְקֵייד</span>');bk.onclick=()=>openArcade();row.appendChild(bk);
-  box.appendChild(row);s.appendChild(box);window.__arc.prize=()=>{const b=box.querySelector('.bigbtn.gold');if(b)b.click();};}
+  s.appendChild(hall);later(()=>{const c=g.querySelector('.cab');if(c&&T.intro)T.intro('i-arc',c,'זֶה הָאַרְקֵייד! מִשְׂחָקִים קְצָרִים וּמְהִירִים, סְתָם בִּשְׁבִיל הַכֵּיף. בְּחַר אֶחָד!');});}
+const later=f=>setTimeout(f,D(700));
 /* ---------- shared game frame ---------- */
 let cur=null;
 function frame(id,title){const gm=G(id);O.setScreen('sTal','final',()=>{if(cur)cur.stop();openArcade();});T.hudT(gm.n);
@@ -43,9 +31,9 @@ function frame(id,title){const gm=G(id);O.setScreen('sTal','final',()=>{if(cur)c
     score:v=>{top.querySelector('.sc b').textContent=v;},time:t=>{top.querySelector('.tm').textContent=t;}};}
 function countdown(F,go){const c=h('div','cdown');F.field.appendChild(c);let n=3;const tick=()=>{if(!c.isConnected)return;if(n>0){c.textContent=n;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');sfx.blip?sfx.blip():sfx.pop(1);n--;setTimeout(tick,D(650));}
   else{c.textContent='קָדִימָה!';c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');sfx.ok(2);setTimeout(()=>{c.remove();go();},D(550));}};tick();}
-function finish(id,score,tk,stars,extra){if(cur){cur.stop();cur=null;}T.setKey(null);const a=A();const best=a.best[id]|0;const rec=score>best;if(rec)a.best[id]=score;
-  a.tickets=(a.tickets|0)+tk;a.plays=(a.plays|0)+1;T.S().arcT=Date.now();T.record('arc-'+id,stars,{b:score});
-  T.result({title:rec&&best?'שִׂיא חָדָשׁ! 🏆':'כָּל הַכָּבוֹד!',sub:`נְקֻדּוֹת: ${score}${extra||''}`,stars,gems:0,extra:`<div class="tkwin">🎟️ +${tk}</div>`,back:()=>openArcade(),again:()=>start(id)});}
+function finish(id,score,stars,extra){if(cur){cur.stop();cur=null;}T.setKey(null);const a=A();const best=a.best[id]|0;const rec=score>best;if(rec)a.best[id]=score;
+  a.plays=(a.plays|0)+1;T.record('arc-'+id,stars,{b:score});
+  T.result({title:rec&&best?'שִׂיא חָדָשׁ! 🏆':'כָּל הַכָּבוֹד!',sub:`נְקֻדּוֹת: ${score}${extra||''}`,stars,gems:0,back:()=>openArcade(),again:()=>start(id)});}
 const lvl=id=>{const b=A().best[id]|0;return b;};
 const COLS=[['#ff4b5c','אֲדֻמִּים'],['#3d8bff','כְּחֻלִּים'],['#ffd23f','צְהֻבִּים'],['#3cd070','יְרֻקִּים']];
 /* ---------- a. balloons ---------- */
@@ -63,7 +51,7 @@ function balloon(){const F=frame('balloon','פּוֹצֵץ כַּמָּה שֶׁ
   const loop=now=>{if(!alive||!F.field.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;spawn-=dt;if(spawn<=0){mk();spawn=D(phase?650:800);}
     list.forEach(o=>{o.y-=o.sp*dt;o.el.style.top=o.y+'px';});list.filter(o=>o.y<-90).forEach(o=>{o.el.remove();});list=list.filter(o=>o.y>=-90);
     const left=Math.max(0,Math.ceil((end-now)/1000));F.time('⏱️ '+left);if(now>=end){done();return;}requestAnimationFrame(loop);};
-  function done(){if(!alive)return;alive=false;const st=score>=20?3:score>=12?2:1;finish('balloon',score,score,st);}
+  function done(){if(!alive)return;alive=false;const st=score>=20?3:score>=12?2:1;finish('balloon',score,st);}
   cur={stop:()=>{alive=false;},finish:(sc)=>{if(sc!=null){score=sc;}done();},hit:()=>{const o=list.find(good);if(o)hit(o);else{score++;F.score(score);}},get score(){return score;}};
   rule();countdown(F,()=>{last=performance.now();end=last+D(45000);requestAnimationFrame(loop);});}
 /* ---------- b. whack-a-mole ---------- */
@@ -83,7 +71,7 @@ function mole(){const F=frame('mole');let score=0,alive=true,end=0,tmr=0;const b
   function whack(i){const ex=state[i];if(!alive||!ex)return;state[i]=null;const hl=holes[i];hl.classList.remove('up');
     if(ex.ok){score++;F.score(score);sfx.hit?sfx.hit():sfx.pop(4);hl.classList.add('bonk');setTimeout(()=>hl.classList.remove('bonk'),D(300));O.floatText(hl,'+1');}else{sfx.no();hl.classList.add('wrong');setTimeout(()=>hl.classList.remove('wrong'),D(500));}}
   const tick=()=>{if(!alive||!g.isConnected){alive=false;return;}const left=Math.max(0,Math.ceil((end-performance.now())/1000));F.time('⏱️ '+left);if(left<=0)return done();setTimeout(tick,250);};
-  function done(){if(!alive)return;alive=false;clearTimeout(tmr);const st=score>=12?3:score>=7?2:1;finish('mole',score,score,st);}
+  function done(){if(!alive)return;alive=false;clearTimeout(tmr);const st=score>=12?3:score>=7?2:1;finish('mole',score,st);}
   T.setKey(e=>{const n=+e.key;if(n>=1&&n<=9)whack([6,7,8,3,4,5,0,1,2][n-1]);});
   cur={stop:()=>{alive=false;clearTimeout(tmr);},finish:(sc)=>{if(sc!=null)score=sc;done();},hit:()=>{const i=state.findIndex(x=>x&&x.ok);if(i>=0)whack(i);else{score++;F.score(score);}},get score(){return score;}};
   countdown(F,()=>{end=performance.now()+D(45000);pop();tick();});}
@@ -101,11 +89,11 @@ function frog(){const F=frame('frog');const best=lvl('frog');const MAX=best>=10?
     info.innerHTML=`קְפִיצוֹת: <b>0</b>`;F.time(`🐸 ${r+1}/${R}`);F.score(tk);};
   function jump(j){if(busy)return;const np=Math.max(0,Math.min(MAX,pos+j));if(np===pos)return;pos=np;used++;put(fr,pos);fr.classList.remove('hop');void fr.offsetWidth;fr.classList.add('hop');sfx.jump?sfx.jump():sfx.pop(3);
     info.innerHTML=`קְפִיצוֹת: <b>${used}</b>`;
-    if(pos===tgt){busy=true;const o=opt(tgt);const got=used<=o?3:used<=o+1?2:1;tk+=got;F.score(tk);sfx.ok(r);O.floatText(lily,'+'+got+' 🎟️');lily.classList.add('win');
+    if(pos===tgt){busy=true;const o=opt(tgt);const got=used<=o?3:used<=o+1?2:1;tk+=got;F.score(tk);sfx.ok(r);O.floatText(lily,'+'+got+' ⭐');lily.classList.add('win');
       setTimeout(()=>{if(!line.isConnected)return;lily.classList.remove('win');busy=false;r++;if(r>=R)done();else round();},D(1100));}
     else if(pos>tgt){info.innerHTML+=' · <span class="over">עָבַרְתָּ! קְפֹץ אֲחוֹרָה ↩</span>';}}
   T.setKey(e=>{const m={'1':1,'2':2,'5':5,'0':10};if(m[e.key]&&JUMPS.includes(m[e.key]))jump(m[e.key]);if(e.key==='Backspace'||e.key==='-'){e.preventDefault();jump(-1);}});
-  function done(){const st=tk>=13?3:tk>=9?2:1;finish('frog',tk,tk,st);}
+  function done(){const st=tk>=13?3:tk>=9?2:1;finish('frog',tk,st);}
   cur={stop:()=>{busy=true;},finish:(sc)=>{if(sc!=null)tk=sc;done();},hit:()=>{let n=tgt-pos;for(const j of [...JUMPS].reverse()){while(n>=j){jump(j);n-=j;}}},get score(){return tk;}};
   round();}
 /* ---------- shared: three big answer buttons ---------- */
@@ -127,7 +115,7 @@ function soccer(){const F=frame('soccer');const best=lvl('soccer');const N=8;let
     setTimeout(()=>{if(!goal.isConnected)return;if(ok){goals++;F.score(goals);goal.classList.add('shake');msg.textContent='גּוֹל! 🎉';msg.className='kmsg win';sfx.win();setTimeout(()=>goal.classList.remove('shake'),D(500));}
       else{msg.textContent='הַשּׁוֹעֵר תָּפַס! הַתְּשׁוּבָה: '+q.ans;msg.className='kmsg';corners[right].classList.add('show');sfx.no();}
       setTimeout(()=>{if(!goal.isConnected)return;k++;if(k>=N)done();else round();},D(ok?1100:1700));},D(520));}
-  function done(){const st=goals>=7?3:goals>=4?2:1;finish('soccer',goals,goals,st,` מִתּוֹךְ ${N}`);}
+  function done(){const st=goals>=7?3:goals>=4?2:1;finish('soccer',goals,st,` מִתּוֹךְ ${N}`);}
   T.setKey(e=>{const n=+e.key;if(n>=1&&n<=3)kick(n-1);});
   cur={stop:()=>{busy=true;},finish:sc=>{if(sc!=null)goals=sc;done();},hit:()=>kick(right),get score(){return goals;}};
   round();}
@@ -147,7 +135,7 @@ function basket(){const F=frame('basket');const best=lvl('basket');const N=8;let
   function throwIt(force){if(phase!=='aim')return;phase='fly';const ok=force||Math.abs(meter-50)<=zone/2;ball.className='bball '+(ok?'swish':'miss');sfx.whoosh?sfx.whoosh():sfx.pop(2);
     setTimeout(()=>{if(!hoop.isConnected)return;if(ok){made++;F.score(made);msg.textContent='סַל! 🎉';msg.className='kmsg win';hoop.classList.add('shake');sfx.win();setTimeout(()=>hoop.classList.remove('shake'),D(500));}else{msg.textContent='כִּמְעַט! 💪';msg.className='kmsg';sfx.no();}setTimeout(next,D(1000));},D(650));}
   function next(){if(!alive||!hoop.isConnected)return;k++;if(k>=N)done();else ask();}
-  function done(){if(!alive)return;alive=false;const st=made>=7?3:made>=4?2:1;finish('basket',made,made,st,` מִתּוֹךְ ${N}`);}
+  function done(){if(!alive)return;alive=false;const st=made>=7?3:made>=4?2:1;finish('basket',made,st,` מִתּוֹךְ ${N}`);}
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)made=sc;done();},hit:()=>{if(phase==='q'){const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();}else if(phase==='aim')throwIt(true);},get phase(){return phase;},get score(){return made;}};
   ask();}
 /* ---------- d. swim race: each right answer is a stroke ---------- */
@@ -160,12 +148,12 @@ function swim(){const F=frame('swim');const best=lvl('swim');const N=10;let you=
     area.appendChild(answers(q,(good,b)=>{if(!alive)return;if(good){you++;ok++;F.score(ok);b.classList.add('ok');me.classList.remove('stroke');void me.offsetWidth;me.classList.add('stroke');sfx.pop(4);put();if(you>=N)return end(true);setTimeout(()=>{if(alive)ask();},D(250));}
       else{b.classList.add('bad');b.disabled=true;sfx.no();}}));};
   const loop=now=>{if(!alive||!lanes.isConnected){alive=false;return;}const dt=Math.min(50,now-last);last=now;rival=Math.min(1,rival+dt/D(rivalT));put();F.time(rival>you/N?'🐬 מוֹבִיל':'🏊 מוֹבִיל');if(rival>=1)return end(false);requestAnimationFrame(loop);};
-  function end(win){if(!alive)return;alive=false;const st=win?(rival<.75?3:2):1;finish('swim',ok,ok+(win?5:0),st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
+  function end(win){if(!alive)return;alive=false;const st=win?(rival<.75?3:2):1;finish('swim',ok,st,win?' · נִצַּחְתָּ! 🏆':' · הַדּוֹלְפִין נִצֵּחַ הַפַּעַם');}
   cur={stop:()=>{alive=false;},finish:sc=>{if(sc!=null)ok=sc;end(ok>=N);},hit:()=>{const b=[...area.querySelectorAll('.ab')].find(x=>+x.textContent===q.ans);if(b)b.click();},get score(){return ok;}};
   put();ask();countdown(F,()=>{last=performance.now();requestAnimationFrame(loop);});}
 /* ---------- wiring ---------- */
 const RUN={balloon,soccer,basket,swim,mole,frog};
 function start(id){T.setKey(null);RUN[id]();}
 window.TAL_arcade=openArcade;T.arcade=openArcade;
-window.__arc={open:openArcade,start,get cur(){return cur;},finish:sc=>cur&&cur.finish(sc),hit:()=>cur&&cur.hit(),state:()=>A(),prize:()=>{}};
+window.__arc={open:openArcade,start,get cur(){return cur;},finish:sc=>cur&&cur.finish(sc),hit:()=>cur&&cur.hit(),state:()=>A()};
 })();

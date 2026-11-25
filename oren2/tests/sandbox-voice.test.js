@@ -31,7 +31,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  const r3=await p.evaluate(()=>{const O=window.OREN,T=window.TAL;return {mode:O.isParentPlay,gems:O.save.gems,mix:!!T.S().tl['art-mix'],lvl:O.stars(O.WORLDS[2].levels[4].id),kept:O.save.s['add-0-0'],hide:T.S().set.hide.lab,panel:!document.querySelector('#sPar').hidden,bar:document.querySelector('.pbar2').hidden};});
  ok('back to Oren: untouched progress, panel open',!r3.mode&&r3.gems===7&&!r3.mix&&r3.lvl===0&&r3.kept===2&&r3.hide===1&&r3.panel&&r3.bar,JSON.stringify(r3));
  // try button from missions
- await p.evaluate(()=>window.TAL.parentPanel('plan'));await sleep(200);await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'נסו'}).click();await sleep(300);
+ await p.evaluate(()=>{const T=window.TAL,d=T.dailyEnsure();if(!d.t.length){d.t=['math','math'];d.done=[0,0];d.ch='math';}T.parentPanel('plan');});await sleep(200);await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'נסו'}).click();await sleep(300);
  ok('try a mission from the list',await p.evaluate(()=>window.OREN.isParentPlay&&(!document.querySelector('#sTal').hidden||!document.querySelector('#sMap').hidden)));
  const pers=await p.evaluate(()=>{window.OREN.persist();return {kid:JSON.parse(localStorage.getItem('oren4-v1')).gems,par:JSON.parse(localStorage.getItem('oren4-v1-parent')).gems};});ok('separate storage',pers.kid===7&&pers.par===500,JSON.stringify(pers));
  await p.evaluate(()=>window.TAL_parentGate());await sleep(200);ok('parent gate inside sandbox goes to panel as Oren',await p.evaluate(()=>!window.OREN.isParentPlay&&!document.querySelector('#sPar').hidden));
