@@ -22,8 +22,8 @@ const res = []; const ok = (n, c, i = '') => res.push((c ? 'PASS ' : 'FAIL ') + 
   const lv = await p.evaluate(() => { const l = window.OREN.ALLLV.find(x => x.type === 'learn' && x.u.gen && x.u.gen(5).k !== 'col'); return l && l.id; });
   s = await said(() => p.evaluate(id => window.OREN.startLevel(window.OREN.ALLLV.find(x => x.id === id)), lv));
   ok('lesson sentence is read by itself', s.length >= 1, JSON.stringify(s));
-  s = await said(() => p.click('#sLearn .bigbtn:not(.plain)'));
-  ok('lesson "next" step is read by itself', s.length === 1 && s[0].length > 1, JSON.stringify(s));
+  s = await said(() => p.evaluate(() => { const bs = [...document.querySelectorAll('#sLearn .lch .chb, #sLearn .btnrow .bigbtn')]; bs[0].click(); }));
+  ok('lesson: what happens after a tap (hint or answer) is read by itself', s.length === 1 && s[0].length > 1, JSON.stringify(s));
   // reading practice: a question Oren should try to read first is not read right away
   s = await said(() => p.evaluate(() => { const a = window.TAL.ACT['read-sent'] || window.TAL.ACT['read-wp']; a.run(() => {}); }), 1200);
   ok('reading practice question: not read automatically', s.length === 0 && await p.evaluate(() => !!window.__noAuto), JSON.stringify(s));

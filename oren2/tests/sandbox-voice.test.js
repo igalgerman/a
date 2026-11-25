@@ -13,12 +13,12 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
    window.Audio=function(x){u=x;return {play:()=>Promise.resolve(),pause(){}};};G.ok=true;window.__fast=false;
    window.TAL.S().set.voice={eng:'browser',name:'x',gv:'he-IL-Wavenet-D',rate:1.2};window.OREN.say('שָׁלוֹם');
    window.__fast=true;G.ok=ok0;window.Audio=A0;try{G.audio=null;}catch(e){}return {u,opts:/מהירות|קול אחר|מנוע:/.test(t)};});
- ok('one fixed voice: Kore 0.9 even with old saved choices, no voice options',/[?&]v=he-IL-Chirp3-HD-Kore&r=0\.9$/.test(fv.u)&&!fv.opts,JSON.stringify(fv));
+ ok('one fixed voice: Kore 0.9 even with old saved choices, no voice options',/[?&]v=he-IL-Chirp3-HD-Kore&r=0\.9&k=\d+$/.test(fv.u)&&!fv.opts,JSON.stringify(fv));
  const fe=await p.evaluate(async()=>{const G=window.__gv,A0=window.Audio,ok0=G.ok,sp0=speechSynthesis.speak;let u='',fb='';
    window.Audio=function(x){u=x;return {play:()=>Promise.resolve(),pause(){}};};G.ok=true;window.__fast=false;window.OREN.sayLang('<b>Apple</b>  pie','en');const u1=u;
    window.Audio=function(x){return {play:()=>Promise.reject(new Error('x')),pause(){}};};speechSynthesis.speak=x=>{fb=x.lang;};window.OREN.sayLang('cat','en');await new Promise(r=>setTimeout(r,50));
    window.__fast=true;G.ok=ok0;window.Audio=A0;speechSynthesis.speak=sp0;G.audio=null;return {u:u1,fb};});
- ok('English: Google Despina 0.85, plain text, browser fallback',fe.u==='/api/tts?t=Apple%20pie&v=en-US-Chirp3-HD-Despina&r=0.85'&&fe.fb==='en-US',JSON.stringify(fe));
+ ok('English: Google Despina 0.85, plain text, browser fallback',/^\/api\/tts\?t=Apple%20pie&v=en-US-Chirp3-HD-Despina&r=0\.85&k=\d+$/.test(fe.u)&&fe.fb==='en-US',JSON.stringify(fe));
  await p.locator('#sPar .bigbtn',{hasText:'אוקי'}).click();await sleep(200);ok('voice approved saved',await p.evaluate(()=>!!window.TAL.S().set.voiceOk));
  await p.evaluate(()=>window.TAL.parentPanel('try'));await sleep(200);await L.shot(p,{path:L.SHOTDIR+'/try.png',fullPage:true});
  await p.locator('#sPar .bigbtn',{hasText:'כניסה למשחק כהורה'}).click();await sleep(400);
@@ -36,7 +36,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  const r3=await p.evaluate(()=>{const O=window.OREN,T=window.TAL;return {mode:O.isParentPlay,gems:O.save.gems,mix:!!T.S().tl['art-mix'],lvl:O.stars(O.WORLDS[2].levels[4].id),kept:O.save.s['add-0-0'],hide:T.S().set.hide.lab,panel:!document.querySelector('#sPar').hidden,bar:document.querySelector('.pbar2').hidden};});
  ok('back to Oren: untouched progress, panel open',!r3.mode&&r3.gems===7&&!r3.mix&&r3.lvl===0&&r3.kept===2&&r3.hide===1&&r3.panel&&r3.bar,JSON.stringify(r3));
  // try button from missions
- await p.evaluate(()=>{const T=window.TAL,d=T.dailyEnsure();if(!d.t.length){d.t=['math','math'];d.done=[0,0];d.ch='math';}T.parentPanel('plan');});await sleep(200);await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'נסו'}).click();await sleep(300);
+ await p.evaluate(()=>{const T=window.TAL,d=T.dailyEnsure();if(!d.t.length){d.t=['math','math'];d.done=[0,0];d.ch='math';}T.parentPanel('plan');});await sleep(200);await p.locator('.tdrow').nth(1).click();await sleep(50);await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'נסו'}).click();await sleep(300);
  ok('try a mission from the list',await p.evaluate(()=>window.OREN.isParentPlay&&(!document.querySelector('#sTal').hidden||!document.querySelector('#sMap').hidden)));
  const pers=await p.evaluate(()=>{window.OREN.persist();return {kid:JSON.parse(localStorage.getItem('oren4-v1')).gems,par:JSON.parse(localStorage.getItem('oren4-v1-parent')).gems};});ok('separate storage',pers.kid===7&&pers.par===500,JSON.stringify(pers));
  await p.evaluate(()=>window.TAL_parentGate());await sleep(200);ok('parent gate inside sandbox goes to panel as Oren',await p.evaluate(()=>!window.OREN.isParentPlay&&!document.querySelector('#sPar').hidden));

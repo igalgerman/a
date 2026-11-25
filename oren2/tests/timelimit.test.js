@@ -60,11 +60,12 @@ const srv = http.createServer((q, r) => { const m = /^\/api\/save\/([a-f0-9]{32}
   await cont(); ok('then the lock (tasks done)', (await locked()) === 'סִיַּמְתָּ אֶת הַמְּשִׂימוֹת שֶׁל הַיּוֹם!', await locked());
   // the parent's block
   await p.evaluate(() => { document.querySelectorAll('.tlock').forEach(e => e.remove()); document.body.classList.remove('tlocked'); window.TAL.parentPanel('day'); }); await sleep(300);
-  const pb = await p.evaluate(() => { const s = document.querySelector('#sPar .pbody .psec'); return { h: s && s.querySelector('h3').textContent, chips: s ? [...s.querySelectorAll('.pchip')].map(x => x.textContent) : [] }; });
-  ok('parent: "⏱️ היום" block first, with minutes and tasks', pb.h === '⏱️ היום' && ['+10 דק׳', '+20 דק׳', '+30 דק׳', 'עוד משימה אחת', 'עוד 2', 'עוד 3', 'ללא הגבלה'].every(c => pb.chips.includes(c)), JSON.stringify(pb));
+  const pb = await p.evaluate(() => { const s = document.querySelector('#sPar .pbody .psec'); return { h: s && s.querySelector('h3').textContent, chips: s ? [...s.querySelectorAll('.pchip')].map(x => x.textContent) : [], big: s ? [...s.querySelectorAll('.pbig .bigbtn')].map(x => x.textContent).join('|') : '' }; });
+  ok('parent: "⏱️ היום" block first: two big buttons, the rest folded', pb.h === '⏱️ היום' && ['ללא הגבלה', '⏹ לסיים עכשיו'].every(c => pb.chips.includes(c)) && pb.big === '+15 דק׳|+ משימה', JSON.stringify(pb));
   if (process.env.HSHOTS) await p.screenshot({ path: path.join(process.env.HSHOTS, 'parent-today-' + L.variant + '.png') });
-  await p.locator('#sPar .psec .pchip', { hasText: 'עוד 2' }).first().click(); await sleep(200);
-  ok('"עוד 2" gives two more activities', await p.evaluate(d0 => { const t = window.TAL.S().set.lim.today; return t.n === d0 + 4; }, d0));
+  const n0 = await p.evaluate(() => (window.TAL.S().set.lim.today || {}).n | 0);
+  await p.locator('#sPar .pbig .bigbtn', { hasText: '+ משימה' }).click(); await sleep(200);
+  ok('"+ משימה" gives one more activity', await p.evaluate(n0 => window.TAL.S().set.lim.today.n === n0 + 1, n0), String(n0));
   await ctx.close();
   // ---------- two devices: the parent's phone grants, Oren's device unlocks ----------
   if (fs.existsSync(path.join(PUB, 'index.html'))) {
@@ -77,10 +78,10 @@ const srv = http.createServer((q, r) => { const m = /^\/api\/save\/([a-f0-9]{32}
     const B = await (await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage(); await B.addInitScript(init); B.on('pageerror', e => errs.push('B ' + e.message));
     await B.goto(BASE); await B.waitForFunction(() => window.OREN && window.OREN.family && window.TAL.S().set.lim && window.TAL.S().set.lim.daily === 5, null, { timeout: 20000 }).catch(() => { }); await L.noCoach(B);
     await B.evaluate(() => window.TAL.parentPanel('day')); await sleep(400);
-    await B.locator('#sPar .psec .pchip', { hasText: '+20 דק׳' }).first().click(); await sleep(2500);
+    await B.locator('#sPar .pbig .bigbtn', { hasText: '+15 דק׳' }).click(); await sleep(2500);
     const got = await A.waitForFunction(() => !document.querySelector('.tlock:not(.tyay)') && !!document.querySelector('.tyay'), null, { timeout: 15000 }).then(() => true).catch(() => false);
-    ok('the parent\'s phone grants +20: Oren\'s device unlocks by itself, with the happy note', got, await A.evaluate(() => JSON.stringify(window.TAL.S().set.lim)));
-    ok('and the top bar shows the new time', await A.evaluate(() => { const e = document.querySelector('#hud .tpill'); return !!e && !e.hidden && /20 דַּקּוֹת/.test(e.textContent); }));
+    ok('the parent\'s phone grants +15: Oren\'s device unlocks by itself, with the happy note', got, await A.evaluate(() => JSON.stringify(window.TAL.S().set.lim)));
+    ok('and the top bar shows the new time', await A.evaluate(() => { const e = document.querySelector('#hud .tpill'); return !!e && !e.hidden && /15 דַּקּוֹת/.test(e.textContent); }));
   }
   ok('no page errors', !errs.length, errs.join(' | '));
   await b.close(); srv.close(); L.finish('timelimit-' + L.variant, res);

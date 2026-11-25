@@ -12,9 +12,9 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  // missions tab: today controls
  await p.evaluate(()=>window.TAL.parentPanel('plan'));await sleep(200);
  const t0=await p.evaluate(()=>window.TAL.S().daily.t.slice());
- await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'▲'}).click();await sleep(100);const t1=await p.evaluate(()=>window.TAL.S().daily.t.slice());ok('reorder today',t1[0]===t0[1]&&t1[1]===t0[0],JSON.stringify([t0,t1]));
- await p.locator('.tdrow').nth(0).locator('.pchip',{hasText:'בוצע'}).click();await sleep(100);ok('mark done',await p.evaluate(()=>window.TAL.S().daily.done[0]===1));
- await p.locator('.tdrow').nth(2).locator('.pchip',{hasText:'הסר'}).click();await sleep(100);ok('remove step',await p.evaluate(n=>window.TAL.S().daily.t.length===n-1,t0.length));
+ await p.locator('.tdrow').nth(1).click();await sleep(50);await p.locator('.tdrow').nth(1).locator('.pchip',{hasText:'▲'}).click();await sleep(100);const t1=await p.evaluate(()=>window.TAL.S().daily.t.slice());ok('reorder today',t1[0]===t0[1]&&t1[1]===t0[0],JSON.stringify([t0,t1]));
+ await p.locator('.tdrow').nth(0).locator('.pchip',{hasText:'✓'}).click();await sleep(100);ok('mark done',await p.evaluate(()=>window.TAL.S().daily.done[0]===1));
+ await p.locator('.tdrow').nth(2).locator('.pchip',{hasText:'✕'}).click();await sleep(100);ok('remove step',await p.evaluate(n=>window.TAL.S().daily.t.length===n-1,t0.length));
  await p.locator('#sPar .pchip',{hasText:'חשבון'}).first().click();await sleep(100);ok('add step',await p.evaluate(n=>window.TAL.S().daily.t.length===n,t0.length));
  // template with specific activity
  await p.evaluate(()=>{document.querySelectorAll('#sPar details').forEach(d=>d.open=true);});await sleep(150);
@@ -22,10 +22,10 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  ok('template saved with specific activity',await p.evaluate(()=>JSON.stringify(window.TAL.S().set.plan).includes('act:art-mix')));
  const nd=await p.evaluate(()=>{delete window.TAL.S().daily;return window.TAL.dailyEnsure().t;});ok('new day uses template',nd[1]==='art-mix',JSON.stringify(nd));
  // time tab
- await p.evaluate(()=>window.TAL.parentPanel('time'));await sleep(200);await p.locator('#sPar .psec',{hasText:'הגבלה קבועה'}).locator('.pchip',{hasText:/^30$/}).click();await sleep(100);
+ await p.evaluate(()=>window.TAL.parentPanel('time'));await sleep(200);await p.evaluate(()=>document.querySelectorAll('#sPar details').forEach(d=>d.open=true));await p.locator('#sPar .psec',{hasText:'הגבלה קבועה'}).locator('.pchip',{hasText:/^30$/}).click();await sleep(100);
  ok('daily limit set',await p.evaluate(()=>window.TAL.S().set.lim.daily===30));
- await p.locator('#sPar .pchip',{hasText:'+10'}).click();await sleep(100);ok('today +10',await p.evaluate(()=>window.TAL.S().set.lim.today.min===40));
- await p.locator('#sPar .pchip',{hasText:'כמו כל יום'}).click();await sleep(100);
+ await p.locator('#sPar .bigbtn',{hasText:'+15'}).click();await sleep(100);ok('today +15',await p.evaluate(()=>window.TAL.S().set.lim.today.min===45));
+ await p.evaluate(()=>document.querySelectorAll('#sPar details').forEach(d=>d.open=true));await p.locator('#sPar .pchip',{hasText:'כמו כל יום'}).click();await sleep(100);
  await p.locator('#sPar .bigbtn',{hasText:'יציאה'}).click();await sleep(300);
  ok('the top bar shows the time left',(await p.textContent('#hud .tpill')).includes('30 דַּקּוֹת'));
  // the last 5 minutes

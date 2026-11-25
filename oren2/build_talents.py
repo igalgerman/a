@@ -20,6 +20,7 @@ head=('<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">'
  '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
  '<title>הַמַּסָּע שֶׁל אוֹרֶן</title><meta name="theme-color" content="#6aa84f">'
  '<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon-192.png">'
+ '<script>window.__site=1</script>'
  '<link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">'
  '</head><body>')
 pub=d/'cf'/'public'

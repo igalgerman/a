@@ -16,8 +16,8 @@ async function finishLevel(p,maxMs=60000){const t0=Date.now();while(Date.now()-t
  // 1. real speed: intro, studio, first 3 levels incl. lesson, transitions, gem fly
  {const p=await page(b);await p.click('#btnStart');await sleep(700);let g=0;while(g++<10&&!(await p.locator('#dlg').isHidden())){await p.click('#dNext');await sleep(400);}
   await p.locator('#sStudio .bigbtn').last().click();await sleep(900);await p.locator('.wcard2').nth(1).click();await sleep(900);g=0;while(g++<10&&!(await p.locator('#dlg').isHidden())){await p.click('#dNext');await sleep(400);}
-  let levels=0;for(let i=0;i<3;i++){await p.locator('.pnode').nth(i).click();await sleep(900);if(!(await p.locator('#sLearn').isHidden())){await p.locator('#sLearn .bigbtn.plain').click();await sleep(900);}
-    const done=await finishLevel(p);if(done)levels++;await sleep(2200);await L.shot(p,{path:L.SHOTDIR+'/real-res'+i+'.png'});const blue=p.locator('#ov .bigbtn.blue');if(await blue.count())await blue.click();else await p.locator('#ov .bigbtn').last().click();await sleep(2500);}
+  let levels=0;for(let i=0;i<3;i++){await p.locator('.pnode').nth(i).click();await sleep(900);if(!(await p.locator('#sLearn').isHidden())){await L.doLesson(p);await sleep(900);}
+    const done=await finishLevel(p);if(done)levels++;await sleep(2200);await L.shot(p,{path:L.SHOTDIR+'/real-res'+i+'.png'});await p.evaluate(()=>document.getElementById('btnBack').click());await sleep(1500);}
   const gems=await p.evaluate(()=>window.__oren4.save.gems);const gemc=await p.textContent('#gemc');
   ok('real-speed: 3 levels with transitions',levels===3&&!p.errs.length,`levels ${levels}, errors ${p.errs.join('; ')}`);ok('gem counter matches save',gemc.trim()===String(gems),`hud ${gemc} save ${gems}`);
   const wipeHidden=await p.locator('#wipe').isHidden();ok('wipe overlay hidden after transitions',wipeHidden);
@@ -27,7 +27,7 @@ async function finishLevel(p,maxMs=60000){const t0=Date.now();while(Date.now()-t
  {const p=await page(b,{},()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked')}});});
   await p.evaluate(()=>window.__oren4&&window.__oren4.setFast(true));const loaded=await p.evaluate(()=>!!window.__oren4);
   if(loaded){await p.click('#btnStart');await sleep(200);let g=0;while(g++<10&&!(await p.locator('#dlg').isHidden()))await p.click('#dNext');await p.locator('#sStudio .bigbtn').last().click();await p.locator('.wcard2').nth(1).click();g=0;while(g++<10&&!(await p.locator('#dlg').isHidden()))await p.click('#dNext');
-    await p.locator('.pnode').nth(0).click();await sleep(100);if(!(await p.locator('#sLearn').isHidden()))await p.locator('#sLearn .bigbtn.plain').click();await finishLevel(p,20000);}
+    await p.locator('.pnode').nth(0).click();await sleep(100);if(!(await p.locator('#sLearn').isHidden()))await L.doLesson(p);await finishLevel(p,20000);}
   ok('works when browser storage is blocked',loaded&&!p.errs.length,p.errs.slice(0,2).join('; '));await p.context().close();}
  // 3. migration from previous version save
  {const p=await page(b,{},()=>{try{localStorage.clear();localStorage.setItem('oren3-v1',JSON.stringify({s:{'add-0':3,'add-5':2,'add-16':2,'mul-15':1,'word-3':1},m:{'3x4':1,'4x3':1},days:['2026-11-24'],ans:50,ok:40}));}catch(e){}});
@@ -61,7 +61,7 @@ async function finishLevel(p,maxMs=60000){const t0=Date.now();while(Date.now()-t
  // 6. reduced motion + phone portrait sanity
  {const p=await page(b,{reducedMotion:'reduce'});await p.evaluate(()=>window.__oren4.setFast(true));await p.click('#btnStart');let g=0;while(g++<10&&!(await p.locator('#dlg').isHidden()))await p.click('#dNext');
   await p.locator('#sStudio .bigbtn').last().click();await p.locator('.wcard2').nth(6).click();g=0;while(g++<10&&!(await p.locator('#dlg').isHidden()))await p.click('#dNext');await p.locator('.pnode').nth(0).click();await sleep(100);
-  if(!(await p.locator('#sLearn').isHidden()))await p.locator('#sLearn .bigbtn.plain').click();const done=await finishLevel(p,20000);ok('reduced-motion mode playable',done&&!p.errs.length,p.errs.join('; '));await p.context().close();}
+  if(!(await p.locator('#sLearn').isHidden()))await L.doLesson(p);const done=await finishLevel(p,20000);ok('reduced-motion mode playable',done&&!p.errs.length,p.errs.join('; '));await p.context().close();}
  // 7. cloud document size at full progress
  {const p=await page(b);const r=await p.evaluate(()=>{const O=window.__oren4,s=O.save;O.ALLLV.forEach(l=>s.s[l.id]=3);for(let a=1;a<=10;a++)for(let c=1;c<=10;c++)s.m[a+'x'+c]=3;
     const gens=O.ALLLV.map(l=>l.gen);s.rq=[];let t=0;while(s.rq.length<60&&t++<2000){const q=gens[t%gens.length](0);if(q.k==='ch'&&/<svg/.test(q.pr))continue;s.rq.push({q,u:'x'});}

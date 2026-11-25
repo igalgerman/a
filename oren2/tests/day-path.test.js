@@ -10,7 +10,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  await p.evaluate(()=>{const O=window.OREN,T=window.TAL;O.save.story.intro=1;T.S().prof={an:'cat',col:'#3a8fc4',love:'art'};O.showMap();});await sleep(1200);
  ok('tour starts on the first home visit',await p.locator('.tour').count()===1);
  let n=0;while(await p.locator('.tour').count()&&n<30){await p.locator('.tour').click({position:{x:5,y:5}});n++;await sleep(120);}
- ok('tour: one tap per step, then gone',n>=8&&n<=12&&await p.locator('.tour').count()===0,'taps '+n);
+ ok('tour: 3 short steps, one tap each, then gone',n===3&&await p.locator('.tour').count()===0,'taps '+n);
  await home();await sleep(1200);ok('tour shows only once',await p.locator('.tour').count()===0&&await p.evaluate(()=>window.TAL.S().coach.tour===1));
  await p.locator('#sHome .hpair').click();await sleep(300);ok('tapping the friend replays the tour',await p.locator('.tour').count()===1);
  await p.evaluate(()=>window.OREN.showMap());await sleep(200);ok('leaving home ends the tour',await p.locator('.tour').count()===0);
@@ -18,7 +18,7 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  // --- the day choice, from enabled parts only ---
  await p.evaluate(()=>{const st=window.TAL.S().set;st.hide.lab=1;st.hide.art=1;st.offA=st.offA||{};st.offA['read-pw']=1;window.TAL.S().last={id:'write-trace',d:'2000-01-01'};});await home();await sleep(300);
  const c=await p.evaluate(()=>({cards:document.querySelectorAll('#sHome .dchoice .dcard').length,cont:document.querySelectorAll('#sHome .dcard.cont').length,more:!!document.querySelector('#sHome .dmore'),big:!!document.querySelector('#sHome .bigbtn.huge'),bub:document.querySelector('#sHome .hbub2').textContent,doors:document.querySelectorAll('#sHome .doors2 .door').length}));
- ok('home asks "what do you feel like today?" with 3 cards + something else, doors stay',c.cards===3&&c.more&&!c.big&&c.bub.includes('מָה בָּא לְךָ הַיּוֹם')&&c.doors===4,JSON.stringify(c));
+ ok('home asks "what do you feel like today?" with 3 cards + something else; the doors live inside "something else"',c.cards===3&&c.more&&!c.big&&c.bub.includes('מָה בָּא לְךָ הַיּוֹם')&&c.doors===0,JSON.stringify(c));
  ok('one card continues where Oren stopped',c.cont===1);
  await p.evaluate(()=>{const d=window.TAL.S().daily;d.o=['explore','math','readg','create','calm'];});await home();await sleep(200);
  await p.locator('#sHome .dcard:not(.cont)').first().click();await sleep(300);

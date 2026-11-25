@@ -97,7 +97,7 @@ H.check=()=>{endSeen();if(off()||H.blocking()||!safeBase())return;const r=day(),
 H.breakNow=()=>showBreak();
 
 /* ---------- screens ---------- */
-const friend=()=>{const pr=T.S().prof||{};return pr.an?T.ALLSPR(pr.an):T.FACES.happy.s;};
+const friend=()=>T.friend?T.friend():T.FACES.happy.s;
 function lock(cls,html){close();const el=h('div','hlock '+cls,`<div class="card">${html}</div>`);document.body.appendChild(el);document.body.classList.add('hlocked');O.hush&&O.hush();return el;}
 function close(){document.querySelectorAll('.hlock').forEach(e=>{clearInterval(e._iv);e.remove();});document.body.classList.remove('hlocked');}
 const after=()=>setTimeout(()=>{decorate();H.check();},300);

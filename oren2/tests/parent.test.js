@@ -35,13 +35,13 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  // parts: disable building, activity, world
  const r1=await p.evaluate(async()=>{const T=window.TAL,O=window.OREN,st=T.S().set;st.hide.lab=1;st.offA['read-first']=1;st.offW.add=1;T.S().prof=null;
    T.openHub();await new Promise(r=>setTimeout(r,200));const wiz=!!document.querySelector('.profg');
-   for(let k=0;k<3;k++){document.querySelector('.pfb').click();await new Promise(r=>setTimeout(r,80));}
+   for(let k=0;k<2;k++){document.querySelector('.pfb').click();await new Promise(r=>setTimeout(r,80));}
    const prof=JSON.stringify(T.S().prof);document.querySelector('#sTal .bigbtn').click();await new Promise(r=>setTimeout(r,250));
    const head=!!document.querySelector('.hhead .hbub');const fav=!!document.querySelector('.gdoor.fav');const names=[];T.GROUPS.forEach(g=>{T.openGroup(g);document.querySelectorAll('#sTal .bld .nm').forEach(e=>names.push(e.textContent));});
    T.openBuilding(T.BUILD.find(b=>b.id==='read'));const acts=[...document.querySelectorAll('.actc .an')].map(e=>e.textContent);
    O.showJourney();await new Promise(r=>setTimeout(r,200));const hiddenCards=[...document.querySelectorAll('.worlds > .wcard2')].filter(c=>c.hidden).length;
    const d=T.dailyEnsure();return {wiz,prof,lab:names.some(n=>n.replace(/[\u0591-\u05C7]/g,'')==='המעבדה'),head,fav,first:acts.some(a=>a.includes('אוֹת רִאשׁוֹנָה')),hiddenCards,daily:d.t.some(id=>id.startsWith('sci-')||id==='read-first')};});
- ok('profile wizard on first hub visit',r1.wiz&&r1.prof.includes('an'),r1.prof);ok('favourite door marked',r1.fav);
+ ok('profile wizard on first hub visit (no animal: the friend is the studio pet)',r1.wiz&&r1.prof.includes('love')&&!r1.prof.includes('"an"'),r1.prof);ok('favourite door marked',r1.fav);
  ok('disabled building hidden',!r1.lab);ok('disabled activity hidden',!r1.first);ok('disabled world hidden on map',r1.hiddenCards===1);ok('daily missions skip disabled parts',!r1.daily);
  await shot('hubp');
  // gradual
@@ -77,12 +77,12 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
  ok('full reset keeps password+profile, wipes progress',r7.pw&&r7.prof&&r7.gems===0&&r7.tl===0,JSON.stringify(r7));
  const r8=await p.evaluate(async()=>{const T=window.TAL,O=window.OREN;T.S().set.plan=['math','read','mind'];delete T.S().daily;O.showMap();await new Promise(r=>setTimeout(r,300));
    const steps=document.querySelectorAll('.today .tstep2').length;const d=T.S().daily;const ok2=d.t[0]==='math'&&T.ACT[d.t[1]].b.id==='read'&&T.ACT[d.t[2]].b.id==='mind';
-   const doors=document.querySelectorAll('#sHome .door').length;document.querySelector('.door.city').click();await new Promise(r=>setTimeout(r,200));const groups=document.querySelectorAll('.gdoor').length;
+   const doors=document.querySelectorAll('#sHome .door').length;T.otherDay();await new Promise(r=>setTimeout(r,100));document.querySelector('#sTal .door.city').click();await new Promise(r=>setTimeout(r,200));const groups=document.querySelectorAll('.gdoor').length;
    const homeBtn=!document.querySelector('#btnHome').hidden;T.openBuilding(T.BUILD[0]);await new Promise(r=>setTimeout(r,100));const homeBtn2=!document.querySelector('#btnHome').hidden;document.querySelector('#btnHome').click();await new Promise(r=>setTimeout(r,200));
    const back=!document.querySelector('#sHome').hidden;document.querySelector('.today .bigbtn').click();await new Promise(r=>setTimeout(r,300));const math=!document.querySelector('#sPlay').hidden||!document.querySelector('#sLearn').hidden||!document.querySelector('#sWorld').hidden;
    window.TAL.parentPanel('voice');const v=document.querySelector('#sPar').textContent.includes('Kore');window.TAL.parentPanel('plan');const pl=document.querySelectorAll('#sPar .plrow').length;
    return {steps,ok2,doors,groups,homeBtn,homeBtn2,back,math,v,pl};});
- ok('home: plan respected, 3 doors, grouped city, home button, continue starts math, voice+plan tabs',r8.steps===3&&r8.ok2&&r8.doors>=3&&r8.groups===4&&!r8.homeBtn&&r8.homeBtn2&&r8.back&&r8.math&&r8.v&&r8.pl===3,JSON.stringify(r8));
+ ok('home: plan respected, no doors on home (inside "something else"), grouped city, home button, continue starts math, voice+plan tabs',r8.steps===3&&r8.ok2&&r8.doors===0&&r8.groups===4&&!r8.homeBtn&&r8.homeBtn2&&r8.back&&r8.math&&r8.v&&r8.pl===3,JSON.stringify(r8));
  await p.evaluate(()=>{window.TAL.parentPanel('voice');});await sleep(200);await shot('voice');await p.evaluate(()=>{window.OREN.showMap();});await sleep(300);await shot('home');
  ok('no JS errors',!errs.length,errs.slice(0,5).join(' | '));
  await b.close();L.finish('parent-'+L.variant,res);})();

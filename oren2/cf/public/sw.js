@@ -5,7 +5,7 @@
    - /api/save and everything else: never cached
    - postMessage({type:'prefetch', urls?:[...]}) saves a list of sentences (default: the server's list of all game
      sentences, /api/tts/list); progress is posted back as {type:'prefetch', left, ok, fail}. */
-const PAGE = 'oren-page-v1', AUDIO = 'oren-audio-v1', MAX = 1500;
+const PAGE = 'oren-page-v1', AUDIO = 'oren-audio-v2', MAX = 1500;
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(PAGE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys()
@@ -62,8 +62,9 @@ self.addEventListener('message', e => {
   const tell = m => { if (e.source && e.source.postMessage) e.source.postMessage(Object.assign({ type: 'prefetch' }, m)); };
   e.waitUntil((async () => {
     let urls = d.urls;
-    if (!Array.isArray(urls)) try { urls = (await (await fetch('/api/tts/list', { cache: 'no-store' })).json()).urls; } catch (er) { urls = null; }
+    if (!Array.isArray(urls)) try { const j = await (await fetch('/api/tts/list', { cache: 'no-store' })).json(); urls = Array.isArray(j) ? j : j.urls; } catch (er) { urls = null; }
     if (!Array.isArray(urls)) return tell({ left: 0, ok: 0, fail: 1, error: 'list' });
+    if (d.k != null) urls = urls.map(x => /[?&]k=/.test(x) ? x : x + '&k=' + d.k); /* the game's audio URLs carry the voice-fix version */
     const c = await caches.open(AUDIO); const have = new Set((await c.keys()).map(r => r.url));
     const todo = urls.map(x => new URL(x, location.origin).href).filter(x => !have.has(x)).slice(0, MAX);
     let ok = urls.length - todo.length, fail = 0, i = 0, left = todo.length;

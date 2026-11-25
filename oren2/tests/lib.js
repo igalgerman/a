@@ -27,3 +27,6 @@ const VIEWPORT = variant === 'phone' ? { viewport: { width: 390, height: 844 }, 
 module.exports = { ROOT, TMP, PAGE, URL: 'file://' + PAGE, SHOTDIR, wrap, sleep, shot, finish, variant, VIEWPORT };
 // the pointing guide (coach marks), the first-time home tour and the place intros can cover dialogs mid-test; switch them off once the page is up
 module.exports.noCoach = async page => { await page.waitForFunction(() => window.TAL && window.TAL.S, null, { timeout: 15000 }); await page.evaluate(() => { window.TAL.S().coach = { home: 99, hub: 99, group: 99, map: 99, tour: 1, 'i-city': 1, 'i-map': 1, 'i-king': 1, 'i-arc': 1 }; }); };
+// a lesson: answer the example (any answer; after two wrong ones the right one lights up), then "now it's your turn"
+module.exports.doLesson = async page => { for (let k = 0; k < 14; k++) { if (await page.locator('#sLearn').isHidden()) return;
+  const b = page.locator('#sLearn .btnrow .bigbtn'); if (await b.count()) await b.click(); else await page.locator('#sLearn .lch .chb:not([disabled])').first().click(); await sleep(200); } };

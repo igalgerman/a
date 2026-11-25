@@ -291,8 +291,8 @@
 .door .dico svg{width:70px;height:70px}.door>b{font-size:24px;font-weight:900}.door small{font-size:14px;font-family:var(--read);color:var(--ink-soft);text-align:center}
 .door .bar{width:80%;height:10px;background:rgba(0,0,0,.12);display:block}.door .bar i{display:block;height:100%;background:var(--dc)}
 
-@media (hover:hover){.door:hover,.tstep2:hover{filter:brightness(1.07)}}
-.door:active,.tstep2:active{transform:translateY(3px)}
+@media (hover:hover){.door:hover{filter:brightness(1.07)}}
+.door:active{transform:translateY(3px)}
 
 .hgt{font-weight:900;font-size:19px;color:#fff;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill;text-shadow:2px 2px 0 var(--ink)}
 
@@ -376,7 +376,7 @@ body.pplay #screens{padding-bottom:52px}
 .coach .chand{position:fixed;font-size:44px;animation:poke 1s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}
 .coach .chand.up{transform:rotate(180deg);animation:pokeu 1s ease-in-out infinite}
 @keyframes poke{50%{transform:translateY(-12px)}}@keyframes pokeu{0%,100%{transform:rotate(180deg)}50%{transform:rotate(180deg) translateY(-12px)}}
-.coach .cbub{position:fixed;display:flex;align-items:center;gap:10px;background:#fff;padding:10px 14px;font-family:var(--read);font-size:21px;font-weight:700;line-height:1.4;box-shadow:0 0 0 4px var(--gold),0 8px 0 4px rgba(0,0,0,.2);pointer-events:auto;cursor:pointer;animation:flashin .35s ease-out}
+.coach .cbub{position:fixed;display:flex;align-items:center;gap:10px;background:#fff;padding:10px 14px;font-family:var(--read);font-size:21px;font-weight:700;line-height:1.4;box-shadow:0 0 0 4px var(--gold),0 8px 0 4px rgba(0,0,0,.2);pointer-events:none;animation:flashin .35s ease-out}
 .coach .cpet svg{width:48px;height:48px}
 @media (max-width:760px){.coach .cbub{font-size:18px}.tgoal{width:52px;height:52px;font-size:28px}}
 /* ===== minimal home ===== */
@@ -527,3 +527,10 @@ body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
 .tyay{z-index:95;cursor:pointer}
 .tlock .callp svg{width:96px;height:96px}
 @media (max-width:760px){.tpill{font-size:13px;padding:3px 6px}body.haspill #gemc{display:none}.tgrace{font-size:16px;padding:6px 12px}}
+
+/* parent "today": compact rows and status */
+.tdrow{cursor:pointer}.tdrow .tdmore{display:none;flex-wrap:wrap;gap:6px;width:100%}.tdrow.open .tdmore{display:flex}
+.tdrow .pchip.tdx{min-width:44px}
+.pstat{font-weight:800;font-size:17px;margin:4px 0 10px}
+.pbig{display:flex;gap:10px;flex-wrap:wrap}.pbig .bigbtn{font-size:20px;padding:10px 22px}
+.dnh{animation:pulse 1.6s infinite}
