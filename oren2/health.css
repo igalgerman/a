@@ -1,0 +1,27 @@
+/* ===== healthy screen time (health.js) ===== */
+.hlock{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(20,40,60,.74);backdrop-filter:blur(3px);padding:16px;overflow:auto}
+.hlock .card{display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--paper);padding:22px 28px;max-width:560px;width:100%;box-sizing:border-box;text-align:center;box-shadow:0 0 0 6px var(--ink),0 14px 0 6px rgba(0,0,0,.3);animation:pop .35s ease-out both}
+.hlock h2{margin:0;font-size:32px;line-height:1.35}.hlock .sub{font-family:var(--read);font-size:22px;line-height:1.6}
+body.hlocked #ov{position:fixed;z-index:100}
+.hfr{display:flex;align-items:flex-end;justify-content:center;gap:12px}.hfr .hav svg{width:104px;height:104px}.hfr .hk{font-size:66px;line-height:1}
+.hcd{font-size:34px;font-weight:900;direction:ltr;min-height:40px;color:var(--ink-soft)}
+.hcnt{font-size:56px;font-weight:900;line-height:1;color:#3a8fc4}
+.hlock .hback[disabled]{filter:grayscale(1);opacity:.5;cursor:default}
+.hlock .hback.ready{animation:pop .35s ease-out both}
+.hjump .hav svg{animation:hjump 1s ease-in-out infinite}
+@keyframes hjump{0%,100%{transform:translateY(0)}40%{transform:translateY(-34px) scaleY(1.05)}60%{transform:translateY(-34px)}85%{transform:translateY(0) scaleY(.92)}}
+.hstretch .hav svg{animation:hstretch 2.4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes hstretch{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.22) scaleX(.92)}}
+.hcards{display:flex;gap:16px;justify-content:center;width:100%}
+.hcards .dcard{width:200px;min-height:160px}
+.hone{background:none;font-size:18px;font-weight:800;text-decoration:underline;color:var(--ink-soft);padding:6px 10px}
+.hpar{background:none;font-size:13px;color:var(--ink-soft);opacity:.75;padding:4px 8px}
+.hrest{position:relative}.hrest>*:not(.hmoon){filter:saturate(.3);opacity:.75}
+.hmoon{position:absolute;top:6px;left:6px;background:#2d3a5a;color:#fff1a8;font-size:13px;font-weight:800;padding:2px 8px;border-radius:12px;white-space:nowrap;pointer-events:none}
+.hml{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:14px}.hml input{width:auto}
+.hnote{font-size:12px;color:var(--ink-soft)}
+.hlg{display:inline-block;background:#eef6ff;padding:1px 7px;margin:2px;font-weight:700;direction:ltr}.hlg.no{opacity:.55}
+.hrs{font-size:13px;font-weight:800;color:#2d3a5a}
+@media (max-width:760px){.hlock .card{padding:16px 14px}.hlock h2{font-size:24px}.hlock .sub{font-size:18px}.hfr .hav svg{width:80px;height:80px}.hfr .hk{font-size:50px}
+  .hcards{gap:10px}.hcards .dcard{width:calc((100vw - 90px)/2);min-height:128px}}
+@media (prefers-reduced-motion:reduce){.hjump .hav svg,.hstretch .hav svg{animation:none}}
