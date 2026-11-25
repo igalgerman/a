@@ -1,0 +1,6 @@
+{
+  "name": "oren-lanes",
+  "version": "0.1.0",
+  "description": "Side pane and status line for the Oren study lanes: running herdr windows, issue backlog groups and the last runner log line.",
+  "types": "./types/index.d.ts"
+}

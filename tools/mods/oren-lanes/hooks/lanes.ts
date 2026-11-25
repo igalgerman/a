@@ -1,0 +1,82 @@
+import type { OrenLanesData, OrenLanesGroup } from '../types/index'
+
+export type Issue = {
+  number: number
+  title: string
+  body?: string | null
+  labels?: { name: string }[]
+}
+
+export type Win = { name: string; state: string }
+
+const NAME = /^(run|issue|review|intake)-/
+
+/** Issue numbers named on "Blocked by:" lines of an issue body. */
+export function parseBlockers(body: string | null | undefined): number[] {
+  const out: number[] = []
+  for (const line of (body ?? '').split('\n')) {
+    const m = /blocked[ \t-]*by[^#]*(.*)$/i.exec(line)
+    if (!m) continue
+    for (const n of (m[1] ?? '').matchAll(/#(\d+)/g)) out.push(Number(n[1]))
+  }
+  return out
+}
+
+const empty = (): OrenLanesGroup => ({ count: 0, titles: [] })
+
+export function groupIssues(issues: Issue[]): OrenLanesData['groups'] {
+  const open = new Set(issues.map(i => i.number))
+  const g = {
+    running: empty(), ready: empty(), waiting: empty(),
+    blocked: empty(), needsYou: empty(), triage: empty(),
+  }
+  const add = (grp: OrenLanesGroup, i: Issue) => {
+    grp.count += 1
+    grp.titles.push(`#${i.number} ${i.title}`)
+  }
+  for (const i of issues) {
+    const l = new Set((i.labels ?? []).map(x => x.name))
+    const hasOpenBlocker = parseBlockers(i.body).some(n => n !== i.number && open.has(n))
+    if (l.has('in-progress')) add(g.running, i)
+    else if (l.has('blocked')) add(g.blocked, i)
+    else if (l.has('ready-for-human')) add(g.needsYou, i)
+    else if (l.has('needs-triage')) add(g.triage, i)
+    else if (l.has('ready-for-agent')) add(hasOpenBlocker ? g.waiting : g.ready, i)
+  }
+  return g
+}
+
+/** Terminals from `hc ls --json` whose label starts with run-/issue-/review-/intake-. */
+export function parseWindows(json: string): Win[] {
+  const data = JSON.parse(json) as { terminals?: Record<string, unknown>[] }
+  const out: Win[] = []
+  for (const t of data.terminals ?? []) {
+    const where = typeof t.where === 'string' ? t.where : ''
+    const cands = [t.name, t.label, t.title, t.address, where, where.split('/').pop()?.trim()]
+    const name = cands
+      .filter((c): c is string => typeof c === 'string')
+      .map(c => c.trim())
+      .find(c => NAME.test(c))
+    if (!name) continue
+    const st = [t.state, t.status].filter(x => typeof x === 'string' && x).join('/')
+    out.push({ name, state: st || '?' })
+  }
+  return out
+}
+
+export const isLive = (w: Win) => w.state.split('/')[0] === 'live'
+
+/** run-<n> windows that were live before and are gone or not live now. */
+export function finishedRuns(prevLive: string[], now: Win[]): string[] {
+  const live = new Set(now.filter(isLive).map(w => w.name))
+  return prevLive.filter(n => /^run-/.test(n) && !live.has(n))
+}
+
+export function statusLine(d: OrenLanesData): string {
+  const lanes = d.windows.filter(w => w.name.startsWith('issue-') && isLive(w)).length
+  let s = `lanes ${lanes}/3 · ready ${d.groups.ready.count} · blocked ${d.groups.blocked.count}`
+  if (d.groups.needsYou.count > 0) s += ` · needs you ${d.groups.needsYou.count}`
+  return s
+}
+
+export const trunc = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s)

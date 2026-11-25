@@ -15,6 +15,7 @@ Keep your own context small: do the work through the runner (herdr windows) or S
   Config: `tools/runner/config.toml` (remote, branch, max_parallel=3, model, hc path). Not yet proven on a real issue.
 - herdr CLI: `C:\Users\97254\AppData\Local\Programs\herdr-core\hc.exe` (`hc ls`, `hc read <t>`, `hc run --bg --name X claude ...`).
   Never touch the owner's other terminals.
+- Panel mod: `tools/mods/oren-lanes` (loaded with --plugin-dir by `tools/orchestrator.cmd`; `/lanes` opens it).
 - PC notes: `python3` = `/c/work/Oren_study/bin` shim (export PATH). Tests are muted (`tests/mute.js`, loaded by `tests/lib.js`).
   `worker` suite fails only on Windows (ESM c:\ path) — known, not a game bug. `activities`/`time-missions` flaky under load: rerun alone.
 
