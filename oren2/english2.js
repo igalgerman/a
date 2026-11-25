@@ -339,7 +339,7 @@ const letBig=(U,l)=>`<div class="e2let">${L_(U+' '+l)}</div>`;
 function optHTML(o){if(o.t==='pic')return pic(o.w);if(o.t==='let')return `<span class="ltr">${o.v}</span>`;if(o.t==='he')return `<span class="e2emo">${o.emo}</span><span>${o.v}</span>`;return `<span class="ltr">${o.v}</span>`;}
 const optCls=q=>{const o=q.opts[0];return o.t==='pic'?'picb':o.t==='let'?'e2lb':o.t==='he'?'e2hb':'e2tb';};
 /* what the card shows + what it says (first time this kind of question appears in a round, the Hebrew question is said first) */
-function qView(q){const w=q.w,qq=x=>`<div class="qq">${x}</div>`;
+function qView(q){const w=q.w,qq=x=>`<div class="e2q">${x}</div>`;
   switch(q.type){
     case 'hear':return {pr:qq(QQ.hear),play:[['en',w]],ask:QQ.hear,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`};
     case 'say':return {pr:`${pic(w,'big')}${qq(QQ.say)}`,seq:true,ask:QQ.say,explain:`${L_(`<b>${w}</b>`)} = ${heOf(w)}`,after:[['en',w]]};
@@ -357,10 +357,10 @@ function teachView(c){
   if(c.kind==='word')return {head:'מִלָּה חֲדָשָׁה!',body:`${pic(c.w,'big')}<div class="e2word">${L_(c.w)}</div><div class="e2he">${heOf(c.w)}</div>`};
   if(c.kind==='letter'){const kw=c.w;const hi=c.end?kw.slice(0,-1)+`<b>${kw.slice(-1)}</b>`:`<b>${kw[0]}</b>${kw.slice(1)}`;
     const snd=c.he?`נִשְׁמַעַת כְּמוֹ <b class="e2heL">${c.he}</b>, `:'נִשְׁמַעַת ';
-    return {head:'אוֹת חֲדָשָׁה!',body:`${letBig(c.L,c.l)}<div class="e2kw">${pic(kw)}<span class="e2word sm">${L_(hi)}</span></div><div class="qq">הָאוֹת ${L_(c.L)} ${snd}כְּמוֹ ${c.end?'בַּסּוֹף':'בַּהַתְחָלָה'} שֶׁל ${L_(kw)}</div>`};}
+    return {head:'אוֹת חֲדָשָׁה!',body:`${letBig(c.L,c.l)}<div class="e2kw">${pic(kw)}<span class="e2word sm">${L_(hi)}</span></div><div class="e2q">הָאוֹת ${L_(c.L)} ${snd}כְּמוֹ ${c.end?'בַּסּוֹף':'בַּהַתְחָלָה'} שֶׁל ${L_(kw)}</div>`};}
   if(c.kind==='cvc')return {head:'מְחַבְּרִים צְלִילִים לְמִלָּה',body:`${tiles(c.w)}${pic(c.w,'big')}<div class="e2he">${L_(c.w)} = ${heOf(c.w)}</div>`,tiles:1};
   if(c.kind==='sight')return {head:'מִלָּה שֶׁרוֹאִים הַרְבֵּה!',body:`<div class="e2word">${L_(c.w)}</div><div class="e2he">${L_(c.ex)} = ${c.exHe}</div>`};
-  return {head:'מְדַבְּרִים אַנְגְּלִית!',body:`<div class="e2sit">${E2.PH[c.p].emo}</div><div class="e2phr">${L_(c.p)}</div><div class="e2he">${E2.PH[c.p].he}</div><div class="qq">הַקְשֵׁב, וְאָז אֱמֹר בְּקוֹל</div>`,honor:1};}
+  return {head:'הַקְשֵׁב, וְאָז אֱמֹר בְּקוֹל',body:`<div class="e2sit">${E2.PH[c.p].emo}</div><div class="e2phr">${L_(c.p)}</div><div class="e2he">${E2.PH[c.p].he}</div>`,honor:1};}
 
 /* ---------- one round of a level ---------- */
 const NAMES=['eng-voc','eng-abc','eng-read','eng-talk','eng-song'];
@@ -393,7 +393,7 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
     if(v.play||v.seq){const pb=h('button','hintbtn',ICON.say+`<span>${v.seq?'שׁוּב':'הַשְׁמַע'}</span>`);pb.onclick=()=>playIt();card.appendChild(pb);}
     if(v.hint){const hb=h('button','hintbtn lsn',ICON.say+'<span>עֶזְרָה</span>');hb.onclick=()=>{hinted=true;if(v.karaoke){const tok=++TOK;karaoke(card.querySelector('.e2sent'),v.hint,tok);}else talk([['en',v.hint]]);};card.appendChild(hb);}
     wrap.appendChild(card);
-    const row=h('div','chs'+(q.opts[0].t==='let'||q.opts[0].t==='en'?' ltr':''));
+    const row=h('div','chs'+(q.opts[0].t==='let'||q.opts[0].t==='en'?' ltr':'')+(q.opts.length===4?' e2g4':''));
     q.opts.forEach((o,k)=>{const b=h('button','chb '+optCls(q),optHTML(o));b.onclick=()=>pick(k,b);row.appendChild(b);});wrap.appendChild(row);
     const ex=h('div','hintbox');ex.hidden=true;wrap.appendChild(ex);card.classList.add('flashin');
     O.sayNow=T.plainHe(v.ask||'');
@@ -420,17 +420,17 @@ function round(lv,back){hush();const save=O.save,d=E2.day();const P=E2.plan(save
 
 /* ---------- songs ---------- */
 /* one action: the song he has sung the least (a newly opened song first) */
-function songs(back){hush();const list=E2.openSongs(O.save);const g=E2.st(O.save).g;const min=Math.min(...list.map(x=>g[x.th]|0));return sing(list.find(x=>(g[x.th]|0)===min),back);}
+function songs(back){hush();const list=E2.openSongs(O.save);if(!list.length){he('עוֹד אֵין שִׁיר. קֹדֶם לוֹמְדִים מִלִּים!');if(back)back();return;}const g=E2.st(O.save).g;const min=Math.min(...list.map(x=>g[x.th]|0));return sing(list.find(x=>(g[x.th]|0)===min),back);}
 function sing(song,back){hush();O.setScreen('sTal','sea',back);T.hudT('אַנְגְּלִית: '+song.he);O.sayNow='הקשב ושיר איתי';const s=$('#sTal');s.innerHTML='';
   const wrap=h('div','tq e2');s.appendChild(wrap);
-  const card=h('div','prq tqc e2song',`<div class="e2head">${song.he}</div><div class="qq">הַקְשֵׁב וְשִׁיר אִתִּי</div>${song.l.map(l=>`<div class="e2line">${wordsHTML(l)}</div>`).join('')}`);wrap.appendChild(card);
+  const card=h('div','prq tqc e2song',`<div class="e2head">${song.he}</div><div class="e2q">הַקְשֵׁב וְשִׁיר אִתִּי</div>${song.l.map(l=>`<div class="e2line">${wordsHTML(l)}</div>`).join('')}`);wrap.appendChild(card);
   const row=h('div','chs');const go=h('button','chb e2go',ICON.play+'<span>שָׁרִים יַחַד</span>');row.appendChild(go);wrap.appendChild(row);
   let state=0;window.__quiz={ans:0,get i(){return state;},get wrap(){return wrap;}};
   go.onclick=async()=>{if(go.disabled)return;
     if(state===2){T.setKey(null);E2.st(O.save).g[song.th]=(E2.st(O.save).g[song.th]|0)+1;O.persist();T.finishAct('eng-song',0,1,0,back,()=>sing(song,back),'שַׁרְתָּ יָפֶה! 🎵');return;}
     state=1;go.disabled=true;const tok=++TOK;const ls=[...card.querySelectorAll('.e2line')];
     for(const l of ls){if(tok!==TOK)return;ls.forEach(x=>x.classList.remove('cur'));l.classList.add('cur');if(!(await karaoke(l,song.l[ls.indexOf(l)],tok)))return;await sleep(D(350));}
-    ls.forEach(x=>x.classList.remove('cur'));state=2;go.disabled=false;go.innerHTML='✓ <span>סִיַּמְנוּ</span>';go.classList.add('pulse2');sfx.star(0);};
+    ls.forEach(x=>x.classList.remove('cur'));state=2;go.disabled=false;go.innerHTML=ICON.play+'<span>הַמְשֵׁךְ</span>';go.classList.add('pulse2');sfx.star(0);};
   T.setKey(e=>{if(e.key==='Enter'||e.key===' ')go.click();});
   setTimeout(()=>{if(card.isConnected&&state===0)talk([['he','הַקְשֵׁב וְשִׁיר אִתִּי']]);},D(300));}
 

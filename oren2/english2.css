@@ -51,3 +51,6 @@
   .chb.e2lb{font-size:38px;min-width:80px;height:80px}.chb.e2tb{font-size:24px;padding:6px 14px}.chb.e2hb{font-size:20px;padding:6px 10px}
 }
 @media (prefers-reduced-motion:reduce){.e2t,.e2w{transition:none}.chb.e2go.pulse2{animation:none}}
+.e2q{font-family:var(--read);font-size:30px;font-weight:700;text-align:center;line-height:1.4;text-wrap:balance}
+.chs.e2g4{display:grid;grid-template-columns:repeat(2,auto);justify-content:center}
+@media (max-width:760px){.e2q{font-size:22px}}

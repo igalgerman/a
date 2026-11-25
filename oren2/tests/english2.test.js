@@ -274,6 +274,18 @@ ok([...SL].every(s => !HEB.test(s)), 'speakList is English only');
   await p.evaluate(() => { const O = window.OREN, E = window.ENGLISH2; O.save.set = { brk: 0, hide: {} }; O.save.en2 = {}; const d = E.day();
     E.LEVELS[0].units.slice(0, 3).forEach(u => u.items.forEach(k => { E.st(O.save).i[k] = [2, d + 3]; })); });
   const i2 = await info(); ok(i2.vis.join() === 'eng-voc,eng-abc,eng-song', 'after 3 themes: letters and songs appear', JSON.stringify(i2.vis));
+  /* songs with no open song: no crash, back to the building (the card is hidden anyway) */
+  const ns = await p.evaluate(() => { const O = window.OREN; const keep = O.save.en2; O.save.en2 = {}; let backed = 0; window.ENGLISH2.screens.songs(() => { backed = 1; }); const card = !window.TAL.ACT['eng-song'].avail(); O.save.en2 = keep; return { backed, card }; });
+  ok(ns.backed && ns.card, 'songs() with no open song goes back; songs card hidden', JSON.stringify(ns));
+  /* simplicity: one 🔊 per question card, 4 options as 2x2 */
+  await p.evaluate(() => { window.OREN.save.set.all = 1; window.ENGLISH2.screens.ACTS[0].run(() => { }); }); await L.sleep(150);
+  let g4 = null, spk = [];
+  for (let k = 0; k < 60 && !(await ovOpen()); k++) { const r = await p.evaluate(() => { const st = window.__e2.step; if (!st || st.t !== 'q') return null; const c = document.querySelector('#sTal .tqc');
+      return { rd: c.querySelectorAll('.rdb').length + c.querySelectorAll('.hintbtn').length, four: document.querySelector('#sTal .chs').children.length === 4, grid: document.querySelector('#sTal .chs').classList.contains('e2g4') }; });
+    if (r) { spk.push(r.rd); if (r.four) g4 = r.grid; } await answer(false); await L.sleep(40); }
+  ok(spk.length && spk.every(n => n === 1), 'one sound button per question card', JSON.stringify(spk));
+  ok(g4 !== false, '4 options are laid out 2x2', String(g4));
+  await p.evaluate(() => { document.querySelector('#ov').hidden = true; });
   /* the activities-suite helper (window.__quiz) can play every act */
   ok(await p.evaluate(() => typeof window.__quiz.ans === 'number'), 'window.__quiz is there for the activities suite');
   ok(!errs.length, 'no JS errors', errs.slice(0, 5).join(' | '));
