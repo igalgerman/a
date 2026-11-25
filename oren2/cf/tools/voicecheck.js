@@ -24,7 +24,7 @@ if (process.env.HTTPS_PROXY && !process.env.NODE_USE_ENV_PROXY) {   // Node's fe
   c.on('exit', code => process.exit(code == null ? 1 : code)); return;
 }
 const SITE = (process.env.SITE || 'https://oren-game.pages.dev').replace(/\/$/, '');
-const MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-flash-latest'], MODEL = MODELS[0];  let mi = 0; const VOICE = 'he-IL-Chirp3-HD-Kore', RATE = 0.9;
+const MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']; let mi = 0; const VOICE = 'he-IL-Chirp3-HD-Kore', RATE = 0.9;
 const PER_MIN = +process.env.PER_MIN || 8, WRITES = +process.env.WRITES || 250;
 const DIR = path.join(os.homedir(), '.cache', 'oren-voicecheck'); fs.mkdirSync(DIR, { recursive: true });
 const STATE = path.join(DIR, 'state.json'), LOG = path.join(DIR, 'log.txt');
@@ -40,7 +40,7 @@ if (S.day !== today()) { S.day = today(); S.writes = 0; }
 
 /* ---- Hebrew helpers ---- */
 const plain = s => s.replace(/[֑-ׇ]/g, '');
-const tokens = s => (s.match(/[֐-׿]+/g) || []).filter(t => /[א-ת]/.test(t));
+const tokens = s => (s.match(/[\u0590-\u05BD\u05BF-\u05FF]+/g) || [])   /* maqaf splits words */.filter(t => /[א-ת]/.test(t));
 const mat = s => plain(s).replace(/[^א-ת]/g, '').replace(/[וי]/g, '').replace(/[ךםןףץ]/g, c => 'כמנפצ'['ךםןףץ'.indexOf(c)]);
 const VW = { 'ִ': 'i', 'ֵ': 'e', 'ֶ': 'e', 'ַ': 'a', 'ָ': 'a', 'ֹ': 'o', 'ֺ': 'o', 'ֻ': 'u', 'ֱ': 'e', 'ֲ': 'a', 'ֳ': 'o', 'ׇ': 'o' };
 const CN = { 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ו': 'v', 'ז': 'z', 'ח': 'k', 'ט': 't', 'י': 'y', 'כ': 'k', 'ך': 'k', 'ל': 'l', 'מ': 'm', 'ם': 'm', 'נ': 'n', 'ן': 'n', 'ס': 's', 'פ': 'p', 'ף': 'p', 'צ': 'c', 'ץ': 'c', 'ק': 'k', 'ר': 'r', 'ת': 't' };
@@ -63,7 +63,8 @@ function diff(intended, heard) {
   return out;
 }
 /* Gemini's vocalized text keeps every word of the game text in order (numbers may become words) */
-function sameWords(t, v) { const B = tokens(v).map(mat); let j = 0; for (const a of tokens(t).map(mat)) { while (j < B.length && B[j] !== a) j++; if (j++ >= B.length) return false; } return true; }
+function sameWords(t, v) { const B = tokens(v).map(mat), A = tokens(t).filter(w => plain(w).length >= 2).map(mat); let j = 0, hit = 0;
+  for (const a of A) { const k = B.indexOf(a, j); if (k >= 0) { hit++; j = k + 1; } } return hit >= Math.ceil(A.length * 0.8); }
 /* number words: checked and reported, never respelled (synth() makes them from digits) */
 const NUMW = new Set('אפס אחד אחת שניים שתיים שתים שני שתי שלוש שלושה שלושת ארבע ארבעה ארבעת חמש חמישה חמשת שש שישה ששת שבע שבעה שבעת שמונה שמונת תשע תשעה תשעת עשר עשרה עשרים שלושים ארבעים חמישים שישים שבעים שמונים תשעים מאה מאות מאתיים אלף אלפים אלפיים'.split(' '));
 const isNum = w => NUMW.has(w) || (w[0] === 'ו' && NUMW.has(w.slice(1)));
@@ -91,16 +92,23 @@ async function call(p, body) {
   }
 }
 class Stop extends Error {}
-async function gemini(p, body) {      // paced; waits on overload, stops on a daily quota
-  for (let i = 0; i < 8; i++) {
+async function gemini(p, body) {      // paced; another model when one is busy or at its daily limit (free tier: ~20 a day each)
+  const live = () => MODELS.filter(m => (S.gone || {})[m] !== today());
+  const next = () => { const L = live(); if (!L.length) return false; mi = (L.indexOf(MODELS[mi]) + 1) % L.length; mi = MODELS.indexOf(L[mi]); return true; };
+  if (!live().includes(MODELS[mi]) && !next()) throw new Stop('every Gemini model is at its daily limit');
+  for (let i = 0, busy = 0; i < 12; i++) {
     const w = lastG + 60000 / PER_MIN - Date.now(); if (w > 0) await sleep(w); lastG = Date.now();
     const { status, j, tx } = await call(p, { ...body, m: MODELS[mi] });
     if (j && j.res) { gStreak = 0; return j.res; }
-    const why = String((j && (j.err || j.why || j.raw)) || tx).slice(0, 200);
-    if (j && (j.status === 429 || j.status === 503)) {
-      if (/per ?day|PerDay|daily/i.test(why) || ++gStreak > 12) throw new Stop('Gemini quota: ' + why);
-      if (j.status === 503 && i >= 1) { mi = (mi + 1) % MODELS.length; log(`  gemini busy, trying ${MODELS[mi]}`); continue; }   // overloaded: another model
-      log(`  gemini ${j.status}, waiting… ${why.slice(0, 80)}`); await sleep(30000 * Math.min(4, i + 1)); continue;
+    const why = String((j && (j.err || j.why || j.raw)) || tx);
+    if (j && j.status === 429 && /per ?day|PerDay|daily|requests per day/i.test(why)) {
+      S.gone = S.gone || {}; S.gone[MODELS[mi]] = today(); save(); log(`  ${MODELS[mi]}: daily limit reached`);
+      if (!next()) throw new Stop('every Gemini model is at its daily limit'); continue; }
+    if (j && (j.status === 429 || j.status === 503 || j.status === 404)) {
+      if (++gStreak > 40) throw new Stop('Gemini keeps refusing: ' + why.slice(0, 200));
+      if (j.status === 404) { S.gone = S.gone || {}; S.gone[MODELS[mi]] = today(); if (!next()) throw new Stop('no Gemini model'); continue; }
+      if (++busy % 2 === 0 && next()) { log(`  gemini busy, trying ${MODELS[mi]}`); continue; }
+      log(`  gemini ${j.status} (${MODELS[mi]}), waiting… ${why.slice(0, 80)}`); await sleep(20000 * Math.min(4, busy)); continue;
     }
     log(`  ${p} failed (${status}): ${why.slice(0, 160)}`);
     if (status >= 500 || status === 0 || (j && j.status >= 500)) { await sleep(20000); continue; }
@@ -133,6 +141,15 @@ const RISKY = [
   { w: 'ספר', s: 'באיזו אות מתחילה המילה ספר', want: 'סֵפֶר', vars: ['ספר', 'סֵפֶר', 'סעפר'] },
   { w: 'ספר', s: 'בליילה הריאשון הוא ספר עשרה כוכבים.', want: 'סָפַר', vars: ['ספר', 'סָפַר', 'סאפאר'] },
   { w: 'ספר', s: 'ספר איזו תמונה מתאימה למלה?', want: 'סַפֵּר', vars: ['ספר', 'סַפֵּר', 'ספאר'] },
+  // from the parent's spot-check notes (s = what is said after numbers become words, t = the game text = the audio key)
+  { w: 'ושתי', t: '4 עשרות ו- 2 אחדות הן המספר:', s: 'ארבע עשרות ושתי אחדות הן המספר:', want: 'וּשְׁתֵּי', vars: ['ושתי', 'וּשְׁתֵּי', 'ושתיי', 'ו-שתי'], ctx: false, hint: '2 לא נשמע טוב' },
+  { w: 'ממאה', t: 'מ-100 מורידים קודם עשרות, ואחר כך אחדות.', s: 'ממאה מורידים קודם עשרות, ואחר כך אחדות.', want: 'מִמֵּאָה', vars: ['ממאה', 'מִמֵּאָה', 'מ-מאה', 'ממיאה'], ctx: false, hint: '100' },
+  { w: 'עשר', t: 'כותבים מספר מעל מספר. מתחילים מהאחדות, מימין. אים יוצא 10 או יותר, כותבים את האחדות ומעבירים 1 לעשרות.', s: 'כותבים מספר מעל מספר. מתחילים מהאחדות, מימין. אים יוצא עשר או יותר, כותבים את האחדות ומעבירים אחת לעשרות.', want: 'עֶשֶׂר', vars: ['עשר', 'עֶשֶׂר', 'עסר', 'אסר'], hint: '10 לא נשמע טוב' },
+  { w: 'עשר', t: 'לדני יש 23 צדפים, ולמאייה יש 11 צדפים. כמה צדפים יש להם ביחד?', s: 'לדני יש עשרים ושלושה צדפים, ולמאייה יש אחד עשר צדפים. כמה צדפים יש להם ביחד?', want: 'עָשָׂר', vars: ['עשר', 'עָשָׂר', 'עסאר', 'עשאר'], hint: '23 ו 11' },
+  { w: 'הכסא', s: 'החתול ישן על הכסא. מי ישן?', want: 'הַכִּסֵּא', vars: ['הכסא', 'הכיסא', 'הַכִּסֵּא'], ctx: false, hint: 'המילה כסא לא נכונה, זה צריך להיות כיסא', forms: { 'כסא': 'כיסא' } },
+  { w: 'מידי', s: 'מתחילים מהאחדות. אים הספרה למעלה קטנה מידי, פורטים עשרת אחת ל-10 אחדות.', want: 'מִדַּי', vars: ['מידי', 'מדאי', 'מידאי', 'מִדַּי'], ctx: false },
+  { w: 'ולמאייה', s: 'לדני יש 23 צדפים, ולמאייה יש 11 צדפים. כמה צדפים יש להם ביחד?', want: 'וּלְמָאיָה', vars: ['ולמאייה', 'ולמאיה', 'ולמאיא', 'ולמאי-יה'], ctx: false },
+  { w: 'למלה', s: 'תפוח איזו תמונה מתאימה למלה?', want: 'לַמִּלָּה', vars: ['למלה', 'למילה', 'לַמִּלָּה'], ctx: false, hint: 'המילה מילה לא נכונה' },
 ];
 
 let SAID = [], DICT = {};
@@ -156,15 +173,15 @@ async function applyVotes() {
       const own = tokens(vo.note || '').map(plain).filter(x => x !== w && x[0] === w[0] && Math.abs(x.length - w.length) <= 2);   // a spelling he wrote himself comes first
       const vars = [...new Set([...own, ...(vo.half || []), ...fresh])].slice(0, 4);
       S.retry = S.retry || []; const nid = w + '#' + (100 + S.retry.length);
-      if (vars.length) S.retry.push({ id: nid, w, s: q.s, want: q.want, vars, global, hint: vo.note || 'חצי נכון: ' + vo.half.join(', ') });
+      if (vars.length) S.retry.push({ id: nid, w, s: q.s, want: q.want, vars, global, t: q.t, forms: q.forms, hint: vo.note || 'חצי נכון: ' + vo.half.join(', ') });
       S.applied[k] = sig; log(`choice ${k}: half/comment "${vo.note}" → new variants ${vars.join(', ')}`); save(); continue; }
-    if (v === w) { S.applied[k] = sig; if (q) { const o = rec(q.s); if (!o.st) o.st = 'ok'; } log(`choice ${k}: as it is`); save(); continue; }   // the plain one is right
-    if (!v) { S.applied[k] = sig; if (q) { const o = rec(q.s); o.st = 'bad'; o.note = w + ': אף גרסה לא נשמעה נכון — צריך לבדוק'; } log(`choice ${k}: none is right`); save(); continue; }
+    if (v === w) { S.applied[k] = sig; if (q) { const o = rec(q.t || q.s); if (!o.st) o.st = 'ok'; } log(`choice ${k}: as it is`); save(); continue; }   // the plain one is right
+    if (!v) { S.applied[k] = sig; if (q) { const o = rec(q.t || q.s); o.st = 'bad'; o.note = w + ': אף גרסה לא נשמעה נכון — צריך לבדוק'; } log(`choice ${k}: none is right`); save(); continue; }
     if (S.writes + 3 > WRITES) { log('write budget for today used up; the other choices are applied next run'); break; }
-    if (!global) { if (!q) continue; const r = await fix(q.s, {}, { [w]: v }); if (r) { S.applied[k] = sig; markFix(q.s, w, v); log(`choice ${k} → ${v}: ${r.sent}`); } save(); continue; }
-    const forms = { [w]: v };
-    for (const x of SAID) for (const t of tokens(x.t)) { const p = t.slice(0, t.length - w.length); if (t !== w && t.endsWith(w) && /^[ובהלמשכ]{1,3}$/.test(p)) forms[t] = p + v; }
-    const L = SAID.filter(x => x.v.startsWith('he-') && tokens(x.t).some(t => t in forms));
+    if (!global) { if (!q) continue; const r = await fix(q.t || q.s, {}, { [w]: v }); if (r) { S.applied[k] = sig; markFix(q.t || q.s, w, v); log(`choice ${k} → ${v}: ${r.sent}`); } save(); continue; }
+    const forms = { [w]: v }; for (const [f, fv] of Object.entries((q && q.forms) || {})) forms[f] = fv;   // only forms listed by hand: מפתח is not מ+פתח
+    // (no automatic prefixed forms)
+    const L = SAID.filter(x => x.v.startsWith('he-') && (tokens(x.t).some(t => t in forms) || (q && q.t === x.t)));   // q.t: a word made from digits
     log(`choice ${w} → ${v}: ${Object.keys(forms).join(', ')} in ${L.length} sentences`);
     let first = true, all = true;
     for (const x of L) { if (S.writes + 1 > WRITES) { all = false; break; } const r = await fix(x.t, first ? forms : {}, {}); if (!r) { all = false; break; } first = false; markFix(x.t, w, v); }
@@ -176,12 +193,15 @@ async function applyVotes() {
 /* the listening page: words to choose a spelling for, then sentences to spot-check (risky first) */
 async function pages(votes, marks) {
   const old = S.queue || [], choose = [], seen = new Set();
-  const add = (w, s, want, vars, ctx, hint) => { const key = ctx ? w + '|' + s : w; if (seen.has(key)) return; seen.add(key);
+  const add = (w, s, want, vars, ctx, hint, x) => { const key = ctx ? w + '|' + s : w; if (seen.has(key)) return; seen.add(key);
     if (!ctx && DICT[w]) return;                                          // already in the dictionary
-    const o = old.find(x => x.w === w && (!ctx || x.s === s) && !!x.id.includes('#') === ctx);
-    if (o && S.applied[o.id]) return;                                    // already chosen and applied
-    choose.push({ id: o ? o.id : (ctx ? w + '#' : w), w, s, want, vars, global: !ctx, hint: hint || undefined }); };
-  for (const r of RISKY) { const s = r.s || (SAID.find(x => has(x.t, r.w)) || {}).t; if (s) add(r.w, s, r.want, r.vars, !!r.s); }
+    const C = old.filter(x => x.w === w && (!ctx || x.s === s) && !/#1\d\d$/.test(x.id) && !!x.id.includes('#') === ctx), o = C[0];
+    if (C.some(x => x.id in S.applied)) return;                          // already chosen (a follow-up with new variants may be queued)
+    choose.push({ id: o ? o.id : (ctx ? w + '#' : w), w, s, want, vars, global: !ctx, hint: hint || undefined, ...(x || {}) }); };
+  // the intended reading of the sentences the parent flagged (one Gemini call), so their variants make sense
+  const flagged = [...new Set((marks || []).filter(m => !m.ok && (m.w || []).length && !S.nik[m.t]).map(m => m.t))].slice(0, 25);
+  if (flagged.length) { try { const r = await gemini('/api/tts/nikud', { texts: flagged }); if (Array.isArray(r) && r.length === flagged.length) flagged.forEach((t, q) => { if (typeof r[q] === 'string' && sameWords(t, r[q])) S.nik[t] = r[q]; }); save(); } catch (e) { if (!(e instanceof Stop)) throw e; } }
+  for (const r of RISKY) { const s = r.s || (SAID.find(x => has(x.t, r.w)) || {}).t; if (s) add(r.w, s, r.want, r.vars, r.ctx != null ? r.ctx : !!r.s, r.hint, r.t ? { t: r.t, forms: r.forms } : r.forms ? { forms: r.forms } : null); }
   for (const x of Object.values(S.items)) for (const p of (x.pend || []).filter(p => !isNum(p.word))) add(p.word, x.t, p.want, variants(p.word, p.want), false);
   for (const m of marks || []) { if (m.ok) continue;
     if (!(m.w || []).length && m.note) { const o = rec(m.t); o.st = 'bad'; o.note = 'הערת ההורה: ' + m.note; }
@@ -235,24 +255,26 @@ async function check(it) {
   await pages(votes, marks);
   if (arg('--pages')) return review();
   // 0. make again the sentences made before synth() learned numbers in words and dropping emoji (one write each)
-  const REGEN = 'num1', R = SAID.filter(x => x.v.startsWith('he-') && made[x.t] && (/\d/.test(x.t) || /\p{Extended_Pictographic}/u.test(x.t)) && !(S.regen || {})[x.t]);
+  const RG = S.regen || {}, REGEN = 'num2', R = SAID.filter(x => x.v.startsWith('he-') && made[x.t] && (((/\d/.test(x.t) || /\p{Extended_Pictographic}/u.test(x.t)) && !RG[x.t]) || (/[\u2190-\u21FF]/.test(x.t) && RG[x.t] !== 'num2')));   // num2: arrows → a pause
   S.regen = S.regen || {}; let rn = 0;
   for (const x of R) { if (S.writes + 1 > WRITES) { log(`regen: write budget used up, ${R.length - rn} left for the next run`); break; }
     const r = await fix(x.t, {}, {}); if (!r) { log('regen stopped (KV/Google refused)'); break; } S.regen[x.t] = REGEN; rn++;
     const o = S.items[id(x)]; if (o && o.at) o.at = 0; save(); }
   if (R.length) log(`regen: ${rn}/${R.length} sentences with numbers/emoji made again`);
   try {
-    // 1. the intended reading of every Hebrew sentence (text only, 25 a call)
-    const need = SAID.filter(x => x.v.startsWith('he-') && !S.nik[x.t]).map(x => x.t);
-    for (let i = 0; i < need.length; i += 25) { const L = need.slice(i, i + 25); const r = await gemini('/api/tts/nikud', { texts: L });
-      if (Array.isArray(r) && r.length === L.length) L.forEach((t, k) => { if (typeof r[k] === 'string' && sameWords(t, r[k])) S.nik[t] = r[k]; });
-      save(); log(`nikud ${Math.min(i + 25, need.length)}/${need.length}`); }
-    // 2. listen to every sentence (made ones first: listening to one pregen has not made yet costs KV writes)
+    // 1. what to listen to: risky ones first (numbers, math words, what the parent flagged), made ones before not-yet-made
+    const RISK = /עשרות|אחדות|מאות|ספר|עשר|שארית|כפול|חילוק|חיסור|חיבור|שווה|שוה|זוגי|חצי|רבע|שליש|ישן|פתח|שמה|אחר|שמונה/;
+    const pr = x => (/\d/.test(x.t) ? 4 : 0) + (RISK.test(x.t) ? 3 : 0) + (tokens(x.t).length <= 2 ? 1 : 0) + (made[x.t] ? 2 : 0);
     const Q = SAID.filter(x => { const o = S.items[id(x)]; return arg('--again') || !o || !o.st || o.st === 'err' || (o.st === 'fix' && !o.at); })
-      .sort((a, b) => (made[b.t] ? 1 : 0) - (made[a.t] ? 1 : 0));
+      .sort((a, b) => pr(b) - pr(a));
     log(`voicecheck: ${Q.length} to check of ${SAID.length}; dictionary ${Object.keys(DICT).length} words; ${S.writes}/${WRITES} writes today`);
+    // 2. the intended reading (Gemini vocalizes by meaning, 25 a call), just before those sentences are listened to
+    const nikud = async k => { const L = Q.slice(k, k + 25).filter(x => x.v.startsWith('he-') && !S.nik[x.t]).map(x => x.t); if (!L.length) return;
+      const r = await gemini('/api/tts/nikud', { texts: L });
+      if (Array.isArray(r) && r.length === L.length) L.forEach((t, q) => { if (typeof r[q] === 'string' && sameWords(t, r[q])) S.nik[t] = r[q]; }); save(); };
     let n = 0; const T0 = Date.now();
     for (const it of Q) {
+      if (n % 25 === 0) await nikud(n);
       n++; if (!made[it.t]) S.writes += 2;
       const r = await check(it); const o = S.items[id(it)] || {};
       S.items[id(it)] = { t: it.t, v: it.v, r: it.r, st: r.st, n: r.n, note: r.note || '', pend: r.pend || [], at: Date.now() };

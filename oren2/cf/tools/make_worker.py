@@ -29,7 +29,7 @@ textarea{width:100%;box-sizing:border-box;font:inherit;font-size:16px;border:1px
 const m=document.getElementById('m');let D,a,mode,ci=0,si=0,marks=[],bad=null;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const HW=/[֐-׿]+/g;
-const turl=x=>'/api/tts?t='+encodeURIComponent(x.t)+'&v='+(x.v||'he-IL-Chirp3-HD-Kore')+'&r='+(x.r||0.9);
+const turl=x=>'/api/tts?t='+encodeURIComponent(x.t)+'&v='+(x.v||'he-IL-Chirp3-HD-Kore')+'&r='+(x.r||0.9)+'&fresh='+D.sid;/* never an old copy from this browser's cache */
 const tryurl=t=>'/api/tts/try?t='+encodeURIComponent(t)+'&v=he-IL-Chirp3-HD-Kore&r=0.9';
 function play(u,b){if(a)a.pause();a=new Audio(u);if(b){b.disabled=true;a.onended=a.onerror=()=>{b.disabled=false;};}a.play().catch(()=>{if(b)b.disabled=false;});}
 let LS={};try{LS=JSON.parse(localStorage.getItem('listen')||'{}');}catch(e){}
@@ -222,7 +222,7 @@ function done(){S.forEach((x,i)=>fetch(url(champ,i)));m.innerHTML='<h1>הקול 
   m.querySelectorAll('.pl').forEach(b=>b.onclick=()=>play(champ,+b.dataset.i,b));document.getElementById('re').onclick=()=>{champ=F[0];k=1;hist=[];step();};}
 step();</script></html>`;
  return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});}
-const AH={'content-type':'audio/mpeg','cache-control':'public, max-age=31536000, immutable'};
+const AH={'content-type':'audio/mpeg','cache-control':'public, max-age=86400'};/* a day: a fixed pronunciation reaches browsers soon */
 const monthKey=()=>'ttsuse:'+new Date().toISOString().slice(0,7);
 const ttsKey=async(voice,rate,text)=>'tts:'+await sha(voice+'|'+rate.toFixed(2)+'|'+text);
 /* Pronunciation dictionary for the Hebrew voices: KV 'ttsfixw' = {plainWord: vocalized or respelled}, exact whole words only
@@ -273,7 +273,7 @@ async function listen(req,env,u){const p=u.pathname;
   if(M.length>3000)M.splice(0,M.length-3000);await env.SAVES.put('ttsmarks',JSON.stringify(M));return J({ok:true});}
  return J({error:'not found'},404);}
 /* what the voice must not read aloud: emoji and pictographs (with their variation selectors, joiners, keycaps, flags) and ✓ ✗ */
-const noEmoji=t=>{const c=t.replace(/[\\p{Extended_Pictographic}\\p{Regional_Indicator}\\p{Emoji_Modifier}\\u{E0020}-\\u{E007F}\\u200D\\uFE0E\\uFE0F\\u20E3\\u2713\\u2717\\u2714\\u2718]/gu,'').replace(/[ ]{2,}/g,' ').trim();return c||t;};
+const noEmoji=t=>{const c=t.replace(/\\s*[\\u2190-\\u21FF]\\s*/g,', ').replace(/[\\p{Extended_Pictographic}\\p{Regional_Indicator}\\p{Emoji_Modifier}\\u{E0020}-\\u{E007F}\\u200D\\uFE0E\\uFE0F\\u20E3\\u2713\\u2717\\u2714\\u2718]/gu,'').replace(/[ ]{2,}/g,' ').trim();return c||t;};
 async function synth(env,voice,rate,text,only){text=noEmoji(text);if(voice.startsWith('he-'))text=await fixText(env,heNum(text),only);const r=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':env.GOOGLE_TTS_KEY},
    body:JSON.stringify({input:{text},voice:{languageCode:voice.slice(0,5),name:voice},audioConfig:{audioEncoding:'MP3',speakingRate:rate}})});
  if(!r.ok)return {length:0,status:r.status};
