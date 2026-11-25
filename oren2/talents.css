@@ -474,3 +474,17 @@ button:focus:not(:focus-visible){outline:none}
 .bigbtn:focus:not(:focus-visible),.bigbtn:focus{outline:none}
 .pissok{width:min(900px,100%);box-sizing:border-box;padding:6px 18px;font-size:15px;color:#2e7d32;font-weight:700}
 .piss>summary{color:#b54708}.piss .prow{padding:6px 18px;display:flex;gap:12px}.piss .pn{flex:1;max-width:none}
+/* UX review: empty caption boxes are not shown (no stray white bar) */
+.lcap:empty{display:none}
+/* ice / water / steam: slider row and drops fit a phone, snowflake and fire fully visible */
+.trw{width:min(520px,100%);box-sizing:border-box;padding:0 4px}.trw .trng{width:auto;flex:1 1 auto;min-width:0}
+.statev .wat{white-space:nowrap;font-size:min(96px,20vw)}
+/* a story dialog sits at the bottom: notices go to the top while it is open so they never hide its buttons */
+body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
+@media (max-width:780px),(max-height:560px){
+  /* top-bar buttons look the same but are easier to hit (44px touch area) */
+  .hud .ibtn{position:relative}.hud .ibtn::after{content:"";position:absolute;inset:-3px}
+  .hintbtn{min-height:44px;box-sizing:border-box}
+  /* locked world card: the lock sits on the picture, not on the name */
+  .wcard2 .lk{top:22px;width:28px;padding:3px;box-sizing:border-box;background:#fff;border-radius:50%;box-shadow:0 0 0 2px var(--ink);z-index:1}
+}

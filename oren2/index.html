@@ -1277,7 +1277,7 @@ function addGems(n,fromEl){save.gems=(save.gems|0)+n;
 const app=$('#app');let backTo=null,curWorld=null;
 const wipeEl=$('#wipe');wipeEl.innerHTML='<i></i>'.repeat(70);
 function wipe(){if(window.__fast||RM())return;sfx.whoosh();wipeEl.hidden=false;[...wipeEl.children].forEach((c,i)=>{const r=i/10|0,col=i%10;c.style.animation='none';void c.offsetWidth;c.style.animation='';c.style.animationDelay=((r+col)*22)+'ms';});clearTimeout(wipe.t);wipe.t=setTimeout(()=>wipeEl.hidden=true,720);}
-function setScreen(id,w,back){['sStart','sHome','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
+function setScreen(id,w,back){hush();/* leaving a screen stops any reading aloud; the new screen may speak right after */['sStart','sHome','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
   if(app.dataset.w!==(w||'meadow')){app.dataset.w=w||'meadow';bgW=app.dataset.w;paintBG(performance.now());}setTheme(THEME_OF[app.dataset.w]||'map');
   backTo=back||null;$('#btnBack').style.visibility=back?'visible':'hidden';$('#btnBack').innerHTML=back===showMap?ICON.home:ICON.back;$('#screens').scrollTop=0;play=null;stopSpeed();updateGems();wipe();emit('screen',id,back);}
 $('#btnSay').innerHTML=ICON.say;$('#btnMusic').innerHTML=ICON.music;$('#icoStart').innerHTML=ICON.play;
@@ -1287,6 +1287,8 @@ const syncMusic=()=>{const b=$('#btnMusic');b.innerHTML=save.snd===2?ICON.music:
 $('#btnMusic').onclick=()=>{save.snd=((save.snd|0)+2)%3;persist();syncMusic();if(save.snd===2)musicStart();else musicStop();sfx.pop(2);};
 $('#btnSay').onclick=()=>say(sayNow);
 $('#btnBack').onclick=()=>{hush();backTo&&backTo();};
+/* a button in a pop-up card (close, continue, reply) stops the reading first; its own new speech still plays */
+$('#ov').addEventListener('click',e=>{if(e.target.closest&&e.target.closest('button'))hush();},true);
 function animTitle(){const t=$('.title');if(!t||t.dataset.a)return;t.dataset.a=1;const gs=graphemes(t.textContent);t.innerHTML=gs.map((g,i)=>g===' '?'<span class="tl sp"> </span>':`<span class="tl" style="animation-delay:${i*55}ms,${900+i*90}ms">${g}</span>`).join('');}
 function renderStart(){$('#startScene').innerHTML=`<div class="s-av bob">${AV()}</div><div class="s-castle">${castle(revealedFor(pts()))}</div><div class="s-mix bob" style="animation-delay:-.8s">${SPR.mixer}</div><div class="s-pet bob" style="animation-delay:-1.4s">${PET().s()}</div>`;}
 renderStart();animTitle();
@@ -1304,7 +1306,7 @@ function story(panels,done){const box=$('#dlg');let i=0,tw=0;
     const finish=()=>{clearInterval(tw);tw=0;spans.forEach(s2=>s2.classList.add('on'));const sp=box.querySelector('.sp');if(sp)sp.classList.add('still');};
     if(window.__fast||RM())finish();else tw=setInterval(()=>{if(k>=spans.length)return finish();spans[k].classList.add('on');if(k%3===0&&spans[k].textContent.trim())sfx.blip(pitch+((k*37)%60));k++;},30);
     sayNow=txt;$('#dSay').onclick=()=>say(txt);
-    $('#dNext').onclick=()=>{if(tw){finish();return;}sfx.pop(i+1);i++;if(i<panels.length)show();else{box.hidden=true;box.innerHTML='';done&&done();}};setTimeout(()=>{const b=$('#dNext');b&&b.focus();},50);};
+    $('#dNext').onclick=()=>{if(tw){finish();return;}hush();sfx.pop(i+1);i++;if(i<panels.length)show();else{box.hidden=true;box.innerHTML='';done&&done();}};setTimeout(()=>{const b=$('#dNext');b&&b.focus();},50);};
   show();}
 
 /* ---------- AVATAR STUDIO (Oren designs his hero) ---------- */
@@ -2335,6 +2337,20 @@ button:focus:not(:focus-visible){outline:none}
 .bigbtn:focus:not(:focus-visible),.bigbtn:focus{outline:none}
 .pissok{width:min(900px,100%);box-sizing:border-box;padding:6px 18px;font-size:15px;color:#2e7d32;font-weight:700}
 .piss>summary{color:#b54708}.piss .prow{padding:6px 18px;display:flex;gap:12px}.piss .pn{flex:1;max-width:none}
+/* UX review: empty caption boxes are not shown (no stray white bar) */
+.lcap:empty{display:none}
+/* ice / water / steam: slider row and drops fit a phone, snowflake and fire fully visible */
+.trw{width:min(520px,100%);box-sizing:border-box;padding:0 4px}.trw .trng{width:auto;flex:1 1 auto;min-width:0}
+.statev .wat{white-space:nowrap;font-size:min(96px,20vw)}
+/* a story dialog sits at the bottom: notices go to the top while it is open so they never hide its buttons */
+body:has(#dlg:not([hidden])) .toast{top:74px;bottom:auto}
+@media (max-width:780px),(max-height:560px){
+  /* top-bar buttons look the same but are easier to hit (44px touch area) */
+  .hud .ibtn{position:relative}.hud .ibtn::after{content:"";position:absolute;inset:-3px}
+  .hintbtn{min-height:44px;box-sizing:border-box}
+  /* locked world card: the lock sits on the picture, not on the name */
+  .wcard2 .lk{top:22px;width:28px;padding:3px;box-sizing:border-box;background:#fff;border-radius:50%;box-shadow:0 0 0 2px var(--ink);z-index:1}
+}
 
 /* ===== 🕹️ arcade ===== */
 .arc{width:min(980px,100%);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 16px 22px;color:#fff;
@@ -2504,6 +2520,9 @@ button:focus:not(:focus-visible){outline:none}
 .sl .rdb,.hbub2 .rdb{width:28px;height:28px;font-size:15px}
 @media (max-width:760px){.rdb{width:30px;height:30px;font-size:16px}.sl .rdb,.hbub2 .rdb{width:26px;height:26px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.rdb.pulse{animation:none}}
+/* 🔊 buttons stay small but get a finger-size touch area */
+.rdb{position:relative}.rdb::after{content:"";position:absolute;inset:-7px;border-radius:50%}
+.sl .rdb::after{inset:-5px}
 </style>
 <script>
 /* ===== עִיר הַכִּשְׁרוֹנוֹת — talents city (injected into index.html by build) ===== */

@@ -9,3 +9,6 @@
 .sl .rdb,.hbub2 .rdb{width:28px;height:28px;font-size:15px}
 @media (max-width:760px){.rdb{width:30px;height:30px;font-size:16px}.sl .rdb,.hbub2 .rdb{width:26px;height:26px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.rdb.pulse{animation:none}}
+/* 🔊 buttons stay small but get a finger-size touch area */
+.rdb{position:relative}.rdb::after{content:"";position:absolute;inset:-7px;border-radius:50%}
+.sl .rdb::after{inset:-5px}
