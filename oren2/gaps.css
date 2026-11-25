@@ -7,7 +7,8 @@
 .gp-intro .gp-new{background:#ffcf4d;font-weight:900;padding:2px 14px;font-size:20px}
 .gp-intro .gp-sign{font-family:var(--read);font-size:96px;font-weight:700;line-height:1.15;color:#c0392b;letter-spacing:12px}
 .gp-exs{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.gp-exs .chb{display:flex;align-items:center;gap:8px}.gp-exs .pic svg{width:40px;height:40px}
+.gp-ex{display:flex;align-items:center;gap:6px;font-family:var(--read);font-size:30px;font-weight:700;cursor:pointer}.gp-ex .pic svg{width:36px;height:36px}
+.gp-cur .gp-sign{font-size:120px}.gp-st{display:flex;gap:4px;direction:ltr}.gp-st svg{width:30px;height:30px}
 .gp-ladder{display:flex;flex-direction:column-reverse;gap:8px;width:min(460px,100%)}
 .gp-rung{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:10px;padding:8px 14px;background:var(--birch);font-weight:900;box-shadow:inset -4px -4px 0 rgba(0,0,0,.14),inset 4px 4px 0 rgba(255,255,255,.55),0 5px 0 rgba(0,0,0,.22);text-align:right}
 .gp-rung .gp-rs{font-family:var(--read);font-size:40px;color:#c0392b;line-height:1.1}
@@ -16,7 +17,7 @@
 .gp-rung.cur{outline:4px solid var(--ok);outline-offset:2px}
 .gp-rung.off{opacity:.5;filter:grayscale(.6)}
 .gp-sp .pic svg{width:72px;height:72px}
-.gp-tiles{flex-wrap:wrap;justify-content:center;max-width:620px}
+.chs.gp-tiles{display:grid;gap:10px;justify-content:center;max-width:620px}
 .gp-tiles .chb{min-width:70px}
 .gp-done{color:var(--ok-d)}
 .gp-best{font-family:var(--read);font-size:24px;background:#fff3c4;padding:6px 16px}
@@ -46,6 +47,7 @@
 .gp-scales{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.gp-scales svg.scale{width:min(240px,42vw)}
 .chb.cube{min-width:90px}.chb.cube svg{width:50px;height:50px}
 @media (max-width:760px){
+  .chs:has(>.gp4){display:grid;grid-template-columns:repeat(2,auto);justify-content:center}.chs.gp-tiles .chb.tx{min-width:0;width:62px;padding:0}.gp-sp .slots{gap:5px}.gp-sp .slot2{min-width:44px;height:52px;font-size:30px}
   .gp-syl{font-size:66px}.gp-intro .gp-sign{font-size:70px}.gp-race .bigw{font-size:60px}.gp-ear{font-size:40px}
   .pgraph .pgc{width:24px;height:24px}.pgraph .pgc svg,.pgraph .pgl svg{width:19px;height:19px}
   .chb.shp{min-width:88px;min-height:86px}.chb.shp svg{width:72px;height:72px}.prq svg.shp1{width:120px;height:120px}

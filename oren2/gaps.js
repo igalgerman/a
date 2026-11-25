@@ -81,22 +81,19 @@ function nikRound(r,back){const n=8;T.quiz({id:'nik-'+(r+1),title:RUNG[r].n,bg:'
 function nikIntro(r,back){O.setScreen('sTal','city',back);T.hudT('סֻלַּם הַנִּקּוּד');const R=RUNG[r];const s=$('#sTal');s.innerHTML='';
   const ex=shuffle(focusAt(r).filter(w=>w.s1)).slice(0,3);O.sayNow=R.n+'. כמו במילים: '+ex.map(w=>plainHe(w.w)).join(', ');
   const card=h('div','prq tqc gp-intro',`<div class="gp-new">חָדָשׁ!</div><div class="gp-sign">${R.ex}</div><div class="qq">${R.say}</div>`);
-  const row=h('div','gp-exs');ex.forEach(w=>{const b=h('button','chb tx',`${pic(w)}<span>${hi(w)}</span>`);b.onclick=()=>sayW(w);row.appendChild(b);});card.appendChild(row);s.appendChild(card);
-  const br=h('div','btnrow');const go=h('button','bigbtn',ICON.play+'<span>מַתְחִילִים</span>');go.onclick=()=>nikRound(r,back);br.appendChild(go);s.appendChild(br);
+  const row=h('div','gp-exs');ex.forEach(w=>{const e=h('span','gp-ex',`${pic(w)}<span>${hi(w)}</span>`);e.onclick=()=>sayW(w);row.appendChild(e);});card.appendChild(row);s.appendChild(card);
+  const br=h('div','btnrow');const go=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');go.onclick=()=>nikRound(r,back);br.appendChild(go);s.appendChild(br);
   setTimeout(()=>{if(card.isConnected)O.say(R.n+'. '+'כְּמוֹ בַּמִּלִּים: '+ex.map(w=>w.w).join(', '));},D(400));}
-function nikMenu(back){const me=()=>nikMenu(back);O.setScreen('sTal','city',back);T.hudT('סֻלַּם הַנִּקּוּד');O.sayNow='סולם הניקוד';const s=$('#sTal');s.innerHTML='';
-  s.appendChild(h('div','whead',`<span class="gd gp-gd">בָּ</span><h1>סֻלַּם הַנִּקּוּד</h1>`));
-  const cur=level('nik',RUNG.length)-1;const go=r=>(TL('nik-'+(r+1)).n|0)?nikRound(r,me):nikIntro(r,me);
-  const g=h('div','gp-ladder');RUNG.forEach((R,r)=>{const st=TL('nik-'+(r+1)).s|0;const open=r<=cur;
-    const b=h('button','gp-rung'+(open?'':' off')+(r===cur?' cur':''),`<span class="gp-rs">${R.ex.split(' ')[0]}</span><span class="gp-rn">${R.n}</span><span class="st">${open?[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join(''):SPR.lock}</span>`);
-    b.disabled=!open;b.onclick=()=>go(r);g.appendChild(b);});s.appendChild(g);
-  const br=h('div','btnrow');const p=h('button','bigbtn',ICON.play+`<span>${RUNG[cur].n}</span>`);p.onclick=()=>go(cur);br.appendChild(p);s.appendChild(br);}
+function nikMenu(back){const me=()=>nikMenu(back);O.setScreen('sTal','city',back);T.hudT('סֻלַּם הַנִּקּוּד');const s=$('#sTal');s.innerHTML='';
+  const cur=level('nik',RUNG.length)-1,R=RUNG[cur],st=TL('nik-'+(cur+1)).s|0;O.sayNow=plainHe(R.n);
+  const card=h('div','prq tqc gp-intro gp-cur',`<div class="gp-sign">${R.ex}</div><div class="qq">${R.n}</div><div class="gp-st">${[0,1,2].map(k=>k<st?SPR.star:SPR.starOff).join('')}</div>`);s.appendChild(card);
+  const br=h('div','btnrow');const p=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');p.onclick=()=>(TL('nik-'+(cur+1)).n|0)?nikRound(cur,me):nikIntro(cur,me);br.appendChild(p);s.appendChild(br);}
 
 /* ===================== 5. WHAT SOUND STARTS THE WORD (audio only) ===================== */
 const LETTERS='בגדזחטיכלמנסעפצקרשת'.split('');
 function sndQ(L){const pool=WD.filter(w=>w.s1&&(L<3||w.s1.v!=='s'));const w=pick(pool);
   if(L<3){const k=L===1?3:4;const ds=[];for(const c of shuffle(LETTERS)){if(ds.length>=k-1)break;if(!sameSound(c,w.f)&&!ds.some(d=>sameSound(d,c)))ds.push(c);}
-    const os=shuffle([w.f,...ds]);return {pr:`<div class="gp-ear">👂</div><div class="qq">בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה שֶׁשָּׁמַעְתָּ?</div>`,opts:os,ans:os.indexOf(w.f),cls:'tx big2',
+    const os=shuffle([w.f,...ds]);return {pr:`<div class="gp-ear">👂</div><div class="qq">בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה שֶׁשָּׁמַעְתָּ?</div>`,opts:os,ans:os.indexOf(w.f),cls:'tx big2'+(os.length===4?' gp4':''),
       play:()=>sayW(w),auto:1,playLbl:'שׁוּב',say:'באיזו אות מתחילה המילה ששמעת',explain:`${pic(w)}<span class="bigw">${hi(w)}</span>`,key:w.w,chk:{t:'letter',w:w.w}};}
   const os=sylOpts(w,['a','i','o','u','e']);return {pr:`<div class="gp-ear">👂</div><div class="qq">בְּאֵיזוֹ הֲבָרָה מַתְחִילָה הַמִּלָּה שֶׁשָּׁמַעְתָּ?</div>`,opts:os.map(o=>o.s),ans:os.findIndex(o=>o.s===w.s1.s),cls:'tx big2',
     play:()=>sayW(w),auto:1,playLbl:'שׁוּב',say:'באיזו הברה מתחילה המילה ששמעת',explain:`${pic(w)}<span class="bigw">${hi(w)}</span>`,key:w.w,chk:{t:'syl',w:w.w}};}
@@ -108,13 +105,13 @@ const spLen=(w,L)=>{const n=w.plain.length;return L===1?n<=3:L===2?n===4:n>=5;};
 function spell(back,L0){const L=L0||level('spell',3);const pool=shuffle(WD.filter(w=>spLen(w,L))).slice(0,6);let i=0,err=0,gems=0,lets=0;
   O.setScreen('sTal','meadow',back);const s=$('#sTal');
   const run=()=>{const w=pool[i];const need=[...w.plain];let k=0,miss=0;T.hudT('כּוֹתְבִים מִלִּים',T.progressBar(i,pool.length));O.sayNow=T.spk(w.w);s.innerHTML='';lets+=need.length;
-    const card=h('div','prq tqc gp-sp',`${pic(w)}<div class="slots">${need.map(()=>'<span class="slot2"></span>').join('')}</div>`);
+    const card=h('div','prq tqc gp-sp',`<div class="qq">שׁוֹמְעִים וְכוֹתְבִים</div>${pic(w)}<div class="slots">${need.map(()=>'<span class="slot2"></span>').join('')}</div>`);
     const pb=h('button','hintbtn',ICON.say+'<span>הַשְׁמַע</span>');pb.onclick=()=>sayW(w);card.appendChild(pb);s.appendChild(card);
     const extra=[];const last=need[need.length-1];if(L>1&&FINAL[last]&&!need.includes(FINAL[last]))extra.push(FINAL[last]);
     for(const c of shuffle(LETTERS)){if(extra.length>=L)break;if(!need.some(x=>sameSound(x,c))&&!extra.some(x=>sameSound(x,c)))extra.push(c);}
     const row=h('div','chs gp-tiles');const fb=h('div','lcap','');
-    shuffle([...need,...extra]).forEach(c=>{const b=h('button','chb tx big2',c);b.dataset.c=c;b.onclick=()=>tap(b);row.appendChild(b);});
-    s.appendChild(row);s.appendChild(fb);s.appendChild(h('div','lsent','שׁוֹמְעִים אֶת הַמִּלָּה וְכוֹתְבִים אוֹתָהּ, אוֹת אַחַר אוֹת'));
+    const all=shuffle([...need,...extra]);const rows=all.length<=4?1:all.length<=10?2:3;row.style.gridTemplateColumns=`repeat(${Math.ceil(all.length/rows)},auto)`;all.forEach(c=>{const b=h('button','chb tx big2',c);b.dataset.c=c;b.onclick=()=>tap(b);row.appendChild(b);});
+    s.appendChild(row);s.appendChild(fb);
     function tap(b){if(b.disabled||k>=need.length)return;const c=b.dataset.c;
       if(c===need[k]){const sl=card.querySelectorAll('.slot2')[k];sl.textContent=c;sl.classList.add('on');b.disabled=true;b.classList.add('ok');k++;miss=0;sfx.pop(k);fb.textContent='';row.querySelectorAll('.show').forEach(x=>x.classList.remove('show'));
         if(k===need.length){const g=2;gems+=g;O.addGems(g,card);sfx.ok(i);O.floatText(card,'+2');card.querySelector('.slots').outerHTML=`<div class="bigw gp-done">${w.w}</div>`;sayW(w);
@@ -136,7 +133,7 @@ function race(back){O.setScreen('sTal','city',back);T.hudT('מֵרוֹץ מִל�
   s.appendChild(h('div','whead',`<span class="gd gp-gd">⏱️</span><h1>כַּמָּה מִלִּים בְּ-45 שְׁנִיּוֹת?</h1>`));
   const tip=h('div','lsent','קוֹרְאִים בְּקוֹל כָּל מִלָּה, וְלוֹחֲצִים "קָרָאתִי".');s.appendChild(tip);
   if(best)s.appendChild(h('div','gp-best',`הַשִּׂיא שֶׁלְּךָ: <b>${best}</b> מִלִּים`));
-  const br=h('div','btnrow');const go=h('button','bigbtn',ICON.play+'<span>הַתְחֵל</span>');br.appendChild(go);s.appendChild(br);
+  const br=h('div','btnrow');const go=h('button','bigbtn',ICON.play+'<span>הַמְשֵׁךְ</span>');br.appendChild(go);s.appendChild(br);
   let mic=false;getDict().then(d=>{if(d&&tip.isConnected){mic=true;tip.textContent='קוֹרְאִים בְּקוֹל כָּל מִלָּה. הַמִּיקְרוֹפוֹן מַקְשִׁיב.';}});
   go.onclick=()=>{if(mic&&T.needPerm)T.needPerm('dictation','כְּדֵי לִקְרֹא בְּקוֹל צָרִיךְ אִשּׁוּר שֶׁל הוֹרֶה לַמִּיקְרוֹפוֹן.');raceRun(back,mic?dict:null,best);};}
 function raceRun(back,d,best){O.setScreen('sTal','city',back);const s=$('#sTal');s.innerHTML='';O.hush();

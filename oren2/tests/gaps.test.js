@@ -98,20 +98,20 @@ const SHOTS=process.env.GAPS_SHOTS;                 /* folder for screenshots */
 const EMIT=await p.evaluate(()=>/tlDone/.test(String(window.TAL.record)));   /* older builds do not announce finished rounds */
  /* ---------- nikud ladder: menu → intro → round → next step unlocks ---------- */
  await p.evaluate(()=>window.GAPS.nikMenu(()=>window.OREN.showMap()));await shot('nik-menu');
- ok('ladder: 6 steps, only the first open',await p.evaluate(()=>{const r=[...document.querySelectorAll('#sTal .gp-rung')];return r.length===6&&!r[0].disabled&&r.slice(1).every(x=>x.disabled);}));
+ ok('ladder menu: only the current vowel and one button',await p.evaluate(()=>document.querySelectorAll('#sTal .gp-cur').length===1&&document.querySelectorAll('#sTal .bigbtn').length===1&&/קָמָץ/.test(document.querySelector('#sTal .gp-cur').textContent)));
  await p.click('#sTal .btnrow .bigbtn');await sleep(300);ok('first time on a step shows the new vowel',await p.locator('#sTal .gp-intro').count()===1);await shot('nik-intro');
  await p.click('#sTal .btnrow .bigbtn');await sleep(400);await shot('nik-q-hear');
  let done=await quizLoop(80,async k=>{if(k===4)await shot('nik-q-see');if(k===10)await shot('nik-q-word');});
  ok('ladder round finishes and records nik-1 + read-nik',done&&((await tl('nik-1'))||{}).s===3&&(!EMIT||((await tl('read-nik'))||{}).s===3),JSON.stringify([await tl('nik-1'),await tl('read-nik')]));
  await closeOv();await sleep(300);
- ok('step 2 (chirik) opens after a good round',await p.evaluate(()=>{const r=[...document.querySelectorAll('#sTal .gp-rung')];return r.length===6&&!r[1].disabled&&r[1].classList.contains('cur');}));
+ ok('step 2 (chirik) is next after a good round',await p.evaluate(()=>/חִירִיק/.test((document.querySelector('#sTal .gp-cur')||{}).textContent||'')));
  await p.evaluate(()=>{const t=window.TAL.S().tl;for(let k=1;k<=5;k++)t['nik-'+k]={s:3,n:1};window.GAPS.nikMenu(()=>window.OREN.showMap());});await shot('nik-menu-top');
  await p.evaluate(()=>window.GAPS.nikRound(5,()=>window.OREN.showMap()));await sleep(300);done=await quizLoop();ok('shva step plays',done);await closeOv();
 
  /* ---------- what sound starts the word ---------- */
  await p.evaluate(()=>window.GAPS.sndRound(()=>window.OREN.showMap()));await sleep(300);await shot('snd-1');done=await quizLoop();
  ok('first-sound round records snd-1 and read-sound',done&&((await tl('snd-1'))||{}).s>=2&&(!EMIT||!!(await tl('read-sound'))));await closeOv();
- await p.evaluate(()=>window.GAPS.sndRound(()=>window.OREN.showMap()));await sleep(300);ok('first sound levels up to 4 letters',await p.evaluate(()=>document.querySelectorAll('#sTal .chs .chb').length===4));
+ await p.evaluate(()=>window.GAPS.sndRound(()=>window.OREN.showMap()));await sleep(300);await shot('snd-2');ok('first sound levels up to 4 letters, in a balanced block',await p.evaluate(()=>{const b=[...document.querySelectorAll('#sTal .chs .chb')];const tops=new Set(b.map(x=>Math.round(x.getBoundingClientRect().top)));return b.length===4&&(tops.size===1||tops.size===2&&b.filter(x=>Math.round(x.getBoundingClientRect().top)===[...tops][0]).length===2);}));
  await p.evaluate(()=>window.GAPS.sndRound(()=>window.OREN.showMap(),3));await sleep(300);await shot('snd-3');done=await quizLoop();ok('first-sound syllable level plays',done);await closeOv();
 
  /* ---------- spelling ---------- */
@@ -121,6 +121,7 @@ const EMIT=await p.evaluate(()=>/tlDone/.test(String(window.TAL.record)));   /* 
        const b=[...S.row.children].find(b=>!b.disabled&&b.dataset.c===need);if(b)b.click();return 1;},wrongFinal);
      if(r===2){await sleep(100);sawFin=sawFin||await p.evaluate(()=>/אוֹת סוֹפִית/.test(document.querySelector('#sTal .lcap').textContent));if(sawFin)await shot('spell-final');}await sleep(r?90:200);}
    return sawFin;};
+ await p.evaluate(()=>window.GAPS.spell(()=>window.OREN.showMap(),3));await sleep(400);await shot('spell-3');ok('spelling letters in equal rows',await p.evaluate(()=>{const b=[...document.querySelectorAll('#sTal .gp-tiles .chb')];const m={};b.forEach(x=>{const k=Math.round(x.getBoundingClientRect().top);m[k]=(m[k]||0)+1;});const c=Object.values(m);return Math.max(...c)-Math.min(...c)<=1&&b.every(x=>x.getBoundingClientRect().right<=innerWidth);}));
  await p.evaluate(()=>window.GAPS.spell(()=>window.OREN.showMap()));await sleep(400);await shot('spell-1');
  await spellRun(1);ok('spelling round records spell-1 and write-spell',((await tl('spell-1'))||{}).s>=2&&(!EMIT||!!(await tl('write-spell'))));await closeOv();
  let fin=false;for(let t=0;t<4&&!fin;t++){fin=await spellRun(2,true);await closeOv();}
