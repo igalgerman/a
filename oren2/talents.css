@@ -319,3 +319,4 @@ body.tlocked #ov{position:fixed;z-index:100}
 .pbar2 .pbt{font-weight:800;font-size:14px}.pbar2 .pchip{font-size:13px}
 body.pplay #screens{padding-bottom:52px}
 .vnow{font-size:15px;margin:6px 0}.vsample{font-family:var(--read);font-size:22px;background:#f6f2e8;padding:8px 12px;line-height:1.6}
+.famlink{direction:ltr;font-family:monospace;font-size:13px;background:#f6f2e8;padding:8px;word-break:break-all;user-select:all;margin:6px 0}

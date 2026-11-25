@@ -1035,6 +1035,7 @@ function voiceTab(box){voiceCheck(box);const tts=window.__tts||{};const vp=Objec
   sec(box,'איך מקבלים קול עברי טוב יותר — בחינם',`<div class="pnote">• <b>במחשב Windows עם Edge:</b> יש קולות עבריים טבעיים מובנים (Hila / Avri). פשוט פותחים את המשחק ב-Edge.<br>• <b>Windows בלי חיבור:</b> הגדרות ← זמן ושפה ← דיבור ← הוספת קולות ← עברית.<br>• <b>טלפון Android:</b> הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← להתקין עברית.<br>• <b>אייפון/אייפד:</b> הגדרות ← נגישות ← תוכן מוקרא ← קולות ← עברית ← להוריד את Carmit (משופר).</div>`);}
 /* --- permissions --- */
 async function permTab(box){const d=sec(box,'הרשאות','<div class="pnote">בודק…</div>');const P=await getPerm();
+  if(!P&&!window.claude){d.innerHTML='<h3>הרשאות</h3><div class="pnote">✓ באתר הזה לא צריך הרשאות מיוחדות. (קריאה בקול עם מיקרופון זמינה רק בגרסה שבתוך Claude.)</div>';return;}
   if(!P){d.innerHTML='<h3>הרשאות</h3><div class="pnote">בתצוגה הזו אי אפשר לבקש הרשאות מראש. אם תידרש הרשאה (למשל מיקרופון), אורן יתבקש לקרוא לכם, ואז תאשרו בחלון שייפתח.</div>';return;}
   let st={};try{st=await P.state();}catch(e){}
   const names=[...new Set(['dictation',...Object.keys(st)])];
@@ -1091,6 +1092,9 @@ function setTab(box){const st=SET();
   [p1,p2].forEach(x=>{x.autocomplete='off';x.onkeydown=e=>e.stopPropagation();});const pb=h('button','pchip','שמירת סיסמה');pb.onclick=async()=>{if(p1.value.length<4||p1.value!==p2.value){O.floatText(pb,p1.value.length<4?'לפחות 4 תווים':'לא זהות');sfx.no();return;}st.pw=await hash(p1.value);st.pwT=Date.now();O.persist();O.floatText(pb,'נשמר ✓');p1.value=p2.value='';};
   const pr=h('div','popt');pr.append(p1,p2,pb);ps.appendChild(pr);
   const ks=sec(box,'הכרטיס האישי של אורן','<div class="pnote">אורן בחר חיה, צבע ותחום אהוב. המשחק משתמש בזה כדי לברך אותו, להציע לו פעילויות ולהדגיש את מה שהוא אוהב.</div>');const kr=h('div','popt');const kb=h('button','pchip','פתחו את הכרטיס מחדש לאורן');kb.onclick=()=>{parentOn=false;profile(T.openHub);};kr.appendChild(kb);ks.appendChild(kr);
+  if(O.family){const link=location.origin+location.pathname+'#f='+O.family;const fs=sec(box,'מכשירים נוספים במשפחה',`<div class="pnote">כדי שההתקדמות של אורן תהיה זהה בטלפון, בטאבלט ובמחשב — פתחו את הקישור הזה פעם אחת בכל מכשיר. מי שיש לו את הקישור רואה את ההתקדמות, אז שתפו אותו רק בתוך המשפחה.</div><div class="famlink">${link}</div>`);
+    const r=h('div','btnrow');const cp=h('button','bigbtn sm','📋 <span>העתקת הקישור</span>');cp.onclick=()=>{try{navigator.clipboard.writeText(link).then(()=>O.floatText(cp,'הועתק ✓'),()=>O.floatText(cp,'סמנו והעתיקו ידנית'));}catch(e){O.floatText(cp,'סמנו והעתיקו ידנית');}};
+    const sh=h('button','bigbtn plain sm','📤 <span>שיתוף</span>');sh.onclick=()=>{if(navigator.share)navigator.share({title:'המסע של אורן',url:link}).catch(()=>{});else cp.click();};r.append(cp,sh);fs.appendChild(r);}
   const bk=sec(box,'גיבוי','<div class="pnote">ההתקדמות נשמרת אוטומטית בענן. אפשר גם להעתיק גיבוי ידני ולהדביק אותו במחשב אחר.</div>');
   const ta=h('textarea','pta');ta.setAttribute('aria-label','גיבוי');ta.rows=3;ta.onkeydown=e=>e.stopPropagation();const r=h('div','btnrow');
   const ex=h('button','bigbtn plain sm','<span>הצג גיבוי</span>');ex.onclick=()=>{ta.value=JSON.stringify(O.save);ta.select();try{navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(()=>O.floatText(ex,'הועתק!'),()=>{});}catch(e){}};
@@ -1143,6 +1147,7 @@ function home(){const S0=T.S();
   const pb=h('button','parbtn','🔒 כניסת הורים');pb.onclick=()=>window.TAL_parentGate();s.appendChild(pb);
   T.checkMsg&&T.checkMsg();}
 window.TAL_home=home;T.home=home;
+O.on('synced',()=>{if(!$('#sHome').hidden&&$('#ov').hidden)home();});
 /* a home button that is always in the same place */
 (()=>{const bb=$('#btnBack');if(!bb)return;const hb=h('button','ibtn','');hb.id='btnHome';hb.innerHTML=ICON.home;hb.setAttribute('aria-label','בית');hb.title='הַבַּיִת';hb.hidden=true;hb.onclick=()=>{O.hush&&O.hush();sfx.pop(1);O.showMap();};bb.after(hb);
   O.on('screen',(id,back)=>{hb.hidden=id==='sStart'||id==='sHome'||back===O.showMap;});})();
