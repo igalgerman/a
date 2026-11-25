@@ -140,6 +140,10 @@ const path = require('path');
   for (const [inp, out] of NUM) { await f('/api/tts?t=' + encodeURIComponent('מספר: ' + inp) + '&r=0.9'); const got = calls.at(-1).input.text.replace(/^מספר: /, '');
     ok('number: ' + inp, got === out, got); }
   await f('/api/tts?t=' + encodeURIComponent('3 apples') + '&v=en-US-Chirp3-HD-Kore&r=0.85'); ok('numbers left alone in English', calls.at(-1).input.text === '3 apples');
+  // audio version for the game's URLs (&k=ver): bumped after fixes, read from /api/tts/status
+  const v0 = (await (await f('/api/tts/status')).json()).ver; const vb = await (await f('/api/tts/ver', { method: 'POST' })).json();
+  ok('status gives the audio version; POST /api/tts/ver bumps it', v0 === 1 && vb.ver === 2 && (await (await f('/api/tts/status')).json()).ver === 2 && kv.get('ttsver') === '2');
+  const ck = calls.length; ok('k= is ignored by the cache key', (await f('/api/tts?t=' + encodeURIComponent('כמה עשרות?') + '&r=0.9&k=2')).status === 200 && calls.length === ck);
   // /api/tts/try: made fresh with the dictionary, never stored
   const k0 = kv.size, c2 = calls.length; const tr = await f('/api/tts/try?t=' + encodeURIComponent('יש עשרות'));
   ok('try: fresh audio with the dictionary, no KV write', tr.status === 200 && calls.length === c2 + 1 && calls.at(-1).input.text === 'יש עֲשָׂרוֹת' && kv.size === k0);

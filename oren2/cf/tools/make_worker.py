@@ -108,7 +108,8 @@ async function api(req,env,id){if(!/^[a-f0-9]{32}$/.test(id))return new Response
 const TTS_CAP=250000;const GAME_VOICE='he-IL-Chirp3-HD-Kore',GAME_RATE=0.9;const VOICES=/^(he-IL-((Standard|Wavenet)-[A-D]|Chirp3-HD-[A-Za-z]+)|en-US-Chirp3-HD-[A-Za-z]+)$/;
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function tts(req,env,u){if(!env.GOOGLE_TTS_KEY)return new Response('{"ok":false,"why":"no key"}',{status:503,headers:JH});
- if(u.pathname==='/api/tts/status')return new Response('{"ok":true}',{headers:JH});
+ if(u.pathname==='/api/tts/status')return J({ok:true,ver:await ttsVer(env)});/* the game adds &k=ver to its audio URLs: a bump = fresh audio everywhere */
+ if(u.pathname==='/api/tts/ver'&&req.method==='POST'){const v=(await ttsVer(env,true))+1;await env.SAVES.put('ttsver',String(v));verV=v;verAt=Date.now();return J({ok:true,ver:v});}
  if(u.pathname==='/api/tts/gm'){if(!env.GEMINI_KEY)return new Response('{"ok":false,"why":"no GEMINI_KEY"}',{status:503,headers:JH});const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':env.GEMINI_KEY}});const j=await r.json();return new Response(JSON.stringify((j.models||[]).map(m=>m.name).filter(n=>/gemini/.test(n))),{status:r.status,headers:JH});}
  if(u.pathname==='/api/tts/verify'&&req.method==='POST'){/* Gemini listens to the stored audio and reports pronunciation */
   if(!env.GEMINI_KEY)return new Response('{"ok":false,"why":"no GEMINI_KEY"}',{status:503,headers:JH});
@@ -222,7 +223,8 @@ function done(){S.forEach((x,i)=>fetch(url(champ,i)));m.innerHTML='<h1>הקול 
   m.querySelectorAll('.pl').forEach(b=>b.onclick=()=>play(champ,+b.dataset.i,b));document.getElementById('re').onclick=()=>{champ=F[0];k=1;hist=[];step();};}
 step();</script></html>`;
  return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});}
-const AH={'content-type':'audio/mpeg','cache-control':'public, max-age=86400'};/* a day: a fixed pronunciation reaches browsers soon */
+const AH={'content-type':'audio/mpeg','cache-control':'public, max-age=31536000, immutable'};/* fixed audio reaches devices through &k=ver (see /api/tts/status) */
+let verV=null,verAt=0;async function ttsVer(env,fresh){if(fresh||verV==null||Date.now()-verAt>FX_TTL){verV=+(await env.SAVES.get('ttsver'))||1;verAt=Date.now();}return verV;}
 const monthKey=()=>'ttsuse:'+new Date().toISOString().slice(0,7);
 const ttsKey=async(voice,rate,text)=>'tts:'+await sha(voice+'|'+rate.toFixed(2)+'|'+text);
 /* Pronunciation dictionary for the Hebrew voices: KV 'ttsfixw' = {plainWord: vocalized or respelled}, exact whole words only

@@ -119,7 +119,7 @@ async function gemini(p, body) {      // paced; another model when one is busy o
 async function fix(t, words, only) {
   for (let i = 0; i < 4; i++) {
     const { status, j, tx } = await call('/api/tts/fix', { t, words: words || {}, only: only || {} });
-    if (j && j.ok) { S.writes += 1 + (j.changed ? 1 : 0); save(); await sleep(3500); return j; }   // Google: 20 a minute, shared
+    if (j && j.ok) { S.writes += 1 + (j.changed ? 1 : 0); S.dirty = 1; save(); await sleep(3500); return j; }   // Google: 20 a minute, shared
     log(`  fix failed (${status}): ${(j && j.why) || tx.slice(0, 160)}`);
     if (status === 502 || status === 429 || status === 0 || status >= 500) { await sleep(60000); continue; }
     return null;
@@ -221,6 +221,8 @@ async function pages(votes, marks) {
   const { j } = await call('/api/tts/listen/q', { choose, sample }); S.writes++; save();
   log(`listening page: ${choose.filter(c => !(c.id in (votes || {}))).length} words to choose, ${sample.length} sentences → ${SITE}/api/tts/listen ${j && j.ok ? '' : '(failed)'}`);
 }
+/* new audio under old URLs: bump the version the game puts in its URLs (&k=ver), so devices fetch it again */
+async function bump() { if (!S.dirty) return; const { j } = await call('/api/tts/ver', {}); if (j && j.ok) { S.dirty = 0; S.writes++; save(); log(`audio version → ${j.ver}`); } }
 async function review() {
   const L = Object.values(S.items).filter(x => ['ok', 'fix', 'bad'].includes(x.st)).map(x => ({ t: x.t, n: x.n || x.t, st: x.st, note: x.note || '', v: x.v, r: x.r }));
   const order = { bad: 0, fix: 1, ok: 2 }; L.sort((a, b) => order[a.st] - order[b.st]);
@@ -251,7 +253,7 @@ async function check(it) {
   try { SAID = JSON.parse(fs.readFileSync(path.join(PRE, 'said.json'), 'utf8')).map(item).filter(x => x.t); } catch (e) { log('no said.json — run pregen.js --collect first'); return; }
   let made = {}; try { made = JSON.parse(fs.readFileSync(path.join(PRE, 'state.json'), 'utf8')).done || {}; } catch (e) {}
   DICT = (await call('/api/tts/fix')).j || {};
-  let { marks, votes } = await applyVotes(); DICT = (await call('/api/tts/fix')).j || DICT;
+  let { marks, votes } = await applyVotes(); await bump(); DICT = (await call('/api/tts/fix')).j || DICT;
   await pages(votes, marks);
   if (arg('--pages')) return review();
   // 0. make again the sentences made before synth() learned numbers in words and dropping emoji (one write each)
@@ -260,7 +262,7 @@ async function check(it) {
   for (const x of R) { if (S.writes + 1 > WRITES) { log(`regen: write budget used up, ${R.length - rn} left for the next run`); break; }
     const r = await fix(x.t, {}, {}); if (!r) { log('regen stopped (KV/Google refused)'); break; } S.regen[x.t] = REGEN; rn++;
     const o = S.items[id(x)]; if (o && o.at) o.at = 0; save(); }
-  if (R.length) log(`regen: ${rn}/${R.length} sentences with numbers/emoji made again`);
+  if (R.length) log(`regen: ${rn}/${R.length} sentences with numbers/emoji made again`); await bump();
   try {
     // 1. what to listen to: risky ones first (numbers, math words, what the parent flagged), made ones before not-yet-made
     const RISK = /עשרות|אחדות|מאות|ספר|עשר|שארית|כפול|חילוק|חיסור|חיבור|שווה|שוה|זוגי|חצי|רבע|שליש|ישן|פתח|שמה|אחר|שמונה/;
@@ -282,10 +284,10 @@ async function check(it) {
       save(); log(`${n}/${Q.length} ${r.st.padEnd(3)} ${it.t.slice(0, 70)}${r.note ? '  — ' + r.note : ''}`);
       if (n % 20 === 0) { const c = {}; for (const x of Object.values(S.items)) c[x.st] = (c[x.st] || 0) + 1;
         log(`progress ${n}/${Q.length} · ${Math.round((Date.now() - T0) / 60000)} min · ${JSON.stringify(c)} · writes ${S.writes}`);
-        const nv = await applyVotes(); DICT = (await call('/api/tts/fix')).j || DICT; marks = nv.marks; votes = nv.votes; await pages(votes, marks); }   // the parent may be choosing right now
+        const nv = await applyVotes(); await bump(); DICT = (await call('/api/tts/fix')).j || DICT; marks = nv.marks; votes = nv.votes; await pages(votes, marks); }   // the parent may be choosing right now
     }
   } catch (e) { if (!(e instanceof Stop)) throw e; log('stopped: ' + e.message + ' — run again later to continue'); }
-  await pages(votes, marks); await review();
+  await bump(); await pages(votes, marks); await review();
   const c = {}; for (const x of Object.values(S.items)) c[x.st] = (c[x.st] || 0) + 1;
   log('done: ' + JSON.stringify(c) + ' · dictionary: ' + JSON.stringify(DICT));
 })().catch(e => { log('crashed: ' + (e && e.stack || e)); save(); process.exitCode = 1; });
