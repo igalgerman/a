@@ -23,6 +23,7 @@ const TTS_CAP=250000;const VOICES=/^he-IL-(Standard|Wavenet)-[A-D]$/;
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function tts(req,env,u){if(!env.GOOGLE_TTS_KEY)return new Response('{"ok":false,"why":"no key"}',{status:503,headers:JH});
  if(u.pathname==='/api/tts/status')return new Response('{"ok":true}',{headers:JH});
+ if(u.pathname==='/api/tts/voices'){const r=await fetch('https://texttospeech.googleapis.com/v1/voices?languageCode=he-IL',{headers:{'x-goog-api-key':env.GOOGLE_TTS_KEY}});return new Response(await r.text(),{status:r.status,headers:JH});}
  const text=(u.searchParams.get('t')||'').slice(0,400).trim(),voice=u.searchParams.get('v')||'he-IL-Wavenet-B',rate=Math.min(1.3,Math.max(.7,+u.searchParams.get('r')||1));
  if(!text||!VOICES.test(voice))return new Response('{"error":"bad request"}',{status:400,headers:JH});
  const key='tts:'+await sha(voice+'|'+rate.toFixed(2)+'|'+text);
