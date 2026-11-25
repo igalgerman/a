@@ -93,3 +93,24 @@ node cf/tools/voicecheck.js       # בדיקת הגייה (משתמש ב-GEMINI_
 - `GOOGLE_TTS_KEY`: הקול
 - `GEMINI_KEY`: בדיקת ההגייה
 - KV binding: `SAVES`
+
+## 7. הערות טכניות מהקפטן (להמשך החיבור)
+- **wire.js** (כבר בגיט) מחבר: gaps (14 סיפורים, שאלות נוספות, אותיות סופיות), music2, chess, explore2 עם `{merge:true}` (כולל שינוי השמות של lab ו-world, והעברת code ו-chess למגדל החשיבה), ו-english2.
+  - **צריך:** לייצא מ-talents.js את `T.STORIES`, `T.readStory` ו-`T.WRITE.AB`.
+  - **צריך:** להוסיף `wire` אחרון ברשימת extras ב-build_talents.py.
+- **batch A:**
+  - gaps-math נכנס לליבה לפני WORLDS, דרך build markers. ב-`unlocked()` מוסיפים שורה אחת: שלבים שכבר יש בהם כוכבים נשארים פתוחים.
+  - ב-mergeIn: m2, cz, en2.
+  - handlers ב-activities.test, ועדכון מספר הבניינים הנעולים ב-parent.test.
+  - explore2.test מזריק את הסקריפט רק אם הוא לא כבר בדף.
+  - להוסיף את בדיקות החבילות ל-run.sh.
+- **batch B:**
+  - think.js: לשלוח את האירועים `tq`/`ans` ו-`tlDone` (עם כוכבים). ב-mergeIn: th ו-alog.
+  - לוח ההורים: summary, skills, settings ומפת התוכן.
+  - daylog.js: יומן הפעילות ושורת "משחק עכשיו".
+  - כשלוח ההורים פתוח: famPull כל 20 שניות.
+- **batch C:**
+  - learn: ה-hooks, וגם `pickItem`/`seen` בכל חבילה, ושורות "נשאר תוכן".
+  - help: ה-hooks, והסרת כפתור "רֶמֶז".
+  - topic.js: צריך CSS, ו-hook על החבר בבית (רק כשזה לא זמן חופשי).
+- **pregen.js** כבר אוסף משפטים מכל החבילות כשהן קיימות. אחרי כל העלאה מריצים `node oren2/cf/tools/pregen.js`.
