@@ -1,0 +1,42 @@
+// Auto-read: story panels, lesson steps and screen instructions are read by themselves once the screen settles;
+// not while reading practice wants Oren to read first, not on parent screens, not when the parents turned it off.
+const L = require('./lib');
+const { chromium } = require('playwright'); const sleep = L.sleep;
+const res = []; const ok = (n, c, i = '') => res.push((c ? 'PASS ' : 'FAIL ') + n + (i ? ' — ' + i : ''));
+(async () => {
+  const b = await chromium.launch(); const ctx = await b.newContext(L.VIEWPORT);
+  await ctx.addInitScript(() => { try { localStorage.clear(); } catch (e) {} window.__fast = true; window.__noFamily = true;
+    const fake = { log: [], speaking: false, speak(u) { this.log.push(u.text); }, cancel() {}, getVoices() { return []; }, onvoiceschanged: null, addEventListener() {} };
+    Object.defineProperty(window, 'speechSynthesis', { value: fake, configurable: true }); });
+  const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); await p.goto(L.URL); await L.noCoach(p); await sleep(300);
+  await p.evaluate(() => { const O = window.OREN, T = window.TAL; O.save.story.intro = 1; T.S().prof = { an: 'cat', col: '#3a8fc4', love: 'art' }; O.showMap(); });
+  await sleep(500);
+  const said = async (f, ms = 800) => { await p.evaluate(() => { speechSynthesis.log = []; window.__fast = false; }); await f(); await sleep(ms);
+    return p.evaluate(() => { window.__fast = true; return speechSynthesis.log.slice(); }); };
+  let s = await said(() => p.evaluate(() => window.OREN.story([['nar', 'שָׁלוֹם לְךָ חָבֵר'], ['nar', 'הַפַּעַם הַשְּׁנִיָּה']], () => {})));
+  ok('story panel is read by itself', s.length === 1 && /של/.test(s[0]), JSON.stringify(s));
+  s = await said(() => p.click('#dNext'));
+  ok('next story panel is read too', s.length === 1 && /פעם/.test(s[0]), JSON.stringify(s));
+  await p.click('#dNext').catch(() => {});
+  // lesson: the lesson sentence, then each revealed step
+  const lv = await p.evaluate(() => { const l = window.OREN.ALLLV.find(x => x.type === 'learn' && x.u.gen && x.u.gen(5).k !== 'col'); return l && l.id; });
+  s = await said(() => p.evaluate(id => window.OREN.startLevel(window.OREN.ALLLV.find(x => x.id === id)), lv));
+  ok('lesson sentence is read by itself', s.length >= 1, JSON.stringify(s));
+  s = await said(() => p.click('#sLearn .bigbtn:not(.plain)'));
+  ok('lesson "next" step is read by itself', s.length === 1 && s[0].length > 1, JSON.stringify(s));
+  // reading practice: a question Oren should try to read first is not read right away
+  s = await said(() => p.evaluate(() => { const a = window.TAL.ACT['read-sent'] || window.TAL.ACT['read-wp']; a.run(() => {}); }), 1200);
+  ok('reading practice question: not read automatically', s.length === 0 && await p.evaluate(() => !!window.__noAuto), JSON.stringify(s));
+  // a plain screen instruction is read; parent setting off stops it; parent screens never
+  s = await said(() => p.evaluate(() => window.TAL.openHub()));
+  ok('screen instruction is read by itself', s.length === 1, JSON.stringify(s));
+  await p.evaluate(() => { window.OREN.save.set.autoRead = 0; });
+  s = await said(() => p.evaluate(() => window.OREN.kingdom()));
+  ok('parent setting off: nothing read', s.length === 0, JSON.stringify(s));
+  await p.evaluate(() => { delete window.OREN.save.set.autoRead; window.TAL.parentPanel('voice'); }); await sleep(300);
+  ok('parent voice section has the auto-read switch (on)', await p.evaluate(() => [...document.querySelectorAll('#sPar .pchip')].some(x => /הקראה אוטומטית/.test(x.textContent) && x.classList.contains('on'))));
+  s = await said(() => p.evaluate(() => { window.OREN.sayNow = 'בדיקה בלוח הורים'; }));
+  ok('parent screen: nothing read', s.length === 0, JSON.stringify(s));
+  ok('no page errors', !errs.length, errs.join(' | '));
+  await b.close(); L.finish('auto-read', res);
+})().catch(e => { console.log('FAIL crashed — ' + e.message); console.log('RESULT auto-read 0 1'); process.exitCode = 1; });

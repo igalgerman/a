@@ -14,6 +14,11 @@ const res=[];const ok=(n,c,i='')=>res.push((c?'PASS ':'FAIL ')+n+(i?' — '+i:''
    window.TAL.S().set.voice={eng:'browser',name:'x',gv:'he-IL-Wavenet-D',rate:1.2};window.OREN.say('שָׁלוֹם');
    window.__fast=true;G.ok=ok0;window.Audio=A0;try{G.audio=null;}catch(e){}return {u,opts:/מהירות|קול אחר|מנוע:/.test(t)};});
  ok('one fixed voice: Kore 0.9 even with old saved choices, no voice options',/[?&]v=he-IL-Chirp3-HD-Kore&r=0\.9$/.test(fv.u)&&!fv.opts,JSON.stringify(fv));
+ const fe=await p.evaluate(async()=>{const G=window.__gv,A0=window.Audio,ok0=G.ok,sp0=speechSynthesis.speak;let u='',fb='';
+   window.Audio=function(x){u=x;return {play:()=>Promise.resolve(),pause(){}};};G.ok=true;window.__fast=false;window.OREN.sayLang('<b>Apple</b>  pie','en');const u1=u;
+   window.Audio=function(x){return {play:()=>Promise.reject(new Error('x')),pause(){}};};speechSynthesis.speak=x=>{fb=x.lang;};window.OREN.sayLang('cat','en');await new Promise(r=>setTimeout(r,50));
+   window.__fast=true;G.ok=ok0;window.Audio=A0;speechSynthesis.speak=sp0;G.audio=null;return {u:u1,fb};});
+ ok('English: Google Despina 0.85, plain text, browser fallback',fe.u==='/api/tts?t=Apple%20pie&v=en-US-Chirp3-HD-Despina&r=0.85'&&fe.fb==='en-US',JSON.stringify(fe));
  await p.locator('#sPar .bigbtn',{hasText:'אוקי'}).click();await sleep(200);ok('voice approved saved',await p.evaluate(()=>!!window.TAL.S().set.voiceOk));
  await p.evaluate(()=>window.TAL.parentPanel('try'));await sleep(200);await L.shot(p,{path:L.SHOTDIR+'/try.png',fullPage:true});
  await p.locator('#sPar .bigbtn',{hasText:'כניסה למשחק כהורה'}).click();await sleep(400);

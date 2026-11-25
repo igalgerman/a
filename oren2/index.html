@@ -1044,11 +1044,11 @@ async function famPull(){if(!FAM.on||kidSave)return;try{const snap=await cloud.r
 async function cloudInit(){
   try{for(let i=0;i<40&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
     if(!window.claude||!window.claude.use){if(!/^https?:$/.test(location.protocol)||window.__noFamily)return;
-      FAM.id=FAMILY;const ref=famRef(FAMILY);try{const snap=await ref.get();if(snap.exists)mergeIn(snap.data());}catch(e){return;}
+      FAM.id=FAMILY;const ref=famRef(FAMILY);try{const snap=await ref.get();if(snap.exists)mergeIn(snap.data());}catch(e){addEventListener('online',()=>cloudInit(),{once:true});return;}
       const old=oldFamId();let moved=!old;if(old)try{const os=await famRef(old).get();if(os.exists)mergeIn(os.data());moved=true;}catch(e){}
       cloud.ref=ref;FAM.on=true;try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}cloud.dirty=true;FAM.force=true;await cloudFlush();FAM.force=false;
       if(moved&&!cloud.dirty)try{localStorage.setItem('oren4-family',FAMILY);}catch(e){}
-      setInterval(famPull,60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')famPull();else if(cloud.dirty){FAM.force=true;cloudFlush().finally(()=>{FAM.force=false;});}});
+      setInterval(famPull,60000);addEventListener('online',()=>{cloud.dirty=true;cloudSave();});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')famPull();else if(cloud.dirty){FAM.force=true;cloudFlush().finally(()=>{FAM.force=false;});}});
       updateGems();emit('synced');return;}const db=await window.claude.use('db');const user=await window.claude.use('user');if(!db||!user)return;
     const id=await user.id();if(!id)return;const base='data/users/'+id+'/';const ref=db.doc(base+'progress4');
     const snap=await ref.get();if(snap.exists)mergeIn(snap.data());else{const old=await db.doc(base+'progress').get();if(old.exists)migrateOld(old.data());}
@@ -1166,19 +1166,24 @@ const TTS={ns:null,he:false,en:false,ok:false,blocked:false};
   TTS.langs=L;TTS.he=!!(L&&L.some(x=>/^(he|iw)/i.test(x)));TTS.en=true;TTS.ok=true;try{TTS.ns.onState(({state,reason})=>{duck(state!=='idle');if(reason==='not_granted'||reason==='unavailable')TTS.blocked=true;});}catch(e){}pickVoice();})();
 const useClaude=lang=>!!TTS.ns&&!TTS.blocked&&(lang==='en'?TTS.en:TTS.he);
 /* nikud text -> full spelling (ktiv male), so a voice that ignores nikud still reads it right */
-function fullSpell(str){const t=String(str).replace(/<[^>]+>/g,' ');const NIK=/[\u0591-\u05C7]/;let out='';
+function fullSpell(str){/* words the rules cannot know (Israeli spelling), also after a prefix ו/ה/ב/כ/ל/מ/ש */
+  const SPELL_RX=fullSpell.X||(fullSpell.X=Object.entries({'בְּרֵכָה':'בריכה','בְּרֵכוֹת':'בריכות','אִמָּא':'אמא','מַיִם':'מים','מַּיִם':'מים','מִכָּל':'מכל','מִשָּׁם':'משם','מִפֹּה':'מפה','אַרְיֵה':'אריה','מִרְיָם':'מרים','מַרְיָם':'מרים','יְרוּשָׁלַיִם':'ירושלים','לִוְיָתָן':'לווייתן','לִּוְיָתָן':'לווייתן','לִוְיָתָנִים':'לווייתנים','יְרוּשָׁלַםִ':'ירושלים'}).map(([k,v])=>[new RegExp('(^|[^\u05D0-\u05EA\u0591-\u05C7])((?:[ובכל][\u05B0\u05B4\u05B7\u05B8\u05BC]{0,2}|ה[\u05B6\u05B7\u05B8]|מ[\u05B4\u05B5]|ש[\u05B6\u05C1]{2}){0,3})'+k.normalize('NFC')+'(?![\u05D0-\u05EA\u0591-\u05C7])','g'),v]));
+  let t=String(str).replace(/<[^>]+>/g,' ').normalize('NFC');const NIK=/[\u0591-\u05C7]/;let out='';
+  for(const [rx,v] of SPELL_RX)t=t.replace(rx,(m,a,pre)=>a+pre.replace(/[\u0591-\u05C7]/g,'')+v);
   const words=t.split(/(\s+)/);for(const w of words){if(!NIK.test(w)){out+=w;continue;}
     const L=[];for(const ch of w){if(/[\u05D0-\u05EA]/.test(ch))L.push({c:ch,m:''});else if(L.length&&NIK.test(ch))L[L.length-1].m+=ch;else L.push({c:ch,m:'',x:1});}
     let r='';for(let i=0;i<L.length;i++){const a=L[i],n=L[i+1];if(a.x){r+=a.c;continue;}
       const has=(o,c)=>o&&o.m.includes(c);const isL=o=>o&&!o.x;
       /* consonantal vav/yod inside a word are doubled */
       let c=a.c;const mid=i>0&&isL(L[i-1])&&isL(n)&&(i>1||!'הובכלמש'.includes(L[0].c));
-      if(mid&&(c==='ו'||c==='י')&&a.m&&!(c==='י'&&has(a,'\u05B4'))&&!has(a,'\u05B9')&&!(c==='ו'&&a.m==='\u05BC')&&!(c==='י'&&!/[\u05B0-\u05BB]/.test(a.m)))c=c+c;
+      const PX={'ו':/^[\u05B0\u05BC]*$/,'ה':/^[\u05B6-\u05B8]*$/,'ב':/^[\u05B0\u05B4\u05B7\u05B8\u05BC]*$/,'כ':/^[\u05B0\u05B4\u05B7\u05B8\u05BC]*$/,'ל':/^[\u05B0\u05B4\u05B7\u05B8\u05BC]*$/,'מ':/^[\u05B4\u05B5]*$/,'ש':/^[\u05B6\u05C1]*$/};const pre=L.slice(0,i).every(o=>!o.x&&PX[o.c]&&PX[o.c].test(o.m));/* a yod right after prefixes starts the word: ביחד, שביחד */
+      if(mid&&(c==='ו'||c==='י')&&a.m&&!(c==='י'&&pre)&&!(c==='י'&&has(a,'\u05B4'))&&!has(a,'\u05B9')&&!(c==='ו'&&a.m==='\u05BC')&&!(c==='י'&&!/[\u05B0-\u05BB]/.test(a.m)))c=c+c;
+      if(c==='י'&&i>=2&&has(a,'\u05B4')&&!has(a,'\u05BC')&&/[\u05B7\u05B8]/.test(L[i-1].m)&&n&&n.c==='ם'&&!L[i+2])c='יי';
       r+=c;
       if(has(a,'\u05BB'))r+='ו';                       /* kubutz -> vav */
       else if(has(a,'\u05B9')&&c!=='ו'&&!(n&&n.c==='ו')&&!['לא','כל','ראש','ראשי','זאת','צאן','ראשון','ראשונה'].includes(w.replace(/[^\u05D0-\u05EA]/g,'')))r+='ו'; /* holam -> vav */
       else if(has(a,'\u05B4')&&a.c!=='י'&&isL(n)&&n.c!=='י'){      /* hiriq -> yod in an open syllable */
-        const nShva=has(n,'\u05B0'),nDag=has(n,'\u05BC');const prefixMin=i===0&&'מש'.includes(a.c)&&nDag&&L.filter(o=>!o.x).length>=4;
+        const nShva=has(n,'\u05B0'),nDag=has(n,'\u05BC');const prefixMin=i===0&&a.c==='מ'&&nDag&&L.filter(o=>!o.x).length>=4;
         if(!prefixMin&&(!nShva||nDag))r+='י';}}
     out+=r;}
   out=out.replace(/[\u0591-\u05C7]/g,'').replace(/\s+/g,' ').trim();
@@ -1195,21 +1200,30 @@ const GV={ok:false,audio:null};
 (async()=>{if(!/^https?:$/.test(location.protocol)||/claude\.ai|claudeusercontent/.test(location.host)||window.__noFamily)return;
   try{const r=await fetch('/api/tts/status',{cache:'no-store'});GV.ok=r.ok;}catch(e){}})();
 window.__gv=GV;
-const useGoogle=lang=>lang==='he'&&GV.ok;
-function googleSay(t){try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}
-  const url='/api/tts?t='+encodeURIComponent(fullSpell(t).slice(0,400))+'&v='+GVOICE+'&r='+GRATE;
+const GEN={v:'en-US-Chirp3-HD-Despina',r:0.85};/* English: one fixed Google voice too, chosen by the parents */
+const useGoogle=lang=>(lang==='he'||lang==='en')&&GV.ok;
+function googleSay(t,lang){const en=lang==='en';try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}
+  const url='/api/tts?t='+encodeURIComponent((en?plain(t):fullSpell(t)).slice(0,400))+'&v='+(en?GEN.v:GVOICE)+'&r='+(en?GEN.r:GRATE);
   const a=new Audio(url);GV.audio=a;let go=false;
-  const fall=why=>{clearTimeout(tm);duck(false);if(GV.audio!==a)return;try{a.pause();}catch(e){}GV.audio=null;browserSay(t,'he');if(why)logIssue('voice',why);};
+  const fall=why=>{clearTimeout(tm);duck(false);if(GV.audio!==a)return;try{a.pause();}catch(e){}GV.audio=null;browserSay(t,en?'en':'he');if(why)logIssue('voice',why);};
   const tm=setTimeout(()=>{if(!go)fall('timeout');},3000);/* never let Oren wait more than 3 seconds */
   a.onplaying=()=>{go=true;clearTimeout(tm);};a.onplay=()=>duck(true);a.onended=()=>{duck(false);if(GV.audio===a)GV.audio=null;};
   a.onerror=()=>fall('error');a.play().catch(e=>fall(e&&e.name==='NotAllowedError'?null:'error'));}
-function say(t,lang){if(!t||window.__fast)return;lang=lang||'he';
-  if(useGoogle(lang)){googleSay(t);return;}
+function say(t,lang){if(!t||window.__fast)return;window.__autoSaid=Date.now();lang=lang||'he';
+  if(useGoogle(lang)){googleSay(t,lang);return;}
   if(useClaude(lang)){try{speechSynthesis.cancel();}catch(e){}const txt=(lang==='he'?withNikud(t):plain(t)).slice(0,1900);
     TTS.ns.speak(txt,{language:lang,rate:lang==='en'?.9:.95}).catch(e=>{const c=e&&(e.code||e.reason);if(c==='not_granted'||c==='unavailable'){TTS.blocked=true;return;}if(c==='stopped')return;browserSay(t,lang);});return;}
   browserSay(t,lang);}
 window.__tts=TTS;
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,1500);}else $('#voiceNote').hidden=false;
+/* auto-read: when a screen, story panel, lesson step or question sets its instruction (sayNow), it is read once by
+   itself after the screen settles (300 ms). Skipped when something was already said meanwhile, on parent screens, when the
+   parents turned it off, and while reading practice wants Oren to read first (window.__noAuto, set by reading.js). 🔊 replays. */
+const AUTO={cur:'',gen:0,seen:-1,at:0,wait:false};
+setInterval(()=>{if(sayNow!==AUTO.cur||AUTO.gen!==AUTO.seen){AUTO.cur=sayNow;AUTO.seen=AUTO.gen;AUTO.at=Date.now();AUTO.wait=!!sayNow;return;}
+  if(!AUTO.wait||Date.now()-AUTO.at<300)return;AUTO.wait=false;
+  if(window.__fast||window.__noAuto||(window.__autoSaid|0)>=AUTO.at||(save.set&&save.set.autoRead===0)||!$('#sPar').hidden||$('#hud').hidden)return;
+  hush();say(sayNow);},100);
 const hush=()=>{try{speechSynthesis.cancel();}catch(e){}try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}if(TTS.ns&&!TTS.blocked)TTS.ns.stop().catch(()=>{});};
 
 /* ---------- animated pixel background: cached static layer + live elements ---------- */
@@ -1284,7 +1298,7 @@ function addGems(n,fromEl){save.gems=(save.gems|0)+n;
 const app=$('#app');let backTo=null,curWorld=null;
 const wipeEl=$('#wipe');wipeEl.innerHTML='<i></i>'.repeat(70);
 function wipe(){if(window.__fast||RM())return;sfx.whoosh();wipeEl.hidden=false;[...wipeEl.children].forEach((c,i)=>{const r=i/10|0,col=i%10;c.style.animation='none';void c.offsetWidth;c.style.animation='';c.style.animationDelay=((r+col)*22)+'ms';});clearTimeout(wipe.t);wipe.t=setTimeout(()=>wipeEl.hidden=true,720);}
-function setScreen(id,w,back){hush();/* leaving a screen stops any reading aloud; the new screen may speak right after */['sStart','sHome','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
+function setScreen(id,w,back){hush();window.__noAuto=0;/* leaving a screen stops any reading aloud; the new screen may speak right after */['sStart','sHome','sMap','sWorld','sLearn','sPlay','sKing','sStudio','sTeach','sTable','sFinal','sTal','sPar'].forEach(s=>$('#'+s).hidden=s!==id);$('#hud').hidden=id==='sStart';$('#ov').hidden=true;
   if(app.dataset.w!==(w||'meadow')){app.dataset.w=w||'meadow';bgW=app.dataset.w;paintBG(performance.now());}setTheme(THEME_OF[app.dataset.w]||'map');
   backTo=back||null;$('#btnBack').style.visibility=back?'visible':'hidden';$('#btnBack').innerHTML=back===showMap?ICON.home:ICON.back;$('#screens').scrollTop=0;play=null;stopSpeed();updateGems();wipe();emit('screen',id,back);}
 $('#btnSay').innerHTML=ICON.say;$('#btnMusic').innerHTML=ICON.music;$('#icoStart').innerHTML=ICON.play;
@@ -1312,7 +1326,7 @@ function story(panels,done){const box=$('#dlg');let i=0,tw=0;
     const spans=[...box.querySelectorAll('.tw')];let k=0;clearInterval(tw);
     const finish=()=>{clearInterval(tw);tw=0;spans.forEach(s2=>s2.classList.add('on'));const sp=box.querySelector('.sp');if(sp)sp.classList.add('still');};
     if(window.__fast||RM())finish();else tw=setInterval(()=>{if(k>=spans.length)return finish();spans[k].classList.add('on');if(k%3===0&&spans[k].textContent.trim())sfx.blip(pitch+((k*37)%60));k++;},30);
-    sayNow=txt;$('#dSay').onclick=()=>say(txt);
+    sayNow=txt;AUTO.gen++;$('#dSay').onclick=()=>say(txt);
     $('#dNext').onclick=()=>{if(tw){finish();return;}hush();sfx.pop(i+1);i++;if(i<panels.length)show();else{box.hidden=true;box.innerHTML='';done&&done();}};setTimeout(()=>{const b=$('#dNext');b&&b.focus();},50);};
   show();}
 
@@ -1541,18 +1555,19 @@ function lesson(lv){const u=lv.u;setScreen('sLearn',u.w.bg,()=>showWorld(u.w));
   const next=h('button','bigbtn',ICON.play+'<span>הַבָּא</span>');const go=h('button','bigbtn plain sm',ICON.skip+'<span>לַתִּרְגּוּל</span>');
   const start=()=>{save.seen[u.id]=1;persist();playLevel(lv);};go.onclick=start;btns.append(next,go);wrap.append(stage,btns);s.appendChild(wrap);sayNow=u.lesson;
   let stepI=0;const seq=[];
+  const tell=el=>{const t=String(el.innerText||el.textContent).replace(/[\u200e\u200f]/g,'').replace(/(\d)\s*:\s*(\d)/g,'$1 חלקי $2').replace(/[+−×=]/g,c=>' '+OPW[c]+' ').replace(/[←→?]/g,' ').replace(/\s+/g,' ').trim();if(t){sayNow=t;AUTO.gen++;}};
   if(ex.k==='col'){stage.innerHTML=`<div class="lcap">דֻּגְמָה:</div><div class="colwrap" id="colw"></div><div class="hintbox" id="hint" hidden></div>`;const st=colInit(ex);renderCol(ex,st);
     next.onclick=()=>{if(st.c>=st.R.length)return start();const hb=$('#hint');hb.hidden=false;
       if(ex.op==='−'&&colNeedBorrow(st,st.c)){const old=st.tops[st.c];colBorrow(st,st.c);hb.innerHTML=cap(`${L_(old)} קָטָן מ-${L_(st.B[st.c])} ← פּוֹרְטִים ${st.c===0?'עֶשֶׂרֶת':'מֵאָה'}`)+steps([`${st.tops[st.c]} − ${st.B[st.c]|0} = ${st.R[st.c]}`]);}
       else hb.innerHTML=colHint(ex,st).replace('<b>?</b>',st.R[st.c]);
-      colAdvance(ex,st,st.R[st.c],false);renderCol(ex,st);sfx.pop(st.c);
+      colAdvance(ex,st,st.R[st.c],false);renderCol(ex,st);sfx.pop(st.c);tell(hb);
       if(st.c>=st.R.length){next.querySelector('span').textContent='עַכְשָׁו תּוֹרְךָ!';go.hidden=true;burst(...center($('#colw')),24);}};return;}
   const qView=h('div','qarea');qView.innerHTML=questionHTML(ex,true)+(ex.k==='ch'?choicesStatic(ex):'');stage.appendChild(qView);
   const hv=h('div','hintbox');hv.hidden=true;stage.appendChild(hv);
   seq.push(()=>{hv.hidden=false;hv.innerHTML=hintHTML(ex,1);});
   seq.push(()=>{const html=hintHTML(ex,2);if(html!==hv.innerHTML)hv.innerHTML=html;});
   seq.push(()=>{qView.innerHTML=questionHTML(ex,true,true)+(ex.k==='ch'?choicesStatic(ex,true):'');burst(...center(qView),24);sfx.ok();next.querySelector('span').textContent='עַכְשָׁו תּוֹרְךָ!';go.hidden=true;});
-  next.onclick=()=>{if(stepI>=seq.length)return start();seq[stepI++]();};}
+  next.onclick=()=>{if(stepI>=seq.length)return start();seq[stepI++]();tell(stepI<seq.length?hv:qView);};}
 
 /* ---------- question rendering ---------- */
 function preHTML(q){
@@ -1862,7 +1877,7 @@ function showFinal(){setScreen('sFinal','final',showMap);$('#hudMid').innerHTML=
 updateGems();cloudInit();
 const BUS={};function emit(e,...a){(BUS[e]||[]).forEach(f=>{try{f(...a);}catch(x){console.error(x);}});}
 window.OREN={get save(){return save;},persist,sfx,RAW,tone,noise,NT,audio,get A(){return A;},musicStart,musicStop,setTheme,duck,say,hush,sprite,SPR,AV,PET,GUARD,h,$,rand,pick,shuffle,setScreen,showMap,burst,rain,center,addGems,updateGems,floatText,ICON,D,RM,graphemes,story,today,dayStreak,masteredCount,WORLDS,ALLLV,ALLU,stars,totalStars,mergeIn,castle,revealedFor,pts,startLevel,kingdom,settleSet:()=>{lastSetJ=JSON.stringify(save.set||{});},get family(){return FAM.on?FAM.id:null;},famPull,parentPlay,skipLevel,get isParentPlay(){return !!kidSave;},get realSave(){return kidSave||save;},showJourney,showWorld,unlocked,studio,sayLang:(t,l)=>say(t,l),get heVoice(){return heVoice;},setVoicePref,
-  set sayNow(v){sayNow=v;},get sayNow(){return sayNow;},hud:html=>{$('#hudMid').innerHTML=html;},resetAll:keep=>{const snd=save.snd;save=blank();save.snd=snd;Object.assign(save,keep||{});persist();renderStart();},on:(e,f)=>{(BUS[e]=BUS[e]||[]).push(f);},emit,blank};
+  set sayNow(v){sayNow=v;AUTO.gen++;},get sayNow(){return sayNow;},hud:html=>{$('#hudMid').innerHTML=html;},resetAll:keep=>{const snd=save.snd;save=blank();save.snd=snd;Object.assign(save,keep||{});persist();renderStart();},on:(e,f)=>{(BUS[e]=BUS[e]||[]).push(f);},emit,blank};
 window.__oren4={renderAudio,THEMES,RAW,setTheme,get mus(){return mus;},WORLDS,ALLLV,ALLU,hintHTML,hintData,uniq,colInit,colNeedBorrow,digs,qkey,bubbleOpts,storyFor,teachCheck,HEROES,get play(){return play;},get save(){return save;},startLevel,playLevel,showMap,showWorld,kingdom,studio,teacher,playSpeed,setFast:v=>{window.__fast=v;},mergeIn,migrateOld,lp};
 })();
 </script>
@@ -3687,7 +3702,7 @@ function voiceTab(box){const st=SET();const g=(window.__gv||{}).ok;
   const vc=sec(box,'בדיקת קול — דקה אחת',`<div class="pnote">לחצו ▶ ושמעו דוגמה. אם הקול נשמע טוב — "אוקי, הקול טוב" וסיימתם.</div><div class="vnow">${g?'קול: <b>Kore</b> — אותו קול בכל המכשירים':'קול: <b>הקול של המכשיר</b> (באתר המשחק: Kore — אותו קול בכל המכשירים)'}${st.voiceOk?' · <span class="pst ok">אושר ✓</span>':''}</div><div class="vsample">${SAMPLE}</div>`);
   const r=h('div','btnrow');const pl=h('button','bigbtn','▶ <span>השמיעו דוגמה</span>');pl.onclick=()=>O.say(SAMPLE);
   const okb=h('button','bigbtn sm','👍 <span>אוקי, הקול טוב</span>');okb.onclick=()=>{st.voiceOk={t:Date.now()};O.persist();sfx.win();panel('voice');};
-  r.append(pl,okb);vc.appendChild(r);if(g)return;
+  r.append(pl,okb);vc.appendChild(r);const ar=h('button','pchip'+(st.autoRead===0?'':' on'),(st.autoRead===0?'':'✓ ')+'הקראה אוטומטית');ar.onclick=()=>{st.autoRead=st.autoRead===0?1:0;O.persist();panel('voice');};vc.appendChild(ar);const sw=navigator.serviceWorker;if(g&&sw&&sw.controller){const dl=h('button','bigbtn plain sm','⬇️ <span>הורדת כל הקולות למכשיר הזה (כ-15MB)</span>');dl.onclick=()=>{dl.disabled=true;sw.onmessage=e=>{const d=e.data||{};if(d.type==='prefetch')dl.lastChild.textContent=d.left?'מוריד… נשארו '+d.left:'✓ '+d.ok+' קולות שמורים במכשיר';};sw.controller.postMessage({type:'prefetch'});};vc.appendChild(dl);}if(g)return;
   sec(box,'איך מקבלים קול עברי טוב יותר — בחינם',`<div class="pnote">• <b>במחשב Windows עם Edge:</b> יש קולות עבריים טבעיים מובנים (Hila / Avri). פשוט פותחים את המשחק ב-Edge.<br>• <b>Windows בלי חיבור:</b> הגדרות ← זמן ושפה ← דיבור ← הוספת קולות ← עברית.<br>• <b>טלפון Android:</b> הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← להתקין עברית.<br>• <b>אייפון/אייפד:</b> הגדרות ← נגישות ← תוכן מוקרא ← קולות ← עברית ← להוריד את Carmit (משופר).</div>`);
 }
 /* --- permissions --- */
@@ -4190,7 +4205,7 @@ let Q=null;
 function heard(el){if(Q&&Q.card&&Q.card.contains(el))Q.heard=true;}
 function clearQ(){if(Q){Q.timers.forEach(clearTimeout);Q.timers=[];}}
 T.rdQ=(q,card)=>{clearQ();decorateAll();const target=card.querySelector('.qq')||card.querySelector('.sent');
-  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};if(!Q.target)return;
+  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};window.__noAuto=!!Q.target;if(!Q.target)return;
   const lv=level(),btn=Q.target.querySelector('.rdb');if(lv===3)return;
   if(lv===2&&btn)btn.classList.add('pulse');
   Q.target.after(h('div','rdcue','נַסֵּה לִקְרֹא 👀'));

@@ -55,7 +55,7 @@ let Q=null;
 function heard(el){if(Q&&Q.card&&Q.card.contains(el))Q.heard=true;}
 function clearQ(){if(Q){Q.timers.forEach(clearTimeout);Q.timers=[];}}
 T.rdQ=(q,card)=>{clearQ();decorateAll();const target=card.querySelector('.qq')||card.querySelector('.sent');
-  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};if(!Q.target)return;
+  Q={q,card,heard:false,answered:false,timers:[],target:target&&!q.play?target:null};window.__noAuto=!!Q.target;if(!Q.target)return;
   const lv=level(),btn=Q.target.querySelector('.rdb');if(lv===3)return;
   if(lv===2&&btn)btn.classList.add('pulse');
   Q.target.after(h('div','rdcue','נַסֵּה לִקְרֹא 👀'));

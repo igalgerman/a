@@ -5,7 +5,8 @@
       data (worlds, intro, quests, words, sentences, stories), each through the page's own fullSpell, so the texts
       are exactly what the client sends. Random math questions are skipped (made on demand, then cached).
    2. upload: POST /api/tts/pregen on the site, 15 texts per call, at most 15 new sentences a minute (Google quota),
-      stops after 700 new sentences a day (Cloudflare KV free tier: 1000 writes/day, shared with family saves).
+      stops after 400 new sentences a day (Cloudflare KV free tier: 1000 writes/day, shared with family saves and the
+      site's own queue of up to 300 a day) and hands the rest to the site's queue (/api/tts/queue).
       Resumable: state in ~/.cache/oren-pregen/ (done texts + today's count). Run it again tomorrow to continue.
    Usage:  node oren2/cf/tools/pregen.js              collect + upload to https://oren-game.pages.dev
            node oren2/cf/tools/pregen.js --collect    collect only (prints count)      --upload  upload last list only
@@ -20,7 +21,13 @@ const ROOT = path.resolve(__dirname, '..', '..');                  // oren2/
 const SITE = (process.env.SITE || 'https://oren-game.pages.dev').replace(/\/$/, '');
 const DIR = path.join(os.homedir(), '.cache', 'oren-pregen'); fs.mkdirSync(DIR, { recursive: true });
 const LIST = path.join(DIR, 'said.json'), STATE = path.join(DIR, 'state.json');
-const DAY_MAX = 700, PER_MIN = 15, BATCH = 15;
+const DAY_MAX = 400, PER_MIN = 15, BATCH = 15;
+/* a sentence: plain text = game voice (Kore 0.9), else {t,v,r} (e.g. English: Despina 0.85) */
+const GV = 'he-IL-Chirp3-HD-Kore', GR = 0.9;
+const txt = x => typeof x === 'string' ? x : x.t, idOf = x => typeof x === 'string' ? x : x.v + '|' + x.r + '|' + x.t;
+const norm = x => { if (!x) return null; const o = typeof x === 'string' ? { t: x } : x; const t = String(o.t || '').slice(0, 400).trim(); if (!t) return null;
+  const v = o.v || GV, r = +o.r || GR; return v === GV && r === GR ? t : { t, v, r }; };
+const post = async (u, body) => { const r = await fetch(SITE + u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); return r.json(); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const arg = a => process.argv.includes(a);
 
@@ -40,11 +47,11 @@ async function collect() {
   const page = path.join(os.tmpdir(), 'oren-pregen-page.html');
   fs.writeFileSync(page, '<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>' + fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8') + '</body></html>');
   const DATA = { SENT: literal('talents.js', 'SENT'), STORIES: literal('talents.js', 'STORIES'), QUESTS: literal('talents.js', 'QUESTS'), INTRO: literal('index.html', 'INTRO') };
-  const SAID = new Set(); const b = await chromium.launch();
+  const SAID = new Map(); const b = await chromium.launch();
   for (const vp of [{ viewport: { width: 1366, height: 768 } }, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]) {
     const ctx = await b.newContext(vp);
     await ctx.addInitScript(() => { window.__noFamily = true; try { localStorage.clear(); } catch (e) {} window.__said = [];
-      window.Audio = function (u) { if (u && u.startsWith('/api/tts?')) window.__said.push(new URLSearchParams(u.split('?')[1]).get('t'));
+      window.Audio = function (u) { if (u && u.startsWith('/api/tts?')) { const q = new URLSearchParams(u.split('?')[1]); window.__said.push({ t: q.get('t'), v: q.get('v'), r: +q.get('r') }); }
         const a = { play: () => { setTimeout(() => { a.onplaying && a.onplaying(); a.onended && a.onended(); }, 5); return Promise.resolve(); }, pause() {}, addEventListener() {} }; return a; };
       setInterval(() => { if (window.__gv) window.__gv.ok = true; }, 50);
       /* press every "read to me" on the screen: the HUD 🔊, the dialog 🔊 and each small 🔊 of the reading helper */
@@ -98,31 +105,36 @@ async function collect() {
       (D.QUESTS || []).forEach(q => { add(q.e + ' ' + q.a); add(sp(q.z)); add(q.t); });
       (T.TOG || []).forEach(a => add(sp(typeof a.kid === 'function' ? a.kid('') : a.kid))); Object.values(T.RW || {}).forEach(r => add(sp(r.t)));
       (T.WORDS || []).forEach(w => add(sp(w.w)));
+      /* English words and letters (eng-word, eng-listen, eng-letter) in the English game voice */
+      (T.WORDS || []).filter(w => w.en).forEach(w => [w.en, w.en[0].toUpperCase() + '. ' + w.en].forEach(t => out.push({ t: sp(t), v: 'en-US-Chirp3-HD-Despina', r: 0.85 })));
       ['זמן לנוח. כל הכבוד היום, אורן! נתראה מחר.', 'הזמן של היום נגמר. כל הכבוד היום, אורן! נתראה מחר.', 'עוד דקה אחת לסיום היום', ...[2, 3, 4, 5].map(n => `עוד ${n} דקות לסיום היום`)].forEach(add);
       (D.SENT || []).forEach(s => { add(s[0]); add(s[1]); });
       (D.STORIES || []).forEach(st => { add(st.t); st.s.forEach(add); st.q.forEach(q => add(q[0])); });
       return out; }, DATA);
-    (await p.evaluate(() => window.__said)).concat(stat).forEach(t => t && SAID.add(t.slice(0, 400).trim()));
+    (await p.evaluate(() => window.__said)).concat(stat).forEach(x => { const c = norm(x); if (c) SAID.set(idOf(c), c); });
     console.log('collected', SAID.size, 'so far (' + (vp.isMobile ? 'phone' : 'desktop') + ')'); await ctx.close(); }
   /* random math questions (new numbers every time) are skipped: made on first use, then cached */
   const RANDOM = /שווה כמה|כמה שווה|ועוד כמה|כמה כפול|פותרים במאונך|^מה השעה\?|קטן, שווה, גדול$|^\d+ \? \d+|בבוקר, ועוד \d+|(התשובה|זריקה|לשחות)\. \d|חילק \d+|^‎?\d+ : \?/;
-  await b.close(); const L = [...SAID].filter(t => t && !RANDOM.test(t)); fs.writeFileSync(LIST, JSON.stringify(L));
-  console.log('sentences', L.length, 'chars', L.reduce((a, t) => a + t.length, 0), '→', LIST); return L;
+  await b.close(); const L = [...SAID.values()].filter(x => !RANDOM.test(txt(x))); fs.writeFileSync(LIST, JSON.stringify(L));
+  console.log('sentences', L.length, 'chars', L.reduce((a, x) => a + txt(x).length, 0), '→', LIST); return L;
 }
 
 async function upload(L) {
   let st = {}; try { st = JSON.parse(fs.readFileSync(STATE, 'utf8')); } catch (e) {}
   const today = new Date().toISOString().slice(0, 10); if (st.day !== today) { st.day = today; st.newToday = 0; } st.done = st.done || {};
   const save = () => fs.writeFileSync(STATE, JSON.stringify(st));
-  const todo = L.filter(t => !st.done[t]); let made = 0, chars = 0, hits = 0, used = '?';
+  const todo = L.filter(x => !st.done[idOf(x)]); let made = 0, chars = 0, hits = 0, used = '?';
+  try { console.log('download list:', JSON.stringify(await post('/api/tts/list', L))); } catch (e) { console.log('list upload failed:', e.message); }
   console.log(`site ${SITE} · to check ${todo.length} of ${L.length} · new today so far ${st.newToday}/${DAY_MAX}`);
   for (let i = 0; i < todo.length;) {
-    if (st.newToday + BATCH > DAY_MAX) { console.log(`daily limit reached (${st.newToday} new today). Run again tomorrow: ${todo.length - i} left to check.`); save(); return; }
+    if (st.newToday + BATCH > DAY_MAX) { save(); const rest = todo.slice(i); let q = {};
+      try { q = await post('/api/tts/queue', rest); } catch (e) { q = { error: e.message }; }
+      console.log(`daily limit reached (${st.newToday} new today). ${rest.length} left: handed to the site's queue (made automatically while the game is used): ${JSON.stringify(q)}`); return; }
     const part = todo.slice(i, i + BATCH); let j;
     try { const r = await fetch(SITE + '/api/tts/pregen', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ texts: part }) });
       j = await r.json(); if (!r.ok || !j.ok) throw new Error(r.status + ' ' + JSON.stringify(j)); }
     catch (e) { console.log('call failed:', e.message, '— waiting a minute'); await sleep(60000); continue; }
-    let n = 0; j.res.forEach((x, k) => { if (x === 'hit' || x === 'new' || x === 'empty') st.done[part[k]] = 1; if (x === 'new') { n++; chars += part[k].length; } if (x === 'hit') hits++; });
+    let n = 0; j.res.forEach((x, k) => { if (x === 'hit' || x === 'new' || x === 'empty') st.done[idOf(part[k])] = 1; if (x === 'new') { n++; chars += txt(part[k]).length; } if (x === 'hit') hits++; });
     made += n; st.newToday += n; used = j.used; i += BATCH; save();
     const bad = j.res.filter(x => !['hit', 'new', 'empty'].includes(x));
     console.log(`${Math.min(i, todo.length)}/${todo.length} checked · new ${made} (${chars} chars) · cached ${hits} · month ${used}/${j.cap}${bad.length ? ' · problems: ' + bad.join(',') : ''}`);
