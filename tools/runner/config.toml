@@ -1,0 +1,10 @@
+# Issue runner config. Edit here when the repo moves.
+repo = "igalgerman/oren_study"   # gh --repo
+remote = "origin"               # git remote that points at that repo (currently "new" for oren_study until the move)
+branch = "main"
+model = "sonnet"
+max_parallel = 3
+worktree_prefix = "C:/work/Oren_study/wt-"
+bash = "C:/Program Files/Git/bin/bash.exe"   # Git Bash (not WSL's bash)
+extra_path = "/c/work/Oren_study/bin"        # python3 shim
+stuck_hours = 2
