@@ -405,7 +405,6 @@ svg.px{shape-rendering:crispEdges;display:block}
 .card .gain{display:flex;align-items:center;gap:8px;font-weight:900;font-size:30px;direction:ltr;color:#1f8f86}
 .card .gain svg{width:30px}
 .card .cs svg{width:260px;max-width:100%}
-.castle .gh{opacity:.15}
 .castle .nw{animation:dropp .5s backwards}
 .gemfly{position:absolute;z-index:9;width:26px;pointer-events:none;transition:transform .75s cubic-bezier(.5,-.3,.6,1),opacity .75s}
 .final{display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;padding:22px 44px 16px;text-align:center;max-width:calc(100% - 40px);box-shadow:0 0 0 10px #8e6fd1,0 0 0 18px #5b3f8c,0 18px 0 18px rgba(0,0,0,.2)}
@@ -652,6 +651,7 @@ const CASTLE=(()=>{const m=new Map();const set=(x,y,c)=>m.set(x+','+y,c);const s
 function castle(revealed,newFrom=revealed){const U=10;let s=`<svg class="px castle" viewBox="0 0 280 200" aria-hidden="true">`;
   for(let x=0;x<28;x++)s+=`<rect x="${x*U}" y="190" width="10" height="10" fill="#6aa84f"/><rect x="${x*U}" y="190" width="10" height="3" fill="#8acb68"/>`;
   CASTLE.forEach((b,i)=>{const cls=i<revealed?(i>=newFrom?'nw':''):'gh';const st=cls==='nw'?` style="animation-delay:${((i-newFrom)*0.03).toFixed(2)}s"`:'';
+    if(cls==='gh'){s+=`<rect class="gh" x="${b.x*U}" y="${b.y*U}" width="10" height="10" fill="#c4d6e4"/>`;return;}
     s+=`<g class="${cls}"${st}><rect x="${b.x*U}" y="${b.y*U}" width="10" height="10" fill="${b.c}"/><rect x="${b.x*U}" y="${b.y*U}" width="10" height="2" fill="rgba(255,255,255,.22)"/><rect x="${b.x*U}" y="${b.y*U+8}" width="10" height="2" fill="rgba(0,0,0,.16)"/></g>`;});
   return s+'</svg>';}
 
@@ -1007,9 +1007,13 @@ function mergeIn(o){if(!o||typeof o!=='object')return;
   for(const [k,v] of Object.entries(o.time||{})){save.time=save.time||{};save.time[k]=Math.max(save.time[k]|0,v|0);}
   for(const [k,v] of Object.entries(o.st||{})){save.st=save.st||{};const c=save.st[k]||{a:0,o:0};save.st[k]={a:Math.max(c.a|0,v.a|0),o:Math.max(c.o|0,v.o|0)};}
   if(o.set&&(+o.setT||0)>(+save.setT||0)){save.set=o.set;save.setT=o.setT;lastSetJ=JSON.stringify(save.set);}
+  for(const x of (o.iss||[])){if(!x||!x.d||!x.k)continue;save.iss=save.iss||[];const e=save.iss.find(y=>y.d===x.d&&y.k===x.k);if(e)e.n=Math.max(e.n|0,x.n|0);else save.iss.push(x);}if(save.iss)save.iss=save.iss.sort((a,b)=>a.d<b.d?-1:1).slice(-30);
   for(const k of ['prof','bdg','last'])if(o[k]&&!save[k])save[k]=o[k];
   if((+o.t||0)>(+save.t||0)){for(const k of ['gems','av','k','tc','made','art','daily','typ','kpic','jar','mood','prof','bdg','arc','coach'])if(o[k]!=null)save[k]=o[k];if(o.set&&!(+o.setT||0)&&!(+save.setT||0))save.set=o.set;save.t=o.t;}}
 var lastSetJ='';
+/* problem log for the parent panel: one entry per kind per day with a count (synced with the family) */
+function logIssue(k,m){try{if(kidSave||window.__fast)return;const d=today();save.iss=save.iss||[];let e=save.iss.find(x=>x.d===d&&x.k===k);if(!e){e={d,k,n:0};save.iss.push(e);save.iss=save.iss.slice(-30);}e.n++;if(m)e.m=String(m).slice(0,120);try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}catch(e){}}/* local only: goes to the family save with the next normal save (no retry loops) */
+window.addEventListener('error',e=>logIssue('err',e&&e.message));
 function persist(){save.t=Date.now();if(!kidSave){const j=JSON.stringify(save.set||{});if(j!==lastSetJ){if(lastSetJ)save.setT=Date.now();lastSetJ=j;}}if(kidSave){try{localStorage.setItem(KEY+'-parent',JSON.stringify(save));}catch(e){}return;}try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}cloudSave();}
 /* parent play: a separate sandbox user with everything open; never touches Oren's save or the cloud */
 let kidSave=null;
@@ -1021,7 +1025,7 @@ function parentPlay(on,fresh){if(on&&!kidSave){kidSave=save;let ps=null;if(!fres
 function skipLevel(){const p=play;if(!p||!p.lv)return false;const lv=p.lv;save.s[lv.id]=Math.max(stars(lv.id),3);persist();showWorld(lv.w);return true;}
 function cloudSave(){if(!cloud.ref)return;cloud.dirty=true;clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,1500);}
 async function cloudFlush(){if(!cloud.ref||cloud.busy||!cloud.dirty)return;cloud.busy=true;cloud.dirty=false;
-  try{const body=JSON.parse(JSON.stringify(save));delete body.music;delete body.snd;if(JSON.stringify(body).length>200000){save.rq=save.rq.slice(-15);body.rq=save.rq;}await cloud.ref.set(body);}catch(e){if(e&&e.code==='invalid_argument'){if(!cloud.retried&&save.rq.length>10){cloud.retried=1;save.rq=save.rq.slice(-10);cloud.dirty=true;}else cloud.ref=null;}}
+  try{const body=JSON.parse(JSON.stringify(save));delete body.music;delete body.snd;if(JSON.stringify(body).length>200000){save.rq=save.rq.slice(-15);body.rq=save.rq;}await cloud.ref.set(body);}catch(e){if(FAM.on)logIssue('sync');if(e&&e.code==='invalid_argument'){if(!cloud.retried&&save.rq.length>10){cloud.retried=1;save.rq=save.rq.slice(-10);cloud.dirty=true;}else cloud.ref=null;}}
   cloud.busy=false;if(cloud.dirty)cloudSave();updateSaveNote();}
 /* ---------- own-website mode: family code + /api/save ---------- */
 const FAM={id:null,on:false,last:0};
@@ -1187,8 +1191,11 @@ window.__gv=GV;
 const useGoogle=lang=>lang==='he'&&GV.ok&&VP().eng!=='browser'&&VP().eng!=='claude';
 function googleSay(t){try{if(GV.audio){GV.audio.pause();GV.audio=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}
   const url='/api/tts?t='+encodeURIComponent(fullSpell(t).slice(0,400))+'&v='+encodeURIComponent(VP().gv||'he-IL-Wavenet-D')+'&r='+(VP().rate||1);
-  const a=new Audio(url);GV.audio=a;a.onplay=()=>duck(true);a.onended=()=>{duck(false);if(GV.audio===a)GV.audio=null;};
-  a.onerror=()=>{duck(false);if(GV.audio===a){GV.audio=null;browserSay(t,'he');}};a.play().catch(()=>{if(GV.audio===a){GV.audio=null;browserSay(t,'he');}});}
+  const a=new Audio(url);GV.audio=a;let go=false;
+  const fall=why=>{clearTimeout(tm);duck(false);if(GV.audio!==a)return;try{a.pause();}catch(e){}GV.audio=null;browserSay(t,'he');if(why)logIssue('voice',why);};
+  const tm=setTimeout(()=>{if(!go)fall('timeout');},3000);/* never let Oren wait more than 3 seconds */
+  a.onplaying=()=>{go=true;clearTimeout(tm);};a.onplay=()=>duck(true);a.onended=()=>{duck(false);if(GV.audio===a)GV.audio=null;};
+  a.onerror=()=>fall('error');a.play().catch(e=>fall(e&&e.name==='NotAllowedError'?null:'error'));}
 function say(t,lang){if(!t||window.__fast)return;lang=lang||'he';
   if(useGoogle(lang)){googleSay(t);return;}
   if(useClaude(lang)){try{speechSynthesis.cancel();}catch(e){}const txt=(lang==='he'?withNikud(t):plain(t)).slice(0,1900);

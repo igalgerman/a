@@ -405,7 +405,6 @@ svg.px{shape-rendering:crispEdges;display:block}
 .card .gain{display:flex;align-items:center;gap:8px;font-weight:900;font-size:30px;direction:ltr;color:#1f8f86}
 .card .gain svg{width:30px}
 .card .cs svg{width:260px;max-width:100%}
-.castle .gh{opacity:.15}
 .castle .nw{animation:dropp .5s backwards}
 .gemfly{position:absolute;z-index:9;width:26px;pointer-events:none;transition:transform .75s cubic-bezier(.5,-.3,.6,1),opacity .75s}
 .final{display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;padding:22px 44px 16px;text-align:center;max-width:calc(100% - 40px);box-shadow:0 0 0 10px #8e6fd1,0 0 0 18px #5b3f8c,0 18px 0 18px rgba(0,0,0,.2)}
@@ -652,6 +651,7 @@ const CASTLE=(()=>{const m=new Map();const set=(x,y,c)=>m.set(x+','+y,c);const s
 function castle(revealed,newFrom=revealed){const U=10;let s=`<svg class="px castle" viewBox="0 0 280 200" aria-hidden="true">`;
   for(let x=0;x<28;x++)s+=`<rect x="${x*U}" y="190" width="10" height="10" fill="#6aa84f"/><rect x="${x*U}" y="190" width="10" height="3" fill="#8acb68"/>`;
   CASTLE.forEach((b,i)=>{const cls=i<revealed?(i>=newFrom?'nw':''):'gh';const st=cls==='nw'?` style="animation-delay:${((i-newFrom)*0.03).toFixed(2)}s"`:'';
+    if(cls==='gh'){s+=`<rect class="gh" x="${b.x*U}" y="${b.y*U}" width="10" height="10" fill="#c4d6e4"/>`;return;}
     s+=`<g class="${cls}"${st}><rect x="${b.x*U}" y="${b.y*U}" width="10" height="10" fill="${b.c}"/><rect x="${b.x*U}" y="${b.y*U}" width="10" height="2" fill="rgba(255,255,255,.22)"/><rect x="${b.x*U}" y="${b.y*U+8}" width="10" height="2" fill="rgba(0,0,0,.16)"/></g>`;});
   return s+'</svg>';}
 
